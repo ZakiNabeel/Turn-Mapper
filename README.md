@@ -11,7 +11,7 @@ AI-assisted, human-verified: every automatic result is checked by validators and
 - Pipeline design: [`docs/PIPELINE1_SPEC.md`](docs/PIPELINE1_SPEC.md)
 - Status and plan: [`docs/ROADMAP_AND_WORKFLOW.md`](docs/ROADMAP_AND_WORKFLOW.md), [`docs/SESSION_LOG.md`](docs/SESSION_LOG.md)
 
-Status: **v0.1 classical baseline working** (M1 + first M2). See [`docs/RESULTS_2026-10-04.md`](docs/RESULTS_2026-10-04.md).
+Status: **v0.2 classical pipeline**: 14/14 FAST floors give valid packages; C block is the main test building. See [`docs/RESULTS_CBLOCK_2026-10-04.md`](docs/RESULTS_CBLOCK_2026-10-04.md) (latest) and [`docs/RESULTS_2026-10-04.md`](docs/RESULTS_2026-10-04.md).
 
 ```bash
 pip install -e ".[dev]"        # also needs the tesseract binary

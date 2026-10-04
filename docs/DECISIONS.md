@@ -38,7 +38,7 @@ Status: OPEN — filled after the app audit (Prompt A1).
 Status: OPEN — app audit decides per field: additive Room migration vs drop-with-warning.
 
 ## ADR-009 — Test set freeze
-Status: OPEN — team to choose. Recommended (PLAN_INVENTORY §6, option A): **dev = B block (pages 4–5), test = A block (pages 2–3) + C block (pages 6–8)**. File: Floor_Plans_2.pdf, SHA-256 8316d9d778c7468d54d3de471216a95c5d340b5f9d95c1ddc2656a47070cd38d. Floors of one block never split across dev/test. Change Status to Accepted with the date once agreed.
+Status: **Accepted (rev. 2026-10-04): dev = B + C, test = A.** C is the main testing/demo building (team decision), so it's developed on. Earlier proposal was dev = B, test = A + C. File: Floor_Plans_2.pdf, SHA-256 8316d9d778c7468d54d3de471216a95c5d340b5f9d95c1ddc2656a47070cd38d. Floors of one block never split across dev/test. Change Status to Accepted with the date once agreed.
 **Note 2026-10-04:** A/C floors were run once untuned (v1: test 1/11 valid) and their overlays inspected; one code-correctness fix followed (no threshold changes), giving v2 test 4/11. For the final evaluation, add floors nobody has looked at (see RESULTS_2026-10-04.md).
 
 ## ADR-010 — Pluggable input adapters + venue configs
@@ -60,3 +60,15 @@ Why: lets the chain run end to end on any plan before site work, without pretend
 ## ADR-013 — Validators run on the metric JSON, not on internal state
 Status: Proposed (2026-10-04)
 Decision: `validate_floor` checks the exported floor.json, so the same validator checks our output, app-exported ground truth, and hand-edited packages. Invalid fixtures name the error code the consumer must report.
+
+## ADR-014 — Stairs and lifts are transition nodes, not traced space
+Status: Proposed (2026-10-04)
+Decision: detect stairs by texture (smooth grey gradient near the floor colour) and lifts by OCR text; exclude stairs from centre-line tracing; add a `transition` node at a walkable anchor (`transition: stairs|lift`) plus a POI. Multi-floor linking (M9) pairs these nodes across floors.
+
+## ADR-015 — Scale transfer between floors of the same building (`scale_like`)
+Status: Proposed (2026-10-04)
+Decision: a floor may declare `scale_like: <floor>`; if it has no measured evidence, its scale = ref scale × ref footprint width / own footprint width (`scale_source: footprint_transfer`), with a warning if the outline aspect differs > 3 %. Lets one set of site measurements serve a whole block.
+
+## ADR-016 — Circulation classification
+Status: Proposed (2026-10-04)
+Decision: circulation = the largest space plus spaces that connect to ≥3 *distinct* neighbouring spaces and are reachable from it through doors. Prevents rooms with several doors into one hall, and closed cubicle clusters, from becoming corridors.

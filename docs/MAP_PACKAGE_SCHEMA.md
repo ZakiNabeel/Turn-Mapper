@@ -62,7 +62,7 @@ The app's v1 importer may import one floor at a time (user picks from `venue.jso
   "transform": {
     "px_to_m": [[0.0125, 0, 0], [0, 0.0125, 0]],
     "scale_m_per_px": 0.0125,
-    "scale_source": "operator_two_point",            // operator_two_point | ocr_dimension | cad_units | scale_bar | door_width_prior (estimate!)
+    "scale_source": "operator_two_point",            // operator_two_point | ocr_dimension | cad_units | scale_bar | door_width_prior (estimate!) | footprint_transfer (from another floor of the same building)
     "scale_evidence": [
       { "p1_px": [100, 400], "p2_px": [1092, 400], "distance_m": 12.4, "used_for_fit": true },
       { "p1_px": [100, 900], "p2_px": [500, 900],  "distance_m": 5.0,  "used_for_fit": false, "residual_m": 0.06 }
@@ -80,7 +80,8 @@ The app's v1 importer may import one floor at a time (user picks from `venue.jso
   "graph": {
     "nodes": [
       { "id": "n1", "x": 10.4, "y": 3.5, "kind": "corridor" },           // corridor | junction | door | transition
-      { "id": "n2", "x": 10.4, "y": 5.0, "kind": "door", "door_id": "d1" }
+      { "id": "n2", "x": 10.4, "y": 5.0, "kind": "door", "door_id": "d1" },
+      { "id": "n9", "x": 2.1, "y": 9.0, "kind": "transition", "transition": "stairs" }   // stairs | lift | escalator
     ],
     "edges": [
       { "id": "e1", "from": "n1", "to": "n2", "length_m": 1.5, "type": "door",   // corridor | door | stairs | lift | escalator
@@ -89,7 +90,9 @@ The app's v1 importer may import one floor at a time (user picks from `venue.jso
   },
 
   "pois": [ { "id": "p1", "name": "Lab 2", "label": "C-405", "node_id": "n2", "room_id": "r1",
-              "category": "lab", "needs_review": false, "provenance": { "source": "auto" } } ],
+              "category": "lab", "needs_review": false, "provenance": { "source": "auto" } },
+            { "id": "p2", "name": "Stairs 1", "label": null, "node_id": "n9", "room_id": null, "category": "stairs",
+              "needs_review": false, "provenance": { "source": "auto" } } ],
 
   "validation": { "passed": true, "forced": false, "errors": [], "warnings": [ { "code": "ROOM_NO_DOOR", "ref": "r7", "message": "…" } ] }
 }

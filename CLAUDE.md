@@ -32,7 +32,8 @@ src/turn_mapper/
   segment.py     # Segmenter interface; ClassicalSegmenter (histogram levels)
   vectorize.py   # orientation-aware wall-gap closing -> spaces, circulation, doors, walls
   scale.py       # two-point evidence, or door-width prior (flagged estimate)
-  graph.py       # skeleton -> polylines -> pruned/merged graph -> wall-safe door links
+  transitions.py # stairs (texture) + lifts (OCR) -> transition anchors
+  graph.py       # skeleton -> polylines -> pruned/merged graph -> wall-safe door links + bridging
   pois.py        # per-room OCR labels -> POIs on door nodes
   validate.py    # schema + geometry validators on metric JSON; A* route sampling
   export.py      # floor.json (metres) + .turnmap writer/reader
@@ -72,7 +73,7 @@ Stages are flat modules for now; split into subpackages when a stage grows (e.g.
 ```bash
 # needs the tesseract binary (apt install tesseract-ocr / brew install tesseract / Windows installer)
 pip install -e ".[dev]"
-pytest -q                                     # 23 tests, ~5 s
+pytest -q                                     # 28 tests, ~10 s
 ruff check . && ruff format --check .
 python scripts/make_fixtures.py               # regenerate contract/fixtures
 turn-mapper inspect samples/private/fast_blocks.pdf
