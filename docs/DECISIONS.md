@@ -1,0 +1,52 @@
+# Decision Log — TURN-Mapper
+
+One ADR per decision. Status ∈ Proposed | Accepted | Superseded. Claude Code may add **Proposed** ADRs; humans accept them.
+
+---
+
+## ADR-001 — Mapping runs offline in Python, not on the phone
+Status: Proposed (2026-10-03)
+Decision: TURN-Mapper produces a file; the app only imports it. No on-device ML.
+Why: heavy ML/OCR/geometry libraries; operator QA on a laptop; Android app stays stable. Fits the B2B story (a venue is mapped once by an operator).
+
+## ADR-002 — TURN-Mapper is its own repository (module) — supersedes the earlier "monorepo folder" idea
+Status: Proposed (2026-10-04)
+Decision: separate repo `TURN-Mapper`. Integration with the app repo only through the versioned `.turnmap` contract (`docs/INTEGRATION_CONTRACT.md`). The app repo vendors tagged contract files.
+Why: the team is building several modules that are integrated later; a separate repo gives an independent Python toolchain/CI, clear ownership, and a clean public API.
+Cost: contract changes need two PRs (one per repo). Mitigated by shared fixtures and tags.
+
+## ADR-003 — `.turnmap` (ZIP + JSON, venue-level, per-floor files) is the only interface
+Status: Proposed (2026-10-04)
+Decision: see `MAP_PACKAGE_SCHEMA.md`. One package can hold multiple buildings/floors (needed for the FAST A/B/C block PDF). App v1 may import one floor at a time.
+
+## ADR-004 — Human-in-the-loop is part of the design
+Status: Proposed
+Decision: provenance + confidence on all auto output; validators gate export; corrections in the app's existing editor (and optionally a later mapper-side editor). Claim: "AI-assisted, human-verified".
+
+## ADR-005 — Vector-first when vectors exist
+Status: Proposed
+Decision: DXF / vector PDF parsed directly into the IR; segmentation only for raster input or ambiguous parts.
+
+## ADR-006 — Thin end-to-end chain before ML
+Status: Proposed
+Decision: build ingest → classical segmentation → vectorize → scale → walkable → graph → validate → export → app import first; learned model replaces the classical segmenter behind the same interface later; classical stays as reported baseline.
+
+## ADR-007 — Coordinate frame
+Status: OPEN — filled after the app audit (Prompt A1).
+
+## ADR-008 — How the app handles fields it cannot store
+Status: OPEN — app audit decides per field: additive Room migration vs drop-with-warning.
+
+## ADR-009 — Test set freeze
+Status: OPEN — team to choose. Recommended (PLAN_INVENTORY §6, option A): **dev = B block (pages 4–5), test = A block (pages 2–3) + C block (pages 6–8)**. File: Floor_Plans_2.pdf, SHA-256 8316d9d778c7468d54d3de471216a95c5d340b5f9d95c1ddc2656a47070cd38d. Floors of one block never split across dev/test. Change Status to Accepted with the date once agreed.
+
+## ADR-010 — Pluggable input adapters + venue configs
+Status: Proposed (2026-10-04)
+Decision: every input format is an adapter in `ingest/` behind a registry (`can_handle(path) -> score`, `load(path, page) -> IngestResult`). Building-specific knowledge (page→floor mapping, crop boxes, measured distances, label patterns like `C-\d{3}`) lives in `configs/venues/<venue>.yaml`, never in code.
+Why: the goal is "digest any floor plan"; new buildings should need a config, not code changes.
+
+## ADR-011 — FAST plans: raster-first; treat as not-to-scale diagrams
+Status: Proposed (2026-10-04)
+Context: `Floor_Plans_2.pdf` (see `PLAN_INVENTORY.md`) has no vector content: embedded PNG/JPEG floor-planner screenshots in a Word export, with no scale bar or dimensions; per-floor pixel scale differs.
+Decision: the raster branch is the critical path for the FAST demo; the vector branch (M7) stays for other venues. Scale is per floor, from on-site measurements on both axes, and the residual drawing error is reported. Ingest takes embedded images at native resolution instead of re-rendering pages.
+Consequences: on-site measurement is a hard dependency before M2 can claim metric output; positioning results must mention map-drawing error.

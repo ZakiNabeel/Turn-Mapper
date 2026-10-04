@@ -1,0 +1,36 @@
+# DRAFT from docs/PLAN_INVENTORY.md (2026-10-04). Verify page/image_index order before use.
+venue:
+  id: fast-isb
+  name: FAST-NUCES Islamabad
+source:
+  file: samples/fast_blocks.pdf      # = Floor_Plans_2.pdf
+  sha256: 8316d9d778c7468d54d3de471216a95c5d340b5f9d95c1ddc2656a47070cd38d
+  kind: pdf_embedded_images          # take embedded images at native resolution; don't re-render the page
+style_hints:                         # optional; the pipeline must work without these
+  floor_gray: [226, 240]
+  wall_gray: [120, 205]
+  background_gray: [250, 255]
+label_patterns:
+  A: '^A-?\d{2,3}[A-Z]?$'
+  B: '^B-?\d{2,3}[A-Z]?$'
+  C: '^C-?\d{3}$'
+buildings:
+  - { id: A, name: A Block }
+  - { id: B, name: B Block }
+  - { id: C, name: C Block }
+floors:
+  - { id: A-GF, building: A, level: 0,  page: 2, image_index: 0 }
+  - { id: A-F1, building: A, level: 1,  page: 2, image_index: 1 }
+  - { id: A-F2, building: A, level: 2,  page: 3, image_index: 0 }
+  - { id: A-F3, building: A, level: 3,  page: 3, image_index: 1 }
+  - { id: B-GF, building: B, level: 0,  page: 4, image_index: 0, notes: "cropped at bottom" }
+  - { id: B-F1, building: B, level: 1,  page: 4, image_index: 1 }
+  - { id: B-F2, building: B, level: 2,  page: 5, image_index: 0 }
+  - { id: C-B1, building: C, level: -1, page: 6, image_index: 0 }
+  - { id: C-GF, building: C, level: 0,  page: 6, image_index: 1 }
+  - { id: C-F1, building: C, level: 1,  page: 7, image_index: 0 }
+  - { id: C-F2, building: C, level: 2,  page: 7, image_index: 1 }
+  - { id: C-F3, building: C, level: 3,  page: 7, image_index: 2 }
+  - { id: C-F4, building: C, level: 4,  page: 8, image_index: 0 }
+  - { id: C-F5, building: C, level: 5,  page: 8, image_index: 1 }
+scale_evidence: {}                   # filled from samples/README.md after on-site measurement

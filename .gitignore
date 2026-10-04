@@ -1,0 +1,32 @@
+# data, models, outputs — never commit
+data/
+runs/
+weights/
+*.pt
+*.pth
+*.ckpt
+*.onnx
+
+# plans without permission to share (keep under $TURN_DATA_DIR)
+samples/private/
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+
+# local claude settings
+.claude/settings.local.json
+
+# os
+.DS_Store
+Thumbs.db
+
+# throwaway exploration scripts
+scratch/
