@@ -27,6 +27,9 @@ def overlay(fr: FloorResult) -> np.ndarray:
     vis = (0.55 * base + 0.45 * 255).astype(np.uint8)
     walk = fr.geom.debug["walk_mask"]
     vis[walk] = (0.5 * vis[walk] + 0.5 * np.array(COL["walk"])).astype(np.uint8)
+    st = fr.geom.debug.get("stairs_mask")
+    if st is not None and st.any():
+        vis[st] = (0.5 * vis[st] + 0.5 * np.array((80, 200, 255))).astype(np.uint8)
     for r in fr.geom.regions:
         if r.kind == "circulation":
             continue
@@ -42,6 +45,9 @@ def overlay(fr: FloorResult) -> np.ndarray:
         c = COL["door_edge"] if e.type == "door" else COL["edge"]
         cv2.line(vis, (int(a.x), int(a.y)), (int(b.x), int(b.y)), c, 2, cv2.LINE_AA)
     for n in nodes.values():
+        if n.kind == "transition":
+            cv2.drawMarker(vis, (int(n.x), int(n.y)), (0, 140, 255), cv2.MARKER_DIAMOND, 14, 3, cv2.LINE_AA)
+            continue
         c = COL["junction"] if n.kind == "junction" else (COL["door"] if n.kind == "door" else COL["node"])
         cv2.circle(vis, (int(n.x), int(n.y)), 4 if n.kind == "junction" else 3, c, -1, cv2.LINE_AA)
     by_node = {}
@@ -106,7 +112,7 @@ def write_html(out_dir: Path, run: dict, floors: list[dict]) -> Path:
 doors {f["n_doors"]} · nodes {f["n_nodes"]} · edges {f["n_edges"]} · POIs {f["n_pois"]}
 (needs review {f["n_review"]}) · graph components {f["n_components"]} · {f["seconds"]:.1f}s</p>
 <div class=imgs><figure><img src="{f["overlay"]}"><figcaption>walkable (orange), doors (green), graph
-(red; purple = junction), labels (red = needs review)</figcaption></figure>
+(red; purple = junction), stairs (amber area, orange diamond = transition node), labels (red = needs review)</figcaption></figure>
 <figure><img src="{f["routes_img"]}"><figcaption>sample A* routes between random destinations</figcaption></figure>
 </div>
 <details open><summary>errors ({len(f["errors"])})</summary><ul>{errs or "<li>none</li>"}</ul></details>

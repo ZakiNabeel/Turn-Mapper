@@ -14,9 +14,9 @@ label_patterns:
   A: '^A-?\d{2,3}[A-Z]?$'
   B: '^B-?\d{2,3}[A-Z]?$'
   C: '^C-?\d{3}$'
-splits:                              # ADR-009 (proposed, not yet accepted by the team)
-  dev: [B]
-  test: [A, C]
+splits:                              # ADR-009 rev 2026-10-04: C is the main testing building -> dev/demo
+  dev: [B, C]
+  test: [A]
 buildings:
   - { id: A, name: A Block }
   - { id: B, name: B Block }

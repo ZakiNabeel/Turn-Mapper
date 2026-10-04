@@ -27,6 +27,7 @@ from .preprocess import preprocess
 from .report import overlay, route_overlay, write_html
 from .scale import estimate_scale, scale_from_evidence
 from .segment import SEGMENTERS
+from .transitions import find_transitions
 from .validate import route_lengths, schema_errors, validate_floor
 from .vectorize import vectorize
 
@@ -78,13 +79,14 @@ def process_floor(spec: FloorSpec, cfg: VenueConfig, method: str = "classical") 
     patterns = [cfg.label_patterns[spec.building]] if spec.building in cfg.label_patterns else []
     label_rooms(geom, pre.gray_raw, p, patterns)
     t["ocr_labels"] = time.perf_counter() - t0
+    t_issues = find_transitions(geom, seg, s)
     t0 = time.perf_counter()
     graph, g_issues = build_graph(geom, s, p, seg.wall)
     t["graph"] = time.perf_counter() - t0
     pois, p_issues = make_pois(geom, graph)
-    warnings = issues + g_issues + p_issues
+    warnings = issues + t_issues + g_issues + p_issues
     for r in geom.regions:
-        if r.kind != "circulation" and not any(r.id in d.regions for d in geom.doors):
+        if r.kind not in ("circulation", "transition") and not any(r.id in d.regions for d in geom.doors):
             warnings.append(Issue("ROOM_NO_DOOR", "no door detected for this room", r.id))
     return FloorResult(
         image=img,

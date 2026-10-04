@@ -28,6 +28,12 @@ class PipelineParams:
     door_gap_wall_ratio: float = 8.5  # before scale is known: max door gap = ratio x wall thickness
     min_region_area_m2: float = 1.0
     circulation_min_doors: int = 3
+    # stairs: smooth grey gradient close to the floor colour (not flat floor, not walls/text)
+    stairs_window_frac: float = 0.05  # texture window as a fraction of the image's short side
+    stairs_density: float = 0.35
+    stairs_min_area_frac: float = 0.5  # min blob area, in window^2
+    # partitions: thin (1-2 px) straight lines with floor on both sides, at least this long
+    partition_min_len_frac: float = 0.035  # of the image's short side (min 25 px)
     # scale
     door_width_prior_m: float = 0.9
     # graph

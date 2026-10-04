@@ -85,7 +85,7 @@ def make_pois(geom: GeometryPx, graph: NavGraph) -> tuple[list[Poi], list[Issue]
     door_node = {n.door_id: n.id for n in graph.nodes.values() if n.door_id}
     pois: list[Poi] = []
     for r in geom.regions:
-        if r.kind == "circulation":
+        if r.kind in ("circulation", "transition"):
             continue
         node = next((door_node[d.id] for d in geom.doors if r.id in d.regions and d.id in door_node), None)
         if node is None:
@@ -104,6 +104,26 @@ def make_pois(geom: GeometryPx, graph: NavGraph) -> tuple[list[Poi], list[Issue]
                 room_id=r.id,
                 needs_review=needs_review,
                 ocr_conf=r.ocr_conf,
+                category=_category(f"{r.label or ''} {r.name or ''}"),
+            )
+        )
+    tnodes = geom.debug.get("transition_nodes", {})
+    counts: dict[str, int] = {}
+    for t in geom.transitions:
+        if t.id not in tnodes:
+            continue
+        counts[t.type] = counts.get(t.type, 0) + 1
+        name = f"{'Stairs' if t.type == 'stairs' else 'Lift'} {counts[t.type]}"
+        pois.append(
+            Poi(
+                id=f"p{len(pois) + 1}",
+                name=name,
+                label=None,
+                node_id=tnodes[t.id],
+                room_id=t.region_id,
+                needs_review=False,
+                ocr_conf=None,
+                category=t.type,
             )
         )
     return pois, issues

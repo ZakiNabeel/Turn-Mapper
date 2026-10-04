@@ -61,7 +61,62 @@ class ClassicalSegmenter:
         floor &= ~wall
         light = g >= lv["background"] - 6
         background = border_connected(light & ~floor)
-        return Segmentation(wall=wall, floor=floor, background=background, levels=lv, method=self.name)
+        stairs = detect_stairs(g, lv, wall | background, params)
+        partitions = detect_partitions(g, lv, wall_thr, wall, background, stairs, params)
+        return Segmentation(
+            wall=wall,
+            floor=floor,
+            background=background,
+            levels=lv,
+            method=self.name,
+            stairs=stairs,
+            partitions=partitions,
+        )
+
+
+def detect_stairs(g: np.ndarray, lv: dict, exclude: np.ndarray, params: PipelineParams) -> np.ndarray:
+    """Stairs in floor-planner exports are a smooth grey gradient near the floor colour, while real floor
+    is flat. Dense 'near-but-not-equal to floor' pixels over a window = stair texture."""
+    d = np.abs(g.astype(int) - lv["floor"])
+    near = ((d >= 2) & (d <= 16) & ~exclude).astype(np.float32)
+    k = max(9, int(min(g.shape) * params.stairs_window_frac))
+    dens = cv2.blur(near, (k, k))
+    m = cv2.morphologyEx(
+        (dens > params.stairs_density).astype(np.uint8), cv2.MORPH_OPEN, np.ones((5, 5), np.uint8)
+    )
+    n, lab, st, _ = cv2.connectedComponentsWithStats(m)
+    keep = [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] >= params.stairs_min_area_frac * k * k]
+    return np.isin(lab, keep) & ~exclude
 
 
 SEGMENTERS: dict[str, Segmenter] = {"classical": ClassicalSegmenter()}
+
+
+def detect_partitions(
+    g: np.ndarray,
+    lv: dict,
+    wall_thr: int,
+    wall: np.ndarray,
+    background: np.ndarray,
+    stairs: np.ndarray,
+    params: PipelineParams,
+) -> np.ndarray:
+    """Thin straight lines that divide spaces (open-plan partitions, study rooms, shelving).
+
+    Kept: long horizontal/vertical thin strokes with floor on both sides. Rejected: door arcs and text
+    (short/curved), door-slab outlines (next to a white slab), stair arrows (inside stairs), and the
+    image border (next to background)."""
+    k3 = np.ones((3, 3), np.uint8)
+    thin = ((g <= lv["floor"] - 12) & ~cv2.dilate(wall.astype(np.uint8), k3).astype(bool)).astype(np.uint8)
+    L = max(25, int(min(g.shape) * params.partition_min_len_frac))
+    part = np.zeros_like(thin)
+    for k in (np.ones((1, L), np.uint8), np.ones((L, 1), np.uint8)):
+        part |= cv2.morphologyEx(thin, cv2.MORPH_OPEN, k)
+    white = (g >= lv["background"] - 9) | background
+    bad = cv2.dilate(white.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool)
+    bad |= cv2.dilate(stairs.astype(np.uint8), np.ones((7, 7), np.uint8)).astype(bool)
+    part = part.astype(bool) & ~bad
+    # drop fragments that became short after filtering
+    n, lab, st, _ = cv2.connectedComponentsWithStats(part.astype(np.uint8), connectivity=8)
+    keep = [i for i in range(1, n) if max(st[i, cv2.CC_STAT_WIDTH], st[i, cv2.CC_STAT_HEIGHT]) >= L]
+    return np.isin(lab, keep)

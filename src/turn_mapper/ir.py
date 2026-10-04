@@ -62,6 +62,8 @@ class Segmentation:
     background: np.ndarray  # bool
     levels: dict  # estimated grey levels {'floor': .., 'wall': .., 'background': ..}
     method: str = "classical"
+    stairs: np.ndarray | None = None  # bool; stair texture (transition areas)
+    partitions: np.ndarray | None = None  # bool; thin straight partition lines (light/open-plan walls)
 
 
 @dataclass
@@ -85,12 +87,25 @@ class Door:
 
 
 @dataclass
+class Transition:
+    """Vertical-movement feature on a floor (stairs / lift). ``anchor`` is the walkable point a person
+    stands at to use it; the graph gets a transition node there."""
+
+    id: str
+    type: str  # "stairs" | "lift"
+    polygon: Polygon  # px
+    anchor: Point
+    region_id: str | None = None
+
+
+@dataclass
 class GeometryPx:
     regions: list[Region]
     doors: list[Door]
     walkable: MultiPolygon  # px
     wall_segments: list[tuple[tuple[float, float], tuple[float, float], float]]  # a, b, thickness px
     wall_mask_closed: np.ndarray
+    transitions: list[Transition] = field(default_factory=list)
     debug: dict = field(default_factory=dict)
 
 
@@ -101,6 +116,7 @@ class GraphNode:
     y: float
     kind: str
     door_id: str | None = None
+    transition: str | None = None  # "stairs" | "lift" for kind == "transition"
 
 
 @dataclass
@@ -127,6 +143,7 @@ class Poi:
     room_id: str
     needs_review: bool
     ocr_conf: float | None
+    category: str | None = None
 
 
 @dataclass

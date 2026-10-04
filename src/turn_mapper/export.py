@@ -71,6 +71,7 @@ def floor_to_dict(fr: FloorResult) -> dict:
             "y": _r(n.y * s),
             "kind": n.kind,
             "door_id": n.door_id,
+            **({"transition": n.transition} if n.transition else {}),
             "provenance": {"source": "auto"},
         }
         for n in fr.graph.nodes.values()
@@ -135,7 +136,7 @@ def floor_to_dict(fr: FloorResult) -> dict:
                 "label": p.label,
                 "node_id": p.node_id,
                 "room_id": p.room_id,
-                "category": None,
+                "category": p.category,
                 "needs_review": p.needs_review,
                 "provenance": {"source": "auto"},
             }

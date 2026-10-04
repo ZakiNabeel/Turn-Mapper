@@ -110,7 +110,19 @@ def vectorize(
     else:
         gap_px = int(round(params.door_gap_wall_ratio * t))
     gap_px = int(np.clip(gap_px, 5, max(seg.wall.shape) // 8))
-    wall_c = close_wall_gaps(seg.wall, gap_px, t)
+    walls_all = seg.wall
+    if seg.partitions is not None and seg.partitions.any():
+        # a thin line lying in a gap of a thick wall is a door leaf, not a partition
+        door_band = close_wall_gaps(seg.wall, 2 * gap_px, t) & ~seg.wall  # 2x: double doors
+        door_band = cv2.dilate(door_band.astype(np.uint8), np.ones((5, 5), np.uint8)) > 0
+        parts = seg.partitions & ~door_band
+        n_p, lab_p, st_p, _ = cv2.connectedComponentsWithStats(parts.astype(np.uint8), connectivity=8)
+        keep_p = [
+            i for i in range(1, n_p) if max(st_p[i, cv2.CC_STAT_WIDTH], st_p[i, cv2.CC_STAT_HEIGHT]) > gap_px
+        ]
+        parts = np.isin(lab_p, keep_p)
+        walls_all = seg.wall | (cv2.dilate(parts.astype(np.uint8), np.ones((3, 3), np.uint8)) > 0)
+    wall_c = close_wall_gaps(walls_all, gap_px, t)
 
     free = ~wall_c & ~seg.background
     n, lab, stats, _ = cv2.connectedComponentsWithStats(free.astype(np.uint8), connectivity=4)
@@ -118,7 +130,7 @@ def vectorize(
     keep = [i for i in range(1, n) if stats[i, cv2.CC_STAT_AREA] >= min_area_px]
 
     # doors = pixels added by closing, between spaces
-    added = wall_c & ~seg.wall & ~seg.background
+    added = wall_c & ~walls_all & ~seg.background
     dn, dlab, dstats, _ = cv2.connectedComponentsWithStats(added.astype(np.uint8), connectivity=8)
     keep_set = set(keep)
     region_of = {i: f"s{i}" for i in keep}

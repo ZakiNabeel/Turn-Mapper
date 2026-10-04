@@ -11,10 +11,11 @@ import networkx as nx
 import numpy as np
 from scipy import ndimage
 from shapely.geometry import LineString, Point
+from shapely.ops import unary_union
 from shapely.prepared import prep
 from skimage.morphology import skeletonize
 
-from .ir import Door, GeometryPx, GraphEdge, GraphNode, Issue, NavGraph
+from .ir import GeometryPx, GraphEdge, GraphNode, Issue, NavGraph
 
 _OFFS = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
 
@@ -210,7 +211,7 @@ def _segment_ok(a, b, region_prep, wall_mask: np.ndarray) -> bool:
     return not wall_mask[ys, xs].any()
 
 
-def simplify_checked(pts, tol: float, region_prep, wall_mask) -> list:
+def simplify_checked(pts, tol: float, region_prep, wall_mask) -> list | None:
     """Douglas-Peucker where every output segment must stay inside the region and off walls."""
     pts = [tuple(p) for p in pts]
     if len(pts) <= 2:
@@ -221,7 +222,30 @@ def simplify_checked(pts, tol: float, region_prep, wall_mask) -> list:
         if all(_segment_ok(a, b, region_prep, wall_mask) for a, b in zip(out[:-1], out[1:], strict=False)):
             return out
         t /= 2
-    return pts
+    return greedy_visible(pts, region_prep, wall_mask)
+
+
+def greedy_visible(pts, region_prep, wall_mask) -> list | None:
+    """From each kept point, jump to the farthest later point still reachable by a valid straight segment.
+    Used when Douglas-Peucker can't satisfy containment (narrow passages); avoids one node per pixel."""
+    out = [pts[0]]
+    i, n = 0, len(pts)
+    while i < n - 1:
+        lo, hi = i + 1, n - 1
+        best = i + 1
+        while lo <= hi:  # binary search is a heuristic (validity isn't monotone); verified below
+            mid = (lo + hi) // 2
+            if _segment_ok(pts[i], pts[mid], region_prep, wall_mask):
+                best, lo = mid, mid + 1
+            else:
+                hi = mid - 1
+        while best > i + 1 and not _segment_ok(pts[i], pts[best], region_prep, wall_mask):
+            best -= 1
+        if best == i + 1 and not _segment_ok(pts[i], pts[best], region_prep, wall_mask):
+            return None  # the traced path itself leaves the valid area (pinch narrower than tolerance)
+        out.append(pts[best])
+        i = best
+    return out
 
 
 def build_graph(
@@ -238,6 +262,10 @@ def build_graph(
         small = np.isin(hl, np.where(sizes < params.hole_fill_m2 * px * px)[0] + 1)
         walk |= small
     walk_s = cv2.morphologyEx(walk.astype(np.uint8), cv2.MORPH_OPEN, np.ones((3, 3), np.uint8)) > 0
+    stairs = geom.debug.get("stairs_mask")
+    if stairs is not None and stairs.any():
+        # stairs are reached via a transition node, not traced: their texture makes the skeleton loop
+        walk_s &= ~cv2.dilate(stairs.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool)
     sk = skeletonize(walk_s)
     lines, cents = skeleton_polylines(sk, with_nodes=True)
     g = _to_nx(lines, cents)
@@ -246,8 +274,20 @@ def build_graph(
     merge_close_nodes(g, params.node_merge_m * px)
     _merge_degree2(g)
 
-    tol = params.inside_tolerance_m * px + 1.5
-    region = geom.walkable.buffer(tol)
+    # same geometry the exported-package validator uses (walkable + tolerance, minus wall bands), slightly
+    # stricter, so an edge accepted here can't fail validation after export
+    tol = params.inside_tolerance_m * px * 0.8
+    wall_bands = unary_union(
+        [
+            LineString([a, b]).buffer(max(t * m_per_px, 0.02) * 0.35 * px + 0.5)
+            for a, b, t in geom.wall_segments
+        ]
+    )
+    region = (
+        geom.walkable.buffer(tol).difference(wall_bands)
+        if not wall_bands.is_empty
+        else geom.walkable.buffer(tol)
+    )
     rprep = prep(region)
     wall_hard = walls_raw & ~geom.debug["walk_mask"]
 
@@ -275,10 +315,14 @@ def build_graph(
         edges.append(GraphEdge(id=f"e{len(edges) + 1}", a=a, b=b, length=length, type=typ))
 
     max_len = params.max_edge_m * px
+    dropped = 0
     for u, v, d in g.edges(data=True):
         pts = oriented(d["pts"], g.nodes[u]["xy"])
         pts[0], pts[-1] = g.nodes[u]["xy"], g.nodes[v]["xy"]
         simp = simplify_checked(pts, params.simplify_tol_m * px, rprep, wall_hard)
+        if simp is None:
+            dropped += 1
+            continue
         dense = [simp[0]]
         for a, b in zip(simp[:-1], simp[1:], strict=False):
             seglen = float(np.hypot(b[0] - a[0], b[1] - a[1]))
@@ -289,6 +333,14 @@ def build_graph(
         for a, b in zip(ids[:-1], ids[1:], strict=False):
             add_edge(a, b)
 
+    if dropped:
+        issues.append(
+            Issue(
+                "SKELETON_EDGE_DROPPED",
+                f"{dropped} centre-line piece(s) pass through a gap narrower "
+                "than the validator allows; dropped (bridging may reconnect)",
+            )
+        )
     # junction kinds
     deg: dict[str, int] = {}
     for e in edges:
@@ -302,15 +354,149 @@ def build_graph(
     for door in geom.doors:
         if not (circ & set(door.regions)):
             continue
-        _link_door(
-            door, nodes, edges, add_node, add_edge, rprep, wall_hard, params.door_link_max_m * px, issues
-        )
+        did = add_node((door.center.x, door.center.y), kind="door", door_id=door.id)
+        if not _link_point(
+            did, nodes, edges, add_node, add_edge, rprep, wall_hard, params.door_link_max_m * px, "door"
+        ):
+            issues.append(
+                Issue(
+                    "DOOR_UNLINKED",
+                    "door could not be linked to the corridor graph with a wall-safe edge",
+                    door.id,
+                )
+            )
+    for t in geom.transitions:
+        tid = add_node((t.anchor.x, t.anchor.y), kind="transition", door_id=t.id)
+        nodes[tid].door_id = None
+        nodes[tid].transition = t.type
+        geom.debug.setdefault("transition_nodes", {})[t.id] = tid
+        if not _link_point(
+            tid, nodes, edges, add_node, add_edge, rprep, wall_hard, params.door_link_max_m * px, "corridor"
+        ):
+            issues.append(Issue("TRANSITION_UNLINKED", f"{t.type} could not be linked to the graph", t.id))
+    _bridge_components(
+        nodes,
+        edges,
+        add_node,
+        add_edge,
+        rprep,
+        wall_hard,
+        params.door_link_max_m * px,
+        issues,
+        _region_mask(region, walk.shape),
+    )
     return NavGraph(nodes=nodes, edges=edges), issues
 
 
-def _link_door(door: Door, nodes, edges, add_node, add_edge, rprep, wall_hard, max_d, issues) -> None:
-    c = (door.center.x, door.center.y)
-    did = add_node(c, kind="door", door_id=door.id)
+def _region_mask(region, shape) -> np.ndarray:
+    """Rasterise the validity region (walkable + tolerance - wall bands), shrunk 1 px for safety."""
+    m = np.zeros(shape, np.uint8)
+    geoms = getattr(region, "geoms", [region])
+    for poly in geoms:
+        if poly.is_empty or poly.geom_type != "Polygon":
+            continue
+        cv2.fillPoly(m, [np.round(np.asarray(poly.exterior.coords)).astype(np.int32)], 1)
+        for hole in poly.interiors:
+            cv2.fillPoly(m, [np.round(np.asarray(hole.coords)).astype(np.int32)], 0)
+    return cv2.erode(m, np.ones((3, 3), np.uint8)) > 0
+
+
+def _routed_path(mask: np.ndarray, a: tuple[float, float], b: tuple[float, float]) -> list | None:
+    """Shortest raster path from a to b staying inside ``mask`` (None if impossible)."""
+    from skimage.graph import route_through_array
+
+    h, w = mask.shape
+
+    def snap(p):
+        x, y = int(round(p[0])), int(round(p[1]))
+        if 0 <= y < h and 0 <= x < w and mask[y, x]:
+            return y, x
+        ys, xs = np.nonzero(mask[max(y - 6, 0) : y + 7, max(x - 6, 0) : x + 7])
+        if len(xs) == 0:
+            return None
+        i = int(np.argmin((xs + max(x - 6, 0) - x) ** 2 + (ys + max(y - 6, 0) - y) ** 2))
+        return int(ys[i] + max(y - 6, 0)), int(xs[i] + max(x - 6, 0))
+
+    sa, sb = snap(a), snap(b)
+    if sa is None or sb is None:
+        return None
+    cost = np.where(mask, 1.0, 1e6)
+    path, total = route_through_array(cost, sa, sb, fully_connected=True, geometric=True)
+    if total >= 1e5:
+        return None
+    return [a] + [(float(x), float(y)) for y, x in path] + [b]
+
+
+def _bridge_components(nodes, edges, add_node, add_edge, rprep, wall_hard, max_d, issues, valid_mask) -> None:
+    """Join small graph components to the largest: first with the shortest valid straight edge, else with
+    a routed path through the valid area (repairs breaks at narrow passages, e.g. beside a stairwell).
+    Components that can't be joined are reported."""
+    for _ in range(20):
+        g = nx.Graph([(e.a, e.b) for e in edges])
+        g.add_nodes_from(nodes)
+        comps = sorted(nx.connected_components(g), key=len, reverse=True)
+        if len(comps) <= 1:
+            return
+        main = comps[0]
+        main_xy = np.array([(nodes[n].x, nodes[n].y) for n in main])
+        main_ids = list(main)
+        joined = False
+        for comp in comps[1:]:
+            best = None
+            for n in comp:
+                d = np.hypot(main_xy[:, 0] - nodes[n].x, main_xy[:, 1] - nodes[n].y)
+                for j in np.argsort(d)[:8]:
+                    if d[j] > max_d:
+                        break
+                    m = main_ids[j]
+                    if (best is None or d[j] < best[0]) and _segment_ok(
+                        (nodes[n].x, nodes[n].y), (nodes[m].x, nodes[m].y), rprep, wall_hard
+                    ):
+                        best = (d[j], n, m)
+                        break
+            if best:
+                add_edge(best[1], best[2])
+                joined = True
+                break
+            # routed fallback: nearest node pair (by distance), path through the valid raster
+            pairs = []
+            hub = np.array([nodes[m].kind in ("corridor", "junction") for m in main_ids])
+            for n in comp:
+                d = np.hypot(main_xy[:, 0] - nodes[n].x, main_xy[:, 1] - nodes[n].y)
+                d = np.where(hub, d, np.inf)  # bridge to corridor/junction nodes, not doors in wall gaps
+                j = int(np.argmin(d))
+                if np.isfinite(d[j]):
+                    pairs.append((d[j], n, main_ids[j]))
+            pairs.sort()
+            for _d, n, m in pairs[:3]:
+                path = _routed_path(valid_mask, (nodes[n].x, nodes[n].y), (nodes[m].x, nodes[m].y))
+                if path is None:
+                    continue
+                simp = greedy_visible(path, rprep, wall_hard)
+                if not simp:
+                    continue
+                ids = [n] + [add_node(p) for p in simp[1:-1]] + [m]
+                for u, v in zip(ids[:-1], ids[1:], strict=False):
+                    add_edge(u, v)
+                joined = True
+                break
+            if joined:
+                break
+        if not joined:
+            for comp in comps[1:]:
+                issues.append(
+                    Issue(
+                        "GRAPH_COMPONENT_ISOLATED",
+                        f"{len(comp)} nodes could not be joined to the main graph",
+                        sorted(comp)[0],
+                    )
+                )
+            return
+
+
+def _link_point(did: str, nodes, edges, add_node, add_edge, rprep, wall_hard, max_d, edge_type: str) -> bool:
+    """Connect node ``did`` to the nearest corridor edge with a straight, wall-safe segment."""
+    c = (nodes[did].x, nodes[did].y)
     cands = []
     for e in edges:
         if e.type != "corridor":
@@ -337,10 +523,6 @@ def _link_door(door: Door, nodes, edges, add_node, add_edge, rprep, wall_hard, m
             e.b = mid
             e.length = float(np.hypot(nodes[mid].x - a.x, nodes[mid].y - a.y))
             add_edge(mid, old_b)
-        add_edge(did, mid, "door")
-        return
-    issues.append(
-        Issue(
-            "DOOR_UNLINKED", "door could not be linked to the corridor graph with a wall-safe edge", door.id
-        )
-    )
+        add_edge(did, mid, edge_type)
+        return True
+    return False
