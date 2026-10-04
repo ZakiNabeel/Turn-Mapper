@@ -19,35 +19,35 @@ Authoritative project context: `docs/TURN_FYP_CONTEXT.md` (parts about Android a
 5. Last 3 entries of `docs/SESSION_LOG.md`
 6. The current step in `docs/MASTER_PLAN.md` (once it exists)
 
-## Layout (target)
+## Layout (current)
 
 ```text
 src/turn_mapper/
-  api.py            # public Python API: convert(), validate_package(), load_package()
-  cli.py            # `turn-mapper` CLI (thin wrapper over api.py)
-  ir/               # intermediate representation dataclasses (pixel + metric)
-  ingest/           # input adapters: pdf_vector, pdf_raster, image, dxf (registry, pluggable)
-  preprocess/
-  segment/          # interface + classical + learned implementations
-  ocr/
-  vectorize/
-  scale/
-  walkable/
-  graph/
-  pois/
-  validate/
-  report/           # QA HTML
-  export/           # .turnmap writer/reader
-  learned/          # training code (imported by notebooks)
-contract/           # turnmap.schema.json, fixtures/*.turnmap, CHANGELOG.md  ← the public contract
-configs/            # YAML configs, incl. per-venue configs (e.g. venues/fast_isb.yaml)
-samples/            # small sample plans with permission + README with measured distances
-eval/               # evaluation scripts
-notebooks/          # thin Colab/Kaggle wrappers
-tests/
+  api.py         # PUBLIC: convert(), process_floor(), validate_package(), load_package()
+  cli.py         # `turn-mapper inspect | run | validate`
+  config.py      # PipelineParams (generic defaults) + venue YAML loader (ADR-010)
+  ir.py          # intermediate representation dataclasses
+  ingest.py      # input adapters: pdf_embedded_image, pdf_render, image (+ inspect)
+  preprocess.py  # grayscale, OCR text boxes, text erasure
+  segment.py     # Segmenter interface; ClassicalSegmenter (histogram levels)
+  vectorize.py   # orientation-aware wall-gap closing -> spaces, circulation, doors, walls
+  scale.py       # two-point evidence, or door-width prior (flagged estimate)
+  graph.py       # skeleton -> polylines -> pruned/merged graph -> wall-safe door links
+  pois.py        # per-room OCR labels -> POIs on door nodes
+  validate.py    # schema + geometry validators on metric JSON; A* route sampling
+  export.py      # floor.json (metres) + .turnmap writer/reader
+  report.py      # QA overlays + HTML
+  synthetic.py   # synthetic plans with known answers (tests, fixtures)
+  schema/        # copy of contract/turnmap.schema.json (test keeps them in sync)
+contract/        # turnmap.schema.json, fixtures/, CHANGELOG.md  ← the public contract
+configs/venues/  # per-venue configs (fast_isb.yaml)
+scripts/         # make_fixtures.py
+tests/           # pytest (synthetic + contract)
 docs/
-data/  runs/  weights/   # gitignored
+data/ runs/ weights/ samples/private/ scratch/   # gitignored
 ```
+
+Stages are flat modules for now; split into subpackages when a stage grows (e.g. `segment/learned.py` in M5).
 
 ## Hard rules
 
@@ -70,11 +70,14 @@ data/  runs/  weights/   # gitignored
 ## Commands (update as they become real)
 
 ```bash
-pip install -e ".[dev]"            # add ".[ml]" for training extras
-pytest
+# needs the tesseract binary (apt install tesseract-ocr / brew install tesseract / Windows installer)
+pip install -e ".[dev]"
+pytest -q                                     # 23 tests, ~5 s
 ruff check . && ruff format --check .
-turn-mapper inspect samples/<plan>.pdf                       # list pages, vector/raster, text
-turn-mapper run samples/<plan>.pdf --venue configs/venues/fast_isb.yaml --out runs/<name>
+python scripts/make_fixtures.py               # regenerate contract/fixtures
+turn-mapper inspect samples/private/fast_blocks.pdf
+turn-mapper run samples/private/fast_blocks.pdf --venue configs/venues/fast_isb.yaml --split dev --out runs/<name>
+turn-mapper run any_plan.png --out runs/<name>                # single image, no config
 turn-mapper validate runs/<name>/venue.turnmap
 ```
 

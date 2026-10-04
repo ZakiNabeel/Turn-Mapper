@@ -14,6 +14,15 @@ See `configs/venues/fast_isb.yaml` (draft) and `docs/PLAN_INVENTORY.md` §2.
 
 ## Measured distances (scale ground truth)
 
+Copy them into `configs/venues/fast_isb.yaml` like this (pixel coordinates from the floor image, e.g. read off `runs/<run>/qa/<floor>_overlay.png` in any image viewer):
+
+```yaml
+scale_evidence:
+  C-F3:
+    - { p1_px: [12, 230], p2_px: [975, 230], distance_m: 41.3 }   # first = used to fit
+    - { p1_px: [140, 180], p2_px: [140, 285], distance_m: 2.9 }   # others = checked, residual reported
+```
+
 Measure with a laser meter or tape, wall face to wall face, straight lines along corridors. At least 3 per floor you will demo; the first is used to fit the scale, the rest check it.
 
 | floor | point A (describe precisely) | point B | distance (m) | tool | by / date |

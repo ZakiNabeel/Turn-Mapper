@@ -17,6 +17,20 @@ Newest entry at the top. Every Claude Code session (and every human session that
 
 ---
 
+## 2026-10-04 — Zaki (+Claude in claude.ai) — M1 + first M2 built
+**Goal:** working module end to end on the FAST PDF.
+**Changed:** src/turn_mapper/* (all stages), contract/turnmap.schema.json + fixtures, tests/, scripts/make_fixtures.py, .github/workflows/ci.yml, configs/venues/fast_isb.yaml (splits), docs/RESULTS_2026-10-04.md.
+**Verified:**
+- `pytest -q` → 23 passed; `ruff check .` + `ruff format --check .` → clean.
+- `turn-mapper run … --split all --out runs/all_v2_bugfix` (commit 2b99f5f): dev 3/3 valid, test 4/11 valid; `turn-mapper validate runs/all_v2_bugfix/venue.turnmap` → PASSED (7 floors packaged).
+- Synthetic plans: exact room/door/POI counts; door-prior scale within 2% of truth.
+**Not verified / unknown:** metric accuracy (no site measurements; all scales are door-width estimates); geometry accuracy vs ground truth (none exists yet); app import (no importer yet); coordinate frame vs app (ADR-007 open).
+**Broken or risky:** stairwells/voids walkable; edited images C-F2/C-F5 fail; small-font OCR on A block; A/C now partly seen (see ADR-009 note).
+**Decisions / ADRs proposed:** ADR-012 (door-width prior), ADR-013 (validators on metric JSON); dev=B/test=A+C written into config (still Proposed).
+**Next step:** site measurements → `scale_evidence`; then stairs/void detection on B.
+
+---
+
 ## 2026-10-04 — Zaki (+Claude in claude.ai) — FAST PDF first look
 **Goal:** inspect Floor_Plans_2.pdf before planning.
 **Changed:** docs/PLAN_INVENTORY.md, docs/img/proto_*.png, configs/venues/fast_isb.yaml (draft), ADR-009 proposal, ADR-011.

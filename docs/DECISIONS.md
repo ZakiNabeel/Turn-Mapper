@@ -39,6 +39,7 @@ Status: OPEN — app audit decides per field: additive Room migration vs drop-wi
 
 ## ADR-009 — Test set freeze
 Status: OPEN — team to choose. Recommended (PLAN_INVENTORY §6, option A): **dev = B block (pages 4–5), test = A block (pages 2–3) + C block (pages 6–8)**. File: Floor_Plans_2.pdf, SHA-256 8316d9d778c7468d54d3de471216a95c5d340b5f9d95c1ddc2656a47070cd38d. Floors of one block never split across dev/test. Change Status to Accepted with the date once agreed.
+**Note 2026-10-04:** A/C floors were run once untuned (v1: test 1/11 valid) and their overlays inspected; one code-correctness fix followed (no threshold changes), giving v2 test 4/11. For the final evaluation, add floors nobody has looked at (see RESULTS_2026-10-04.md).
 
 ## ADR-010 — Pluggable input adapters + venue configs
 Status: Proposed (2026-10-04)
@@ -50,3 +51,12 @@ Status: Proposed (2026-10-04)
 Context: `Floor_Plans_2.pdf` (see `PLAN_INVENTORY.md`) has no vector content: embedded PNG/JPEG floor-planner screenshots in a Word export, with no scale bar or dimensions; per-floor pixel scale differs.
 Decision: the raster branch is the critical path for the FAST demo; the vector branch (M7) stays for other venues. Scale is per floor, from on-site measurements on both axes, and the residual drawing error is reported. Ingest takes embedded images at native resolution instead of re-rendering pages.
 Consequences: on-site measurement is a hard dependency before M2 can claim metric output; positioning results must mention map-drawing error.
+
+## ADR-012 — Scale fallback: door-width prior, always flagged
+Status: Proposed (2026-10-04)
+Decision: if a floor has no measured `scale_evidence`, scale = 0.9 m / median detected door width (px). The package records `scale_source: door_width_prior` and a SCALE_ESTIMATED warning. On synthetic plans the error is about 2%; on real plans it's unknown until measured.
+Why: lets the chain run end to end on any plan before site work, without pretending the scale is measured.
+
+## ADR-013 — Validators run on the metric JSON, not on internal state
+Status: Proposed (2026-10-04)
+Decision: `validate_floor` checks the exported floor.json, so the same validator checks our output, app-exported ground truth, and hand-edited packages. Invalid fixtures name the error code the consumer must report.

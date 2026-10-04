@@ -1,6 +1,6 @@
 # TURN Map Package (`.turnmap`) — Schema v0.1 (draft)
 
-Status: **DRAFT.** Items marked `VERIFY` must be reconciled with the Android app's Room entities (via the app audit, Prompt A1) before `contract-v0.1.0` is tagged.
+Status: **v0.1.0 implemented** in `contract/turnmap.schema.json` + `src/turn_mapper/export.py`; fixtures in `contract/fixtures/`. Not tagged yet. Items marked `VERIFY` must be reconciled with the Android app's Room entities (via the app audit, Prompt A1) before `contract-v0.1.0` is tagged.
 
 Machine-checkable source of truth: `contract/turnmap.schema.json` (JSON Schema 2020-12). This document explains it.
 
@@ -62,7 +62,7 @@ The app's v1 importer may import one floor at a time (user picks from `venue.jso
   "transform": {
     "px_to_m": [[0.0125, 0, 0], [0, 0.0125, 0]],
     "scale_m_per_px": 0.0125,
-    "scale_source": "operator_two_point",            // operator_two_point | ocr_dimension | cad_units | scale_bar
+    "scale_source": "operator_two_point",            // operator_two_point | ocr_dimension | cad_units | scale_bar | door_width_prior (estimate!)
     "scale_evidence": [
       { "p1_px": [100, 400], "p2_px": [1092, 400], "distance_m": 12.4, "used_for_fit": true },
       { "p1_px": [100, 900], "p2_px": [500, 900],  "distance_m": 5.0,  "used_for_fit": false, "residual_m": 0.06 }

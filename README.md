@@ -11,6 +11,11 @@ AI-assisted, human-verified: every automatic result is checked by validators and
 - Pipeline design: [`docs/PIPELINE1_SPEC.md`](docs/PIPELINE1_SPEC.md)
 - Status and plan: [`docs/ROADMAP_AND_WORKFLOW.md`](docs/ROADMAP_AND_WORKFLOW.md), [`docs/SESSION_LOG.md`](docs/SESSION_LOG.md)
 
-Status: setup — no code yet.
+Status: **v0.1 classical baseline working** (M1 + first M2). See [`docs/RESULTS_2026-10-04.md`](docs/RESULTS_2026-10-04.md).
+
+```bash
+pip install -e ".[dev]"        # also needs the tesseract binary
+turn-mapper run plan.png --out runs/try1      # -> runs/try1/venue.turnmap + runs/try1/qa/index.html
+```
 
 Team: Zaki Nabeel (map intelligence / CV, module owner), Shehryar Faisal (platform / app integration), M Sameer (positioning).

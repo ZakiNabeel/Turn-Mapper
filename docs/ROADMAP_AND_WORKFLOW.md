@@ -7,8 +7,8 @@ Status: draft v0.2 (2026-10-04). Targets are weeks from repo creation; the maste
 | M | Name | Output | Done when | Owner | Target |
 |---|---|---|---|---|---|
 | M0 | Repo + audit + plan | repo, docs, `inspect` on FAST PDF, app audit (A1), MASTER_PLAN, ADR-007/008/009 | team reviewed plan; test split frozen | Zaki (+Shehryar for A1) | wk 1 |
-| M1 | Skeleton + contract v0.1 | package, CLI (`inspect`/`run`/`validate`), IR, run manifest, JSON Schema, fixtures, CI | synthetic plan → valid `.turnmap`; tag `contract-v0.1.0` | Zaki | wk 1–2 |
-| M2 | Thin chain (classical) | ingest (PDF raster + image) → preprocess → classical segment → vectorize → scale → walkable → graph → POIs (no OCR yet) → validate → QA HTML → export | FAST **dev** block floor gives a valid, routable package | Zaki | wk 2–4 |
+| M1 ✅ 2026-10-04 (tag pending) | Skeleton + contract v0.1 | package, CLI (`inspect`/`run`/`validate`), IR, run manifest, JSON Schema, fixtures, CI | synthetic plan → valid `.turnmap`; tag `contract-v0.1.0` | Zaki | wk 1–2 |
+| M2 🟡 first version 2026-10-04 (no measured scale yet) | Thin chain (classical) | ingest (PDF raster + image) → preprocess → classical segment → vectorize → scale → walkable → graph → POIs (no OCR yet) → validate → QA HTML → export | FAST **dev** block floor gives a valid, routable package | Zaki | wk 2–4 |
 | M3 | App integration (in app repo) | vendored contract, Kotlin importer, ground-truth exporter, migration if needed | imported FAST floor routes in the app on a phone; existing data untouched; tests green | Shehryar (+Zaki) | wk 4–5 |
 | M4 | Data | CubiCasa mapped; 20+ institutional plans collected/annotated; splits frozen | `plans_index.csv`, masks, test checksums in ADR-009 | Zaki (+team) | wk 2–6 |
 | M5 | Learned segmentation | model behind `segment` interface; Level A results vs classical | beats classical on val; checkpoint + manifest | Zaki | wk 6–9 |
