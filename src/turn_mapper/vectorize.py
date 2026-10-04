@@ -136,9 +136,13 @@ def vectorize(
         outside = bool((seg.background[sl] & ring).any())
         ys, xs = np.nonzero(blob)
         seg_line, long_, short = _blob_segment(ys + sl[0].start, xs + sl[1].start)
-        if long_ < max(2.0 * t, 6) or short > 3.5 * t + 2 or long_ > gap_px * 1.25:
-            continue
         if len(touched) < 2 and not (len(touched) == 1 and outside):
+            continue
+        door_shaped = long_ >= max(2.0 * t, 6) and short <= 3.5 * t + 2 and long_ <= gap_px * 1.25
+        # openings where walls meet (e.g. a diagonal wall next to a door) produce triangular blobs;
+        # accept them when they clearly join exactly two spaces and are not much bigger than a door
+        junction_opening = len(touched) == 2 and long_ <= gap_px * 1.6 and area <= gap_px * gap_px * 0.5
+        if not (door_shaped or junction_opening):
             continue
         did = f"d{len(doors) + 1}"
         doors.append(
