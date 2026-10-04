@@ -120,3 +120,32 @@ def detect_partitions(
     n, lab, st, _ = cv2.connectedComponentsWithStats(part.astype(np.uint8), connectivity=8)
     keep = [i for i in range(1, n) if max(st[i, cv2.CC_STAT_WIDTH], st[i, cv2.CC_STAT_HEIGHT]) >= L]
     return np.isin(lab, keep)
+
+
+def remove_text_blobs(
+    wall: np.ndarray, max_fill: float = 0.45, max_size_frac: float = 0.2
+) -> tuple[np.ndarray, np.ndarray]:
+    """Split dark pixels into walls and bold text.
+
+    Bold labels are components separate from the wall network that are sparse (strokes fill little of
+    their bounding box), smaller than ``max_size_frac`` of the image's short side, and made of thin strokes
+    (a 5x5 opening erases them). Everything else stays a wall."""
+    n, lab, st, _ = cv2.connectedComponentsWithStats(wall.astype(np.uint8), connectivity=8)
+    if n <= 2:
+        return wall, np.zeros_like(wall)
+    main = int(np.argmax(st[1:, cv2.CC_STAT_AREA])) + 1
+    limit = max_size_frac * min(wall.shape)
+    solid = cv2.morphologyEx(wall.astype(np.uint8), cv2.MORPH_OPEN, np.ones((5, 5), np.uint8)) > 0
+    drop = np.zeros(n, bool)
+    for i in range(1, n):
+        if i == main:
+            continue
+        w, h, a = st[i, cv2.CC_STAT_WIDTH], st[i, cv2.CC_STAT_HEIGHT], st[i, cv2.CC_STAT_AREA]
+        if max(w, h) > limit or a / max(w * h, 1) > max_fill:
+            continue
+        x, y = st[i, cv2.CC_STAT_LEFT], st[i, cv2.CC_STAT_TOP]
+        comp = lab[y : y + h, x : x + w] == i
+        if (solid[y : y + h, x : x + w] & comp).sum() < 0.25 * a:  # mostly thin strokes
+            drop[i] = True
+    text_like = drop[lab] & wall
+    return wall & ~text_like, text_like

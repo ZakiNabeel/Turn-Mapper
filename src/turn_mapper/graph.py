@@ -320,23 +320,37 @@ def build_graph(
         pts = oriented(d["pts"], g.nodes[u]["xy"])
         pts[0], pts[-1] = g.nodes[u]["xy"], g.nodes[v]["xy"]
         simp = simplify_checked(pts, params.simplify_tol_m * px, rprep, wall_hard)
+        pieces = [simp]
         if simp is None:
+            # keep the valid stretches of the traced line; only the invalid steps are dropped
             dropped += 1
-            continue
-        dense = [simp[0]]
-        for a, b in zip(simp[:-1], simp[1:], strict=False):
-            seglen = float(np.hypot(b[0] - a[0], b[1] - a[1]))
-            k = int(np.ceil(seglen / max_len)) if seglen > max_len else 1
-            for i in range(1, k + 1):
-                dense.append((a[0] + (b[0] - a[0]) * i / k, a[1] + (b[1] - a[1]) * i / k))
-        ids = [add_node(p) for p in dense]
-        for a, b in zip(ids[:-1], ids[1:], strict=False):
-            add_edge(a, b)
+            pieces, run = [], [pts[0]]
+            for a, b in zip(pts[:-1], pts[1:], strict=False):
+                if _segment_ok(a, b, rprep, wall_hard):
+                    run.append(b)
+                else:
+                    if len(run) >= 2:
+                        pieces.append(greedy_visible(run, rprep, wall_hard))
+                    run = [b]
+            if len(run) >= 2:
+                pieces.append(greedy_visible(run, rprep, wall_hard))
+        for simp in pieces:
+            if not simp or len(simp) < 2:
+                continue
+            dense = [simp[0]]
+            for a, b in zip(simp[:-1], simp[1:], strict=False):
+                seglen = float(np.hypot(b[0] - a[0], b[1] - a[1]))
+                k = int(np.ceil(seglen / max_len)) if seglen > max_len else 1
+                for i in range(1, k + 1):
+                    dense.append((a[0] + (b[0] - a[0]) * i / k, a[1] + (b[1] - a[1]) * i / k))
+            ids = [add_node(p) for p in dense]
+            for a, b in zip(ids[:-1], ids[1:], strict=False):
+                add_edge(a, b)
 
     if dropped:
         issues.append(
             Issue(
-                "SKELETON_EDGE_DROPPED",
+                "SKELETON_EDGE_SPLIT",
                 f"{dropped} centre-line piece(s) pass through a gap narrower "
                 "than the validator allows; dropped (bridging may reconnect)",
             )

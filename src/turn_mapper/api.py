@@ -15,6 +15,7 @@ from pathlib import Path
 
 import cv2
 import networkx as nx
+import numpy as np
 
 from . import __version__
 from .config import VenueConfig, load_venue_config, single_image_config
@@ -57,8 +58,19 @@ def _git_commit() -> str | None:
         return None
 
 
-def process_floor(spec: FloorSpec, cfg: VenueConfig, method: str = "classical") -> FloorResult:
-    """Run every stage on one floor and return the pixel-space result (+ scale)."""
+def footprint_px(seg) -> tuple[float, float]:
+    """Width/height of the drawn building (bounding box of wall pixels)."""
+    ys, xs = np.nonzero(seg.wall)
+    return (float(xs.max() - xs.min()), float(ys.max() - ys.min())) if len(xs) else (0.0, 0.0)
+
+
+def process_floor(
+    spec: FloorSpec, cfg: VenueConfig, method: str = "classical", ref: FloorResult | None = None
+) -> FloorResult:
+    """Run every stage on one floor and return the pixel-space result (+ scale).
+
+    ``ref``: an already-processed floor of the same building footprint (``scale_like`` in the venue config);
+    if this floor has no measured evidence, its scale is transferred by footprint width."""
     p = cfg.params
     t: dict[str, float] = {}
     t0 = time.perf_counter()
@@ -72,9 +84,44 @@ def process_floor(spec: FloorSpec, cfg: VenueConfig, method: str = "classical") 
     t["segment"] = time.perf_counter() - t0
     t0 = time.perf_counter()
     s_known = scale_from_evidence(spec.scale_evidence)[0] if spec.scale_evidence else None
-    geom = vectorize(seg, pre.gray_raw, pre.text, p, s_known)
+    fw, fh = footprint_px(seg)
+    transfer = None
+    if s_known is None and ref is not None and fw > 0:
+        rw, rh = ref.timings.get("_footprint", (0, 0))
+        if rw > 0:
+            s_known = ref.scale_m_per_px * rw / fw
+            aspect_diff = abs((fw / fh) / (rw / rh) - 1) if fh and rh else 0.0
+            transfer = {
+                "method": "footprint_transfer",
+                "from_floor": ref.image.spec.id,
+                "from_scale_source": ref.scale_source,
+                "ref_width_px": rw,
+                "width_px": fw,
+                "aspect_mismatch": round(aspect_diff, 3),
+            }
+    geom = vectorize(seg, pre.gray_raw, pre.text, p, s_known, color_mask=pre.color_mask)
     t["vectorize"] = time.perf_counter() - t0
-    s, s_src, s_ev, issues = estimate_scale(geom, spec.scale_evidence, p.door_width_prior_m)
+    if transfer:
+        s, s_src, s_ev = s_known, "footprint_transfer", [transfer]
+        issues = [
+            Issue(
+                "SCALE_TRANSFERRED",
+                f"scale transferred from {transfer['from_floor']} "
+                f"({transfer['from_scale_source']}) by footprint width",
+            )
+        ]
+        if transfer["aspect_mismatch"] > 0.03:
+            issues.append(
+                Issue(
+                    "SCALE_ANISOTROPY_SUSPECTED",
+                    f"footprint aspect differs by "
+                    f"{transfer['aspect_mismatch']:.1%} from {transfer['from_floor']}: image may be "
+                    "stretched or cropped differently; measure this floor",
+                )
+            )
+    else:
+        s, s_src, s_ev, issues = estimate_scale(geom, spec.scale_evidence, p.door_width_prior_m)
+    t["_footprint"] = (fw, fh)
     t0 = time.perf_counter()
     patterns = [cfg.label_patterns[spec.building]] if spec.building in cfg.label_patterns else []
     label_rooms(geom, pre.gray_raw, p, patterns)
@@ -130,9 +177,19 @@ def convert(
     pkg_floors: dict[str, tuple[dict, bytes]] = {}
     qa_files: dict[str, bytes] = {}
     summaries, venue_floors = [], []
-    for spec in specs:
+    # floors that borrow scale from another floor are processed after it
+    order = sorted(specs, key=lambda sp: 1 if sp.scale_like else 0)
+    done: dict[str, FloorResult] = {}
+    for spec in order:
         t0 = time.perf_counter()
-        fr = process_floor(spec, cfg, method)
+        ref = None
+        if spec.scale_like:
+            ref = done.get(spec.scale_like)
+            if ref is None:
+                ref_spec = next((f for f in cfg.floors if f.id == spec.scale_like), None)
+                ref = process_floor(ref_spec, cfg, method) if ref_spec else None
+        fr = process_floor(spec, cfg, method, ref=ref)
+        done[spec.id] = fr
         fd = floor_to_dict(fr)
         errs, warns = validate_floor(fd, cfg.params.inside_tolerance_m)
         all_warn = [w.to_dict() for w in fr.warnings] + [w.to_dict() for w in warns]

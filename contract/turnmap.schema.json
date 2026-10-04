@@ -260,7 +260,8 @@
                 "ocr_dimension",
                 "cad_units",
                 "scale_bar",
-                "door_width_prior"
+                "door_width_prior",
+                "footprint_transfer"
               ]
             },
             "scale_evidence": {

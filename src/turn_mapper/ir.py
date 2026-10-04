@@ -25,6 +25,7 @@ class FloorSpec:
     image_index: int | None = None
     scale_evidence: list[dict] = field(default_factory=list)
     crop: tuple[int, int, int, int] | None = None  # x0, y0, x1, y1 in px
+    scale_like: str | None = None  # floor id with the same building footprint to transfer scale from
 
 
 @dataclass
@@ -51,6 +52,7 @@ class Preprocessed:
     gray: np.ndarray  # cleaned grayscale (text erased)
     gray_raw: np.ndarray
     text: list[TextBox]
+    color_mask: np.ndarray | None = None  # strongly saturated pixels (annotations/highlights), dilated
 
 
 @dataclass

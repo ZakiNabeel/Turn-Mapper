@@ -24,7 +24,7 @@ class PipelineParams:
     floor_tolerance: int = 8
     wall_max_gray: int = 210
     # vectorize
-    door_max_width_m: float = 1.6  # largest opening closed as a door
+    door_max_width_m: float = 1.2  # largest opening closed as a (single) door; double doors via partitions
     door_gap_wall_ratio: float = 8.5  # before scale is known: max door gap = ratio x wall thickness
     min_region_area_m2: float = 1.0
     circulation_min_doors: int = 3
@@ -82,6 +82,7 @@ def load_venue_config(path: str | Path, input_file: str | None = None) -> VenueC
                 image_index=f.get("image_index"),
                 scale_evidence=list(scale_ev.get(f["id"], []) or []),
                 crop=tuple(f["crop"]) if f.get("crop") else None,
+                scale_like=f.get("scale_like"),
             )
         )
     params = PipelineParams(**(raw.get("params") or {}))

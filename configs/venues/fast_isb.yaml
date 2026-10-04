@@ -32,8 +32,8 @@ floors:
   - { id: C-B1, building: C, level: -1, page: 6, image_index: 0 }
   - { id: C-GF, building: C, level: 0,  page: 6, image_index: 1 }
   - { id: C-F1, building: C, level: 1,  page: 7, image_index: 0 }
-  - { id: C-F2, building: C, level: 2,  page: 7, image_index: 1 }
+  - { id: C-F2, building: C, level: 2,  page: 7, image_index: 1, scale_like: C-F3 }  # re-exported image
   - { id: C-F3, building: C, level: 3,  page: 7, image_index: 2 }
   - { id: C-F4, building: C, level: 4,  page: 8, image_index: 0 }
-  - { id: C-F5, building: C, level: 5,  page: 8, image_index: 1 }
+  - { id: C-F5, building: C, level: 5,  page: 8, image_index: 1, scale_like: C-F3 }  # re-exported JPEG
 scale_evidence: {}                   # filled from samples/README.md after on-site measurement

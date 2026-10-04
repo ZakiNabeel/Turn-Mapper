@@ -59,6 +59,43 @@ def close_wall_gaps(wall: np.ndarray, gap_px: int, thickness: float) -> np.ndarr
     return out > 0
 
 
+def carve_door_slabs(
+    wall: np.ndarray,
+    gray: np.ndarray,
+    levels: dict,
+    background: np.ndarray,
+    t: float,
+    gap_px: int,
+    ignore: np.ndarray | None = None,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Some exports draw a door as a thin white slab *on top of* an unbroken wall line, so the wall has no
+    gap. Find such slabs (thin, elongated, near-white, lying along a wall) and cut an opening through the
+    wall across its thickness, so gap closing + door detection treat them like any other door."""
+    white = (gray >= levels["background"] - 9) & ~background
+    if ignore is not None:
+        white &= ~ignore  # e.g. halo of a coloured highlight drawn over a wall
+    n, lab, st, _ = cv2.connectedComponentsWithStats(white.astype(np.uint8), connectivity=8)
+    out = wall.copy()
+    carved = np.zeros_like(wall)
+    near_wall = cv2.dilate(wall.astype(np.uint8), np.ones((7, 7), np.uint8)) > 0
+    for i in range(1, n):
+        x, y, w, h, a = st[i]
+        long_, short = max(w, h), min(w, h)
+        if not (0.4 * gap_px <= long_ <= 1.2 * gap_px and short <= max(3, 0.8 * t) and long_ >= 3 * short):
+            continue
+        comp = lab[y : y + h, x : x + w] == i
+        if (near_wall[y : y + h, x : x + w] & comp).sum() < 0.6 * a:
+            continue  # must lie on/against a wall
+        r = int(round(t)) + 3
+        if w >= h:  # horizontal slab: cut vertically through the wall band
+            sl = (slice(max(y - r, 0), y + h + r), slice(x, x + w))
+        else:
+            sl = (slice(y, y + h), slice(max(x - r, 0), x + w + r))
+        carved[sl] |= out[sl]
+        out[sl] = False
+    return out, carved
+
+
 def mask_to_polygons(mask: np.ndarray, simplify_px: float = 1.0, min_area: float = 4.0) -> list[Polygon]:
     """Outer boundaries + holes of a binary mask as valid shapely polygons (pixel coords)."""
     m = mask.astype(np.uint8)
@@ -103,6 +140,7 @@ def vectorize(
     text: list[TextBox],
     params: PipelineParams,
     m_per_px: float | None,
+    color_mask: np.ndarray | None = None,
 ) -> GeometryPx:
     t = wall_thickness_px(seg.wall)
     if m_per_px:
@@ -110,7 +148,10 @@ def vectorize(
     else:
         gap_px = int(round(params.door_gap_wall_ratio * t))
     gap_px = int(np.clip(gap_px, 5, max(seg.wall.shape) // 8))
-    walls_all = seg.wall
+    walls_all, carved = carve_door_slabs(
+        seg.wall, gray_raw, seg.levels, seg.background, t, gap_px, ignore=color_mask
+    )
+    n_slabs = int(cv2.connectedComponents(carved.astype(np.uint8))[0] - 1)
     if seg.partitions is not None and seg.partitions.any():
         # a thin line lying in a gap of a thick wall is a door leaf, not a partition
         door_band = close_wall_gaps(seg.wall, 2 * gap_px, t) & ~seg.wall  # 2x: double doors
@@ -121,8 +162,8 @@ def vectorize(
             i for i in range(1, n_p) if max(st_p[i, cv2.CC_STAT_WIDTH], st_p[i, cv2.CC_STAT_HEIGHT]) > gap_px
         ]
         parts = np.isin(lab_p, keep_p)
-        walls_all = seg.wall | (cv2.dilate(parts.astype(np.uint8), np.ones((3, 3), np.uint8)) > 0)
-    wall_c = close_wall_gaps(walls_all, gap_px, t)
+        walls_all = walls_all | (cv2.dilate(parts.astype(np.uint8), np.ones((3, 3), np.uint8)) > 0)
+    wall_c = close_wall_gaps(walls_all, gap_px, t) | carved  # carved slabs are known door openings
 
     free = ~wall_c & ~seg.background
     n, lab, stats, _ = cv2.connectedComponentsWithStats(free.astype(np.uint8), connectivity=4)
@@ -172,11 +213,26 @@ def vectorize(
 
     # classify spaces
     door_count = {rid: 0 for rid in region_of.values()}
+    neighbours: dict[str, set] = {rid: set() for rid in region_of.values()}
     for dr in doors:
         for rid in dr.regions:
             door_count[rid] += 1
+            neighbours[rid] |= set(dr.regions) - {rid}
     areas = {f"s{i}": float(stats[i, cv2.CC_STAT_AREA]) for i in keep}
     largest = max(areas, key=areas.get) if areas else None
+    # circulation = the largest space, plus many-door spaces reachable from it through doors
+    # (a cluster of cubicles behind a closed office is not a corridor)
+    circ_set = {largest} if largest else set()
+    changed = True
+    while changed:
+        changed = False
+        for dr in doors:
+            if circ_set & set(dr.regions):
+                for rid in dr.regions:
+                    # a corridor leads to several *different* spaces; 3 openings into one hall = still a room
+                    if rid not in circ_set and len(neighbours[rid]) >= params.circulation_min_doors:
+                        circ_set.add(rid)
+                        changed = True
     regions: list[Region] = []
     masks: dict[str, np.ndarray] = {}
     for i in keep:
@@ -186,9 +242,7 @@ def vectorize(
         if not polys:
             continue
         poly = max(polys, key=lambda p: p.area)
-        kind = (
-            "circulation" if (rid == largest or door_count[rid] >= params.circulation_min_doors) else "room"
-        )
+        kind = "circulation" if rid in circ_set else "room"
         regions.append(Region(id=rid, polygon=poly, area_px=areas[rid], kind=kind))
         masks[rid] = mask
 
@@ -205,14 +259,21 @@ def vectorize(
     if walkable.geom_type == "Polygon":
         walkable = MultiPolygon([walkable])
 
-    wall_segments = wall_segments_from_mask(seg.wall, t)
+    # export walls as actually used: door slabs carved out, partitions included
+    wall_segments = wall_segments_from_mask(walls_all, t)
     return GeometryPx(
         regions=regions,
         doors=doors,
         walkable=walkable,
         wall_segments=wall_segments,
         wall_mask_closed=wall_c,
-        debug={"wall_thickness_px": t, "door_gap_px": gap_px, "walk_mask": walk, "region_masks": masks},
+        debug={
+            "wall_thickness_px": t,
+            "door_gap_px": gap_px,
+            "door_slabs_carved": n_slabs,
+            "walk_mask": walk,
+            "region_masks": masks,
+        },
     )
 
 
