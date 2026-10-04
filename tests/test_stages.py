@@ -71,3 +71,13 @@ def test_scale_from_two_points_and_residuals():
     assert s == pytest.approx(0.05)
     assert out[0]["used_for_fit"] and not out[1]["used_for_fit"]
     assert out[1]["residual_m"] == pytest.approx(-0.1, abs=1e-6)
+
+
+def test_graph_edges_keep_their_geometry_regardless_of_direction():
+    """Regression: networkx may return (v, u) for an edge stored u->v; the polyline must be re-oriented,
+    otherwise endpoints get swapped and straight 'shortcut' edges cut through rooms."""
+    from turn_mapper.graph import oriented
+
+    pts = [(0, 0), (5, 0), (5, 5)]
+    assert oriented(pts, (5, 5))[0] == (5, 5)
+    assert oriented(pts, (0, 0))[0] == (0, 0)

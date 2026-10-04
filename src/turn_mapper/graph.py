@@ -172,6 +172,13 @@ def prune_spurs(g: nx.MultiGraph, min_len: float, keep_xy: list[tuple[float, flo
     g.remove_nodes_from([n for n in list(g.nodes) if g.degree(n) == 0])
 
 
+def oriented(pts: list, start_xy) -> list:
+    """Return ``pts`` running from the end nearest ``start_xy`` (networkx does not keep edge direction)."""
+    d0 = (pts[0][0] - start_xy[0]) ** 2 + (pts[0][1] - start_xy[1]) ** 2
+    d1 = (pts[-1][0] - start_xy[0]) ** 2 + (pts[-1][1] - start_xy[1]) ** 2
+    return list(pts) if d0 <= d1 else list(pts)[::-1]
+
+
 def merge_close_nodes(g: nx.MultiGraph, radius: float) -> None:
     for _ in range(10):
         short = [(u, v, k) for u, v, k, d in g.edges(keys=True, data=True) if u != v and d["length"] < radius]
@@ -179,17 +186,15 @@ def merge_close_nodes(g: nx.MultiGraph, radius: float) -> None:
             break
         u, v, k = short[0]
         g.remove_edge(u, v, k)
-        xy = tuple(np.mean([g.nodes[u]["xy"], g.nodes[v]["xy"]], axis=0))
+        v_xy = g.nodes[v]["xy"]
+        xy = tuple(np.mean([g.nodes[u]["xy"], v_xy], axis=0))
         g.nodes[u]["xy"] = xy
         for _a, b, d in list(g.edges(v, data=True)):
             other = b if _a == v else _a
-            other = u if other == v else other
-            g.add_edge(
-                u,
-                other,
-                pts=[xy] + d["pts"][1:-1] + [g.nodes[other]["xy"]] if other != u else d["pts"],
-                length=d["length"],
-            )
+            if other in (u, v):
+                continue
+            pts = oriented(d["pts"], v_xy)
+            g.add_edge(u, other, pts=[xy] + pts[1:-1] + [g.nodes[other]["xy"]], length=d["length"])
         g.remove_node(v)
     for u, v, k in [(u, v, k) for u, v, k in g.edges(keys=True) if u == v]:
         g.remove_edge(u, v, k)
@@ -271,7 +276,7 @@ def build_graph(
 
     max_len = params.max_edge_m * px
     for u, v, d in g.edges(data=True):
-        pts = list(d["pts"])
+        pts = oriented(d["pts"], g.nodes[u]["xy"])
         pts[0], pts[-1] = g.nodes[u]["xy"], g.nodes[v]["xy"]
         simp = simplify_checked(pts, params.simplify_tol_m * px, rprep, wall_hard)
         dense = [simp[0]]
