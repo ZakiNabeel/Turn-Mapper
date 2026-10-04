@@ -3,7 +3,7 @@ venue:
   id: fast-isb
   name: FAST-NUCES Islamabad
 source:
-  file: samples/fast_blocks.pdf      # = Floor_Plans_2.pdf
+  file: samples/private/fast_blocks.pdf   # = Floor_Plans_2.pdf (gitignored until permission confirmed)
   sha256: 8316d9d778c7468d54d3de471216a95c5d340b5f9d95c1ddc2656a47070cd38d
   kind: pdf_embedded_images          # take embedded images at native resolution; don't re-render the page
 style_hints:                         # optional; the pipeline must work without these
@@ -14,6 +14,9 @@ label_patterns:
   A: '^A-?\d{2,3}[A-Z]?$'
   B: '^B-?\d{2,3}[A-Z]?$'
   C: '^C-?\d{3}$'
+splits:                              # ADR-009 (proposed, not yet accepted by the team)
+  dev: [B]
+  test: [A, C]
 buildings:
   - { id: A, name: A Block }
   - { id: B, name: B Block }

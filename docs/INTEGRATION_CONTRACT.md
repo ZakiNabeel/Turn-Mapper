@@ -53,13 +53,13 @@ Status: draft v0.1 (2026-10-04). This document is shared with the owners of the 
 from turn_mapper import api
 
 pkg = api.convert(
-    inputs=["fast_blocks.pdf"],            # one or more files
-    venue_config="configs/venues/fast_isb.yaml",   # page→building/floor mapping, scale evidence, crops
+    inputs=["fast_blocks.pdf"],  # one or more files
+    venue_config="configs/venues/fast_isb.yaml",  # page→building/floor mapping, scale evidence, crops
     out_dir="runs/fast_v1",
-)                                           # -> VenuePackage (also writes runs/fast_v1/venue.turnmap + QA report)
+)  # -> VenuePackage (also writes runs/fast_v1/venue.turnmap + QA report)
 
-report = api.validate_package("runs/fast_v1/venue.turnmap")   # -> ValidationReport
-pkg = api.load_package("runs/fast_v1/venue.turnmap")          # -> VenuePackage
+report = api.validate_package("runs/fast_v1/venue.turnmap")  # -> ValidationReport
+pkg = api.load_package("runs/fast_v1/venue.turnmap")  # -> VenuePackage
 ```
 
 A REST wrapper (FastAPI, `POST /convert`) is a possible later addition for an admin portal; it must call `api.convert` and add no logic.

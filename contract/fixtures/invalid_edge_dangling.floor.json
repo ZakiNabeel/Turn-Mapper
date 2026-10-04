@@ -1,0 +1,1668 @@
+{
+ "floor_id": "F1",
+ "image": {
+  "file": "floorplan.png",
+  "width_px": 800,
+  "height_px": 350
+ },
+ "transform": {
+  "px_to_m": [
+   [
+    0.0391304347826087,
+    0.0,
+    0.0
+   ],
+   [
+    0.0,
+    0.0391304347826087,
+    0.0
+   ]
+  ],
+  "scale_m_per_px": 0.0391304347826087,
+  "scale_source": "door_width_prior",
+  "scale_evidence": [
+   {
+    "method": "door_width_prior",
+    "median_door_px": 23.0,
+    "assumed_door_m": 0.9,
+    "n_doors": 6
+   }
+  ]
+ },
+ "bounds_m": {
+  "min_x": 0.0,
+  "min_y": 0.0,
+  "max_x": 31.304,
+  "max_y": 13.696
+ },
+ "walkable": {
+  "type": "MultiPolygon",
+  "coordinates": [
+   [
+    [
+     [
+      3.913,
+      5.791
+     ],
+     [
+      3.913,
+      5.948
+     ],
+     [
+      3.874,
+      5.987
+     ],
+     [
+      1.096,
+      5.987
+     ],
+     [
+      1.096,
+      8.687
+     ],
+     [
+      4.852,
+      8.687
+     ],
+     [
+      4.891,
+      8.726
+     ],
+     [
+      4.891,
+      8.883
+     ],
+     [
+      5.791,
+      8.883
+     ],
+     [
+      5.791,
+      8.726
+     ],
+     [
+      5.83,
+      8.687
+     ],
+     [
+      16.591,
+      8.687
+     ],
+     [
+      16.63,
+      8.726
+     ],
+     [
+      16.63,
+      8.883
+     ],
+     [
+      17.491,
+      8.883
+     ],
+     [
+      17.491,
+      8.726
+     ],
+     [
+      17.53,
+      8.687
+     ],
+     [
+      30.209,
+      8.687
+     ],
+     [
+      30.209,
+      5.987
+     ],
+     [
+      24.378,
+      5.987
+     ],
+     [
+      24.339,
+      5.948
+     ],
+     [
+      24.339,
+      5.791
+     ],
+     [
+      23.478,
+      5.791
+     ],
+     [
+      23.478,
+      5.948
+     ],
+     [
+      23.439,
+      5.987
+     ],
+     [
+      19.487,
+      5.987
+     ],
+     [
+      19.448,
+      5.948
+     ],
+     [
+      19.448,
+      5.791
+     ],
+     [
+      18.587,
+      5.791
+     ],
+     [
+      18.587,
+      5.948
+     ],
+     [
+      18.548,
+      5.987
+     ],
+     [
+      10.683,
+      5.987
+     ],
+     [
+      10.643,
+      5.948
+     ],
+     [
+      10.643,
+      5.791
+     ],
+     [
+      9.783,
+      5.791
+     ],
+     [
+      9.783,
+      5.948
+     ],
+     [
+      9.743,
+      5.987
+     ],
+     [
+      4.852,
+      5.987
+     ],
+     [
+      4.813,
+      5.948
+     ],
+     [
+      4.813,
+      5.791
+     ],
+     [
+      3.913,
+      5.791
+     ]
+    ]
+   ]
+  ],
+  "provenance": {
+   "source": "auto",
+   "confidence": 0.7
+  }
+ },
+ "walls": [
+  {
+   "id": "w1",
+   "a": [
+    7.826,
+    0.988
+   ],
+   "b": [
+    1.017,
+    0.978
+   ],
+   "thickness_m": 0.224,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.9
+   }
+  },
+  {
+   "id": "w2",
+   "a": [
+    1.017,
+    0.978
+   ],
+   "b": [
+    0.988,
+    5.87
+   ],
+   "thickness_m": 0.224,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.9
+   }
+  },
+  {
+   "id": "w3",
+   "a": [
+    7.826,
+    0.988
+   ],
+   "b": [
+    14.674,
+    0.988
+   ],
+   "thickness_m": 0.224,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.9
+   }
+  },
+  {
+   "id": "w4",
+   "a": [
+    14.674,
+    0.988
+   ],
+   "b": [
+    22.5,
+    0.988
+   ],
+   "thickness_m": 0.224,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.9
+   }
+  },
+  {
+   "id": "w5",
+   "a": [
+    22.5,
+    0.988
+   ],
+   "b": [
+    30.287,
+    0.978
+   ],
+   "thickness_m": 0.224,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.9
+   }
+  },
+  {
+   "id": "w6",
+   "a": [
+    30.287,
+    0.978
+   ],
+   "b": [
+    30.316,
+    5.87
+   ],
+   "thickness_m": 0.224,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.9
+   }
+  },
+  {
+   "id": "w7",
+   "a": [
+    7.826,
+    0.988
+   ],
+   "b": [
+    7.826,
+    5.86
+   ],
+   "thickness_m": 0.224,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.9
+   }
+  },
+  {
+   "id": "w8",
+   "a": [
+    14.674,
+    0.988
+   ],
+   "b": [
+    14.674,
+    5.86
+   ],
+   "thickness_m": 0.224,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.9
+   }
+  },
+  {
+   "id": "w9",
+   "a": [
+    22.5,
+    0.988
+   ],
+   "b": [
+    22.5,
+    5.86
+   ],
+   "thickness_m": 0.224,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.9
+   }
+  },
+  {
+   "id": "w10",
+   "a": [
+    3.835,
+    5.83
+   ],
+   "b": [
+    0.988,
+    5.87
+   ],
+   "thickness_m": 0.224,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.9
+   }
+  },
+  {
+   "id": "w11",
+   "a": [
+    9.704,
+    5.83
+   ],
+   "b": [
+    7.826,
+    5.86
+   ],
+   "thickness_m": 0.224,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.9
+   }
+  },
+  {
+   "id": "w12",
+   "a": [
+    18.509,
+    5.83
+   ],
+   "b": [
+    14.674,
+    5.86
+   ],
+   "thickness_m": 0.224,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.9
+   }
+  },
+  {
+   "id": "w13",
+   "a": [
+    23.4,
+    5.83
+   ],
+   "b": [
+    22.5,
+    5.86
+   ],
+   "thickness_m": 0.224,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.9
+   }
+  },
+  {
+   "id": "w14",
+   "a": [
+    4.93,
+    5.87
+   ],
+   "b": [
+    7.826,
+    5.86
+   ],
+   "thickness_m": 0.224,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.9
+   }
+  },
+  {
+   "id": "w15",
+   "a": [
+    10.761,
+    5.87
+   ],
+   "b": [
+    14.674,
+    5.86
+   ],
+   "thickness_m": 0.224,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.9
+   }
+  },
+  {
+   "id": "w16",
+   "a": [
+    19.565,
+    5.87
+   ],
+   "b": [
+    22.5,
+    5.86
+   ],
+   "thickness_m": 0.224,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.9
+   }
+  },
+  {
+   "id": "w17",
+   "a": [
+    24.457,
+    5.87
+   ],
+   "b": [
+    30.316,
+    5.87
+   ],
+   "thickness_m": 0.224,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.9
+   }
+  },
+  {
+   "id": "w18",
+   "a": [
+    0.988,
+    5.87
+   ],
+   "b": [
+    0.988,
+    8.804
+   ],
+   "thickness_m": 0.224,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.9
+   }
+  },
+  {
+   "id": "w19",
+   "a": [
+    30.316,
+    5.87
+   ],
+   "b": [
+    30.316,
+    8.804
+   ],
+   "thickness_m": 0.224,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.9
+   }
+  },
+  {
+   "id": "w20",
+   "a": [
+    4.813,
+    8.765
+   ],
+   "b": [
+    0.988,
+    8.804
+   ],
+   "thickness_m": 0.224,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.9
+   }
+  },
+  {
+   "id": "w21",
+   "a": [
+    16.552,
+    8.765
+   ],
+   "b": [
+    10.761,
+    8.814
+   ],
+   "thickness_m": 0.224,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.9
+   }
+  },
+  {
+   "id": "w22",
+   "a": [
+    5.909,
+    8.804
+   ],
+   "b": [
+    10.761,
+    8.814
+   ],
+   "thickness_m": 0.224,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.9
+   }
+  },
+  {
+   "id": "w23",
+   "a": [
+    17.609,
+    8.804
+   ],
+   "b": [
+    20.543,
+    8.814
+   ],
+   "thickness_m": 0.224,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.9
+   }
+  },
+  {
+   "id": "w24",
+   "a": [
+    20.543,
+    8.814
+   ],
+   "b": [
+    30.316,
+    8.804
+   ],
+   "thickness_m": 0.224,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.9
+   }
+  },
+  {
+   "id": "w25",
+   "a": [
+    0.988,
+    8.804
+   ],
+   "b": [
+    1.017,
+    12.717
+   ],
+   "thickness_m": 0.224,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.9
+   }
+  },
+  {
+   "id": "w26",
+   "a": [
+    1.017,
+    12.717
+   ],
+   "b": [
+    10.761,
+    12.708
+   ],
+   "thickness_m": 0.224,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.9
+   }
+  },
+  {
+   "id": "w27",
+   "a": [
+    10.761,
+    8.814
+   ],
+   "b": [
+    10.761,
+    12.708
+   ],
+   "thickness_m": 0.224,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.9
+   }
+  },
+  {
+   "id": "w28",
+   "a": [
+    20.543,
+    8.814
+   ],
+   "b": [
+    20.543,
+    12.708
+   ],
+   "thickness_m": 0.224,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.9
+   }
+  },
+  {
+   "id": "w29",
+   "a": [
+    30.316,
+    8.804
+   ],
+   "b": [
+    30.287,
+    12.717
+   ],
+   "thickness_m": 0.224,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.9
+   }
+  },
+  {
+   "id": "w30",
+   "a": [
+    30.287,
+    12.717
+   ],
+   "b": [
+    20.543,
+    12.708
+   ],
+   "thickness_m": 0.224,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.9
+   }
+  },
+  {
+   "id": "w31",
+   "a": [
+    26.139,
+    10.604
+   ],
+   "b": [
+    26.413,
+    10.604
+   ],
+   "thickness_m": 0.224,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.9
+   }
+  },
+  {
+   "id": "w32",
+   "a": [
+    26.413,
+    10.604
+   ],
+   "b": [
+    26.296,
+    11.035
+   ],
+   "thickness_m": 0.224,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.9
+   }
+  },
+  {
+   "id": "w33",
+   "a": [
+    25.317,
+    10.643
+   ],
+   "b": [
+    25.317,
+    10.996
+   ],
+   "thickness_m": 0.224,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.9
+   }
+  },
+  {
+   "id": "w34",
+   "a": [
+    24.31,
+    10.839
+   ],
+   "b": [
+    24.378,
+    10.565
+   ],
+   "thickness_m": 0.224,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.9
+   }
+  },
+  {
+   "id": "w35",
+   "a": [
+    24.378,
+    10.565
+   ],
+   "b": [
+    24.613,
+    10.643
+   ],
+   "thickness_m": 0.224,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.9
+   }
+  },
+  {
+   "id": "w36",
+   "a": [
+    24.31,
+    10.839
+   ],
+   "b": [
+    24.564,
+    10.839
+   ],
+   "thickness_m": 0.224,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.9
+   }
+  },
+  {
+   "id": "w37",
+   "a": [
+    10.761,
+    12.708
+   ],
+   "b": [
+    20.543,
+    12.708
+   ],
+   "thickness_m": 0.224,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.9
+   }
+  },
+  {
+   "id": "w38",
+   "a": [
+    25.748,
+    10.604
+   ],
+   "b": [
+    25.983,
+    10.722
+   ],
+   "thickness_m": 0.224,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.9
+   }
+  },
+  {
+   "id": "w39",
+   "a": [
+    25.983,
+    10.722
+   ],
+   "b": [
+    25.865,
+    11.035
+   ],
+   "thickness_m": 0.224,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.9
+   }
+  },
+  {
+   "id": "w40",
+   "a": [
+    25.865,
+    11.035
+   ],
+   "b": [
+    25.67,
+    10.878
+   ],
+   "thickness_m": 0.224,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.9
+   }
+  },
+  {
+   "id": "w41",
+   "a": [
+    25.67,
+    10.878
+   ],
+   "b": [
+    25.748,
+    10.604
+   ],
+   "thickness_m": 0.224,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.9
+   }
+  }
+ ],
+ "doors": [
+  {
+   "id": "d1",
+   "a": [
+    3.913,
+    5.87
+   ],
+   "b": [
+    4.813,
+    5.87
+   ],
+   "room_id": "s1",
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.7
+   }
+  },
+  {
+   "id": "d2",
+   "a": [
+    9.783,
+    5.87
+   ],
+   "b": [
+    10.643,
+    5.87
+   ],
+   "room_id": "s2",
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.7
+   }
+  },
+  {
+   "id": "d3",
+   "a": [
+    18.587,
+    5.87
+   ],
+   "b": [
+    19.448,
+    5.87
+   ],
+   "room_id": "s3",
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.7
+   }
+  },
+  {
+   "id": "d4",
+   "a": [
+    23.478,
+    5.87
+   ],
+   "b": [
+    24.339,
+    5.87
+   ],
+   "room_id": "s4",
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.7
+   }
+  },
+  {
+   "id": "d5",
+   "a": [
+    4.891,
+    8.804
+   ],
+   "b": [
+    5.791,
+    8.804
+   ],
+   "room_id": "s6",
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.7
+   }
+  },
+  {
+   "id": "d6",
+   "a": [
+    16.63,
+    8.804
+   ],
+   "b": [
+    17.491,
+    8.804
+   ],
+   "room_id": "s7",
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.7
+   }
+  }
+ ],
+ "rooms": [
+  {
+   "id": "s1",
+   "polygon": [
+    [
+     1.096,
+     1.096
+    ],
+    [
+     1.096,
+     5.752
+    ],
+    [
+     7.709,
+     5.752
+    ],
+    [
+     7.709,
+     1.096
+    ],
+    [
+     1.096,
+     1.096
+    ]
+   ],
+   "label": "R-101",
+   "name": "R-101",
+   "category": null,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.6,
+    "ocr_confidence": 0.91
+   }
+  },
+  {
+   "id": "s2",
+   "polygon": [
+    [
+     7.943,
+     1.096
+    ],
+    [
+     7.943,
+     5.752
+    ],
+    [
+     14.557,
+     5.752
+    ],
+    [
+     14.557,
+     1.096
+    ],
+    [
+     7.943,
+     1.096
+    ]
+   ],
+   "label": "R-102",
+   "name": "R-102",
+   "category": null,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.6,
+    "ocr_confidence": 0.91
+   }
+  },
+  {
+   "id": "s3",
+   "polygon": [
+    [
+     14.791,
+     1.096
+    ],
+    [
+     14.791,
+     5.752
+    ],
+    [
+     22.383,
+     5.752
+    ],
+    [
+     22.383,
+     1.096
+    ],
+    [
+     14.791,
+     1.096
+    ]
+   ],
+   "label": "R-103",
+   "name": "R-103",
+   "category": null,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.6,
+    "ocr_confidence": 0.91
+   }
+  },
+  {
+   "id": "s4",
+   "polygon": [
+    [
+     22.617,
+     1.096
+    ],
+    [
+     22.617,
+     5.752
+    ],
+    [
+     30.209,
+     5.752
+    ],
+    [
+     30.209,
+     1.096
+    ],
+    [
+     22.617,
+     1.096
+    ]
+   ],
+   "label": "R-104",
+   "name": "R-104",
+   "category": null,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.6,
+    "ocr_confidence": 0.91
+   }
+  },
+  {
+   "id": "s6",
+   "polygon": [
+    [
+     1.096,
+     8.922
+    ],
+    [
+     1.096,
+     12.6
+    ],
+    [
+     10.643,
+     12.6
+    ],
+    [
+     10.643,
+     8.922
+    ],
+    [
+     1.096,
+     8.922
+    ]
+   ],
+   "label": "R-105",
+   "name": "R-105",
+   "category": null,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.6,
+    "ocr_confidence": 0.91
+   }
+  },
+  {
+   "id": "s7",
+   "polygon": [
+    [
+     10.878,
+     8.922
+    ],
+    [
+     10.878,
+     12.6
+    ],
+    [
+     20.426,
+     12.6
+    ],
+    [
+     20.426,
+     8.922
+    ],
+    [
+     10.878,
+     8.922
+    ]
+   ],
+   "label": "R-106",
+   "name": "R-106",
+   "category": null,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.6,
+    "ocr_confidence": 0.91
+   }
+  },
+  {
+   "id": "s8",
+   "polygon": [
+    [
+     20.661,
+     8.922
+    ],
+    [
+     20.661,
+     12.6
+    ],
+    [
+     30.209,
+     12.6
+    ],
+    [
+     30.209,
+     8.922
+    ],
+    [
+     20.661,
+     8.922
+    ]
+   ],
+   "label": null,
+   "name": null,
+   "category": null,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.6
+   }
+  }
+ ],
+ "graph": {
+  "nodes": [
+   {
+    "id": "n1",
+    "x": 28.878,
+    "y": 7.317,
+    "kind": "corridor",
+    "door_id": null,
+    "provenance": {
+     "source": "auto"
+    }
+   },
+   {
+    "id": "n2",
+    "x": 22.255,
+    "y": 7.327,
+    "kind": "corridor",
+    "door_id": null,
+    "provenance": {
+     "source": "auto"
+    }
+   },
+   {
+    "id": "n3",
+    "x": 15.633,
+    "y": 7.337,
+    "kind": "corridor",
+    "door_id": null,
+    "provenance": {
+     "source": "auto"
+    }
+   },
+   {
+    "id": "n4",
+    "x": 9.01,
+    "y": 7.347,
+    "kind": "corridor",
+    "door_id": null,
+    "provenance": {
+     "source": "auto"
+    }
+   },
+   {
+    "id": "n5",
+    "x": 2.387,
+    "y": 7.357,
+    "kind": "corridor",
+    "door_id": null,
+    "provenance": {
+     "source": "auto"
+    }
+   },
+   {
+    "id": "n6",
+    "x": 4.363,
+    "y": 5.87,
+    "kind": "door",
+    "door_id": "d1",
+    "provenance": {
+     "source": "auto"
+    }
+   },
+   {
+    "id": "n7",
+    "x": 4.365,
+    "y": 7.354,
+    "kind": "corridor",
+    "door_id": null,
+    "provenance": {
+     "source": "auto"
+    }
+   },
+   {
+    "id": "n8",
+    "x": 10.213,
+    "y": 5.87,
+    "kind": "door",
+    "door_id": "d2",
+    "provenance": {
+     "source": "auto"
+    }
+   },
+   {
+    "id": "n9",
+    "x": 10.215,
+    "y": 7.345,
+    "kind": "corridor",
+    "door_id": null,
+    "provenance": {
+     "source": "auto"
+    }
+   },
+   {
+    "id": "n10",
+    "x": 19.017,
+    "y": 5.87,
+    "kind": "door",
+    "door_id": "d3",
+    "provenance": {
+     "source": "auto"
+    }
+   },
+   {
+    "id": "n11",
+    "x": 19.02,
+    "y": 7.332,
+    "kind": "corridor",
+    "door_id": null,
+    "provenance": {
+     "source": "auto"
+    }
+   },
+   {
+    "id": "n12",
+    "x": 23.909,
+    "y": 5.87,
+    "kind": "door",
+    "door_id": "d4",
+    "provenance": {
+     "source": "auto"
+    }
+   },
+   {
+    "id": "n13",
+    "x": 23.911,
+    "y": 7.325,
+    "kind": "corridor",
+    "door_id": null,
+    "provenance": {
+     "source": "auto"
+    }
+   },
+   {
+    "id": "n14",
+    "x": 5.341,
+    "y": 8.804,
+    "kind": "door",
+    "door_id": "d5",
+    "provenance": {
+     "source": "auto"
+    }
+   },
+   {
+    "id": "n15",
+    "x": 5.339,
+    "y": 7.352,
+    "kind": "corridor",
+    "door_id": null,
+    "provenance": {
+     "source": "auto"
+    }
+   },
+   {
+    "id": "n16",
+    "x": 17.061,
+    "y": 8.804,
+    "kind": "door",
+    "door_id": "d6",
+    "provenance": {
+     "source": "auto"
+    }
+   },
+   {
+    "id": "n17",
+    "x": 17.059,
+    "y": 7.335,
+    "kind": "corridor",
+    "door_id": null,
+    "provenance": {
+     "source": "auto"
+    }
+   }
+  ],
+  "edges": [
+   {
+    "id": "e1",
+    "from": "n1",
+    "to": "nope",
+    "length_m": 4.967,
+    "type": "corridor",
+    "bidirectional": true,
+    "accessible": null,
+    "provenance": {
+     "source": "auto"
+    }
+   },
+   {
+    "id": "e2",
+    "from": "n2",
+    "to": "n11",
+    "length_m": 3.236,
+    "type": "corridor",
+    "bidirectional": true,
+    "accessible": null,
+    "provenance": {
+     "source": "auto"
+    }
+   },
+   {
+    "id": "e3",
+    "from": "n3",
+    "to": "n9",
+    "length_m": 5.417,
+    "type": "corridor",
+    "bidirectional": true,
+    "accessible": null,
+    "provenance": {
+     "source": "auto"
+    }
+   },
+   {
+    "id": "e4",
+    "from": "n4",
+    "to": "n15",
+    "length_m": 3.671,
+    "type": "corridor",
+    "bidirectional": true,
+    "accessible": null,
+    "provenance": {
+     "source": "auto"
+    }
+   },
+   {
+    "id": "e5",
+    "from": "n7",
+    "to": "n5",
+    "length_m": 1.978,
+    "type": "corridor",
+    "bidirectional": true,
+    "accessible": null,
+    "provenance": {
+     "source": "auto"
+    }
+   },
+   {
+    "id": "e6",
+    "from": "n6",
+    "to": "n7",
+    "length_m": 1.484,
+    "type": "door",
+    "bidirectional": true,
+    "accessible": null,
+    "provenance": {
+     "source": "auto"
+    }
+   },
+   {
+    "id": "e7",
+    "from": "n9",
+    "to": "n4",
+    "length_m": 1.205,
+    "type": "corridor",
+    "bidirectional": true,
+    "accessible": null,
+    "provenance": {
+     "source": "auto"
+    }
+   },
+   {
+    "id": "e8",
+    "from": "n8",
+    "to": "n9",
+    "length_m": 1.475,
+    "type": "door",
+    "bidirectional": true,
+    "accessible": null,
+    "provenance": {
+     "source": "auto"
+    }
+   },
+   {
+    "id": "e9",
+    "from": "n11",
+    "to": "n17",
+    "length_m": 1.961,
+    "type": "corridor",
+    "bidirectional": true,
+    "accessible": null,
+    "provenance": {
+     "source": "auto"
+    }
+   },
+   {
+    "id": "e10",
+    "from": "n10",
+    "to": "n11",
+    "length_m": 1.462,
+    "type": "door",
+    "bidirectional": true,
+    "accessible": null,
+    "provenance": {
+     "source": "auto"
+    }
+   },
+   {
+    "id": "e11",
+    "from": "n13",
+    "to": "n2",
+    "length_m": 1.655,
+    "type": "corridor",
+    "bidirectional": true,
+    "accessible": null,
+    "provenance": {
+     "source": "auto"
+    }
+   },
+   {
+    "id": "e12",
+    "from": "n12",
+    "to": "n13",
+    "length_m": 1.455,
+    "type": "door",
+    "bidirectional": true,
+    "accessible": null,
+    "provenance": {
+     "source": "auto"
+    }
+   },
+   {
+    "id": "e13",
+    "from": "n15",
+    "to": "n7",
+    "length_m": 0.974,
+    "type": "corridor",
+    "bidirectional": true,
+    "accessible": null,
+    "provenance": {
+     "source": "auto"
+    }
+   },
+   {
+    "id": "e14",
+    "from": "n14",
+    "to": "n15",
+    "length_m": 1.452,
+    "type": "door",
+    "bidirectional": true,
+    "accessible": null,
+    "provenance": {
+     "source": "auto"
+    }
+   },
+   {
+    "id": "e15",
+    "from": "n17",
+    "to": "n3",
+    "length_m": 1.426,
+    "type": "corridor",
+    "bidirectional": true,
+    "accessible": null,
+    "provenance": {
+     "source": "auto"
+    }
+   },
+   {
+    "id": "e16",
+    "from": "n16",
+    "to": "n17",
+    "length_m": 1.469,
+    "type": "door",
+    "bidirectional": true,
+    "accessible": null,
+    "provenance": {
+     "source": "auto"
+    }
+   }
+  ]
+ },
+ "pois": [
+  {
+   "id": "p1",
+   "name": "R-101",
+   "label": "R-101",
+   "node_id": "n6",
+   "room_id": "s1",
+   "category": null,
+   "needs_review": false,
+   "provenance": {
+    "source": "auto"
+   }
+  },
+  {
+   "id": "p2",
+   "name": "R-102",
+   "label": "R-102",
+   "node_id": "n8",
+   "room_id": "s2",
+   "category": null,
+   "needs_review": false,
+   "provenance": {
+    "source": "auto"
+   }
+  },
+  {
+   "id": "p3",
+   "name": "R-103",
+   "label": "R-103",
+   "node_id": "n10",
+   "room_id": "s3",
+   "category": null,
+   "needs_review": false,
+   "provenance": {
+    "source": "auto"
+   }
+  },
+  {
+   "id": "p4",
+   "name": "R-104",
+   "label": "R-104",
+   "node_id": "n12",
+   "room_id": "s4",
+   "category": null,
+   "needs_review": false,
+   "provenance": {
+    "source": "auto"
+   }
+  },
+  {
+   "id": "p5",
+   "name": "R-105",
+   "label": "R-105",
+   "node_id": "n14",
+   "room_id": "s6",
+   "category": null,
+   "needs_review": false,
+   "provenance": {
+    "source": "auto"
+   }
+  },
+  {
+   "id": "p6",
+   "name": "R-106",
+   "label": "R-106",
+   "node_id": "n16",
+   "room_id": "s7",
+   "category": null,
+   "needs_review": false,
+   "provenance": {
+    "source": "auto"
+   }
+  }
+ ],
+ "validation": {
+  "passed": true,
+  "forced": false,
+  "errors": [],
+  "warnings": [
+   {
+    "code": "SCALE_ESTIMATED",
+    "ref": null,
+    "message": "no measured distances; scale estimated from median door width 23.0px = 0.9 m -> 0.0391 m/px. Measure on site before trusting distances."
+   },
+   {
+    "code": "ROOM_NOT_REACHABLE",
+    "ref": "s8",
+    "message": "room has no door linked to the corridor graph"
+   },
+   {
+    "code": "ROOM_NO_DOOR",
+    "ref": "s8",
+    "message": "no door detected for this room"
+   }
+  ]
+ },
+ "_expect_error": "EDGE_DANGLING"
+}
