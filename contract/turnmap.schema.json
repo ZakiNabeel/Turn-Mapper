@@ -155,7 +155,6 @@
               "building_id",
               "level",
               "name",
-              "path",
               "validation_passed"
             ],
             "properties": {
@@ -179,8 +178,23 @@
               },
               "validation_passed": {
                 "type": "boolean"
+              },
+              "floor": {
+                "$ref": "#/$defs/floor"
               }
-            }
+            },
+            "anyOf": [
+              {
+                "required": [
+                  "path"
+                ]
+              },
+              {
+                "required": [
+                  "floor"
+                ]
+              }
+            ]
           }
         },
         "transitions": {

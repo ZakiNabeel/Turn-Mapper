@@ -19,7 +19,7 @@ import numpy as np
 
 from . import __version__
 from .config import VenueConfig, load_venue_config, single_image_config
-from .export import floor_to_dict, png_bytes, read_package, venue_dict, write_package
+from .export import floor_to_dict, png_bytes, read_package, venue_dict, write_json_package, write_package
 from .graph import build_graph
 from .ingest import load_floor, sha256_file
 from .ir import FloorResult, FloorSpec, Issue
@@ -157,8 +157,14 @@ def convert(
     floors: list[str] | None = None,
     method: str = "classical",
     force: bool = False,
+    output_format: str = "json",
 ) -> ConvertResult:
-    """Convert floor plan(s) into a venue .turnmap package + QA report + run manifest."""
+    """Convert floor plan(s) into a venue map + QA report + run manifest.
+
+    ``output_format``: ``"json"`` (default) writes ``<out>/venue.json`` with every floor embedded plus
+    ``<out>/images/<floor>.png``; ``"turnmap"`` writes the zipped ``venue.turnmap``; ``"both"``: both."""
+    if output_format not in ("json", "turnmap", "both"):
+        raise ValueError("output_format must be json, turnmap or both")
     inputs = [inputs] if isinstance(inputs, str) else list(inputs)
     cfg = (
         load_venue_config(venue_config, input_file=inputs[0] if inputs else None)
@@ -254,10 +260,13 @@ def convert(
         summaries,
     )
     qa_files["index.html"] = report.read_bytes()
-    pkg_path = out / "venue.turnmap"
+    pkg_path = out / ("venue.json" if output_format == "json" else "venue.turnmap")
     if venue_floors:
         vd = venue_dict(cfg.id, cfg.name, cfg.buildings, venue_floors, run_id, commit, method)
-        write_package(pkg_path, vd, pkg_floors, qa_files)
+        if output_format in ("turnmap", "both"):
+            write_package(out / "venue.turnmap", vd, pkg_floors, qa_files)
+        if output_format in ("json", "both"):
+            write_json_package(out / "venue.json", vd, pkg_floors)
     manifest = {
         "run_id": run_id,
         "generator": {"name": "turn-mapper", "version": __version__, "git_commit": commit},
@@ -275,7 +284,9 @@ def convert(
 
 
 def validate_package(path: str) -> dict:
-    """Schema + geometry validation of a .turnmap package. Returns {'passed', 'venue', 'floors'}."""
+    """Schema + geometry validation of a ``venue.json`` or ``.turnmap``.
+
+    Returns {'passed', 'venue', 'floors'}."""
     pkg = read_package(path)
     out = {"venue": [e.to_dict() for e in schema_errors(pkg["venue"], "venue")], "floors": {}}
     for fid, fd in pkg["floors"].items():
@@ -286,5 +297,7 @@ def validate_package(path: str) -> dict:
 
 
 def load_package(path: str) -> dict:
-    """Read a .turnmap into plain dicts: {'venue', 'floors': {id: floor.json}, 'images': {id: png bytes}}."""
+    """Read a ``venue.json`` or ``.turnmap`` into plain dicts.
+
+    Returns {'venue', 'floors': {id: floor dict}, 'images': {id: png bytes}}."""
     return read_package(path)

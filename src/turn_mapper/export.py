@@ -196,9 +196,38 @@ def write_package(
     return path
 
 
+def write_json_package(path: str | Path, venue: dict, floors: dict[str, tuple[dict, bytes]]) -> Path:
+    """Self-contained JSON output: ``venue.json`` with each floor embedded under ``floors[i].floor`` and the
+    floor images written next to it as ``images/<floor id>.png`` (``floor.image.file`` points there)."""
+    path = Path(path)
+    img_dir = path.parent / "images"
+    img_dir.mkdir(parents=True, exist_ok=True)
+    out = json.loads(json.dumps(venue))
+    for f in out["floors"]:
+        fd, png = floors[f["id"]]
+        fd = json.loads(json.dumps(fd))
+        rel = f"images/{f['id']}.png"
+        (path.parent / rel).write_bytes(png)
+        fd["image"]["file"] = rel
+        f.pop("path", None)
+        f["floor"] = fd
+    path.write_text(json.dumps(out, indent=1))
+    return path
+
+
 def read_package(path: str | Path) -> dict:
     """Returns {'venue': dict, 'floors': {floor_id: dict}, 'images': {floor_id: bytes}}."""
     out: dict = {"floors": {}, "images": {}}
+    path = Path(path)
+    if path.suffix.lower() == ".json":
+        venue = json.loads(path.read_text())
+        out["venue"] = venue
+        for f in venue["floors"]:
+            fd = f["floor"] if "floor" in f else json.loads((path.parent / f["path"]).read_text())
+            out["floors"][f["id"]] = fd
+            img = path.parent / fd["image"]["file"]
+            out["images"][f["id"]] = img.read_bytes() if img.exists() else b""
+        return out
     with zipfile.ZipFile(path) as z:
         out["venue"] = json.loads(z.read("venue.json"))
         for f in out["venue"]["floors"]:

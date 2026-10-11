@@ -36,3 +36,9 @@ def test_invalid_fixtures(path):
 def test_fixtures_exist():
     assert list(FIX.glob("valid_*.turnmap")), "run: python scripts/make_fixtures.py"
     assert list(FIX.glob("invalid_*.floor.json"))
+
+
+@pytest.mark.parametrize("pkg", sorted(FIX.glob("json_*/venue.json")), ids=lambda p: p.parent.name)
+def test_valid_json_fixtures(pkg):
+    r = validate_package(str(pkg))
+    assert r["passed"], r

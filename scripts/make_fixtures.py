@@ -27,9 +27,14 @@ def main() -> None:
     for v in ("basic", "lshape"):
         p = tmp / f"{v}.png"
         cv2.imwrite(str(p), cv2.cvtColor(make_plan(v).rgb, cv2.COLOR_RGB2BGR))
-        res = convert(str(p), out_dir=str(tmp / v))
+        res = convert(str(p), out_dir=str(tmp / v), output_format="both")
         assert res.all_passed, res.floors[0]["errors"]
-        shutil.copy(res.package, FIX / f"valid_synthetic_{v}.turnmap")
+        shutil.copy(tmp / v / "venue.turnmap", FIX / f"valid_synthetic_{v}.turnmap")
+        jdir = FIX / f"json_synthetic_{v}"
+        shutil.rmtree(jdir, ignore_errors=True)
+        jdir.mkdir()
+        shutil.copy(tmp / v / "venue.json", jdir / "venue.json")
+        shutil.copytree(tmp / v / "images", jdir / "images")
     fd = load_package(str(FIX / "valid_synthetic_basic.turnmap"))["floors"]["F1"]
 
     def bad(name, code, mutate):

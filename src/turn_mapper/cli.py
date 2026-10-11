@@ -38,8 +38,17 @@ def inspect(plan: str) -> None:
     help="restrict to dev or test buildings declared in the venue config",
 )
 @click.option("--force", is_flag=True, help="package floors even if validation fails (recorded in package)")
-def run(plans, venue, out, floors, split, force) -> None:
-    """Run the pipeline and write <out>/venue.turnmap + <out>/qa/index.html."""
+@click.option(
+    "--format",
+    "fmt",
+    type=click.Choice(["json", "turnmap", "both"]),
+    default="json",
+    show_default=True,
+    help="json = venue.json + images/; turnmap = zipped package",
+)
+@click.option("--segmenter", default="classical", show_default=True, help="classical | learned")
+def run(plans, venue, out, floors, split, force, fmt, segmenter) -> None:
+    """Run the pipeline and write <out>/venue.json (or .turnmap) + <out>/qa/index.html."""
     from .api import convert
     from .config import load_venue_config
 
@@ -48,7 +57,15 @@ def run(plans, venue, out, floors, split, force) -> None:
         cfg = load_venue_config(venue)
         wanted = set((cfg.splits or {}).get(split, []))
         sel = [f.id for f in cfg.floors if f.building in wanted and (not sel or f.id in sel)]
-    res = convert(list(plans), venue_config=venue, out_dir=out, floors=sel, force=force)
+    res = convert(
+        list(plans),
+        venue_config=venue,
+        out_dir=out,
+        floors=sel,
+        force=force,
+        output_format=fmt,
+        method=segmenter,
+    )
     for f in res.floors:
         status = "PASS" if f["passed"] else "FAIL"
         click.echo(
@@ -64,7 +81,7 @@ def run(plans, venue, out, floors, split, force) -> None:
 @main.command()
 @click.argument("package", type=click.Path(exists=True))
 def validate(package: str) -> None:
-    """Validate a .turnmap (schema + geometry rules)."""
+    """Validate a venue.json or .turnmap (schema + geometry rules)."""
     from .api import validate_package
 
     r = validate_package(package)
