@@ -23,6 +23,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "ruff>=0.5"]
+ml = ["torch>=2.2", "segmentation-models-pytorch>=0.3.3"]
 
 [project.scripts]
 turn-mapper = "turn_mapper.cli:main"

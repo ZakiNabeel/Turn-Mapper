@@ -95,5 +95,87 @@ def validate(package: str) -> None:
     sys.exit(0 if r["passed"] else 1)
 
 
+@main.group()
+def ml() -> None:
+    """Learned segmenter: prepare data, bootstrap masks, train/fine-tune, evaluate (docs/ML_GUIDE.md)."""
+
+
+@ml.command("prepare-cubicasa")
+@click.argument("root", type=click.Path(exists=True))
+@click.option("--out", required=True, help="output mask dataset folder")
+@click.option("--max-side", default=2048, show_default=True)
+@click.option("--limit", type=int, default=None, help="only the first N plans per split (quick tests)")
+def ml_prepare(root, out, max_side, limit) -> None:
+    """Convert an extracted CubiCasa5K folder into images/ + masks/ + split lists."""
+    from .learned.cubicasa import prepare
+
+    click.echo(json.dumps(prepare(root, out, max_side=max_side, limit=limit)))
+
+
+@ml.command("bootstrap-masks")
+@click.argument("plans", nargs=-1, type=click.Path(exists=True), required=True)
+@click.option("--venue", type=click.Path(exists=True))
+@click.option("--floors", default="", help="comma-separated floor ids")
+@click.option("--out", required=True, help="output mask dataset folder (images/, masks/, previews/)")
+def ml_bootstrap(plans, venue, floors, out) -> None:
+    """Classical result -> starting masks for annotation (correct them, then fine-tune on them)."""
+    from .api import process_floor
+    from .config import load_venue_config, single_image_config
+    from .learned.annotate import export_dataset
+
+    cfg = load_venue_config(venue, input_file=plans[0]) if venue else single_image_config(plans[0])
+    sel = [f for f in floors.split(",") if f]
+    res = {s.id: process_floor(s, cfg) for s in cfg.floors if not sel or s.id in sel}
+    ids = export_dataset(res, out)
+    click.echo(f"wrote {len(ids)} masks to {out}: {', '.join(ids)}")
+
+
+@ml.command("train")
+@click.option("--data", multiple=True, required=True, help="mask dataset folder (repeatable)")
+@click.option("--out", required=True, help="checkpoint path, e.g. weights/turn_seg.pt")
+@click.option("--init", default=None, help="checkpoint to fine-tune from")
+@click.option("--epochs", default=40, show_default=True)
+@click.option("--batch", default=8, show_default=True)
+@click.option("--crop", default=512, show_default=True)
+@click.option("--lr", default=1e-4, show_default=True)
+@click.option("--encoder", default="resnet34", show_default=True)
+@click.option("--no-pretrained", is_flag=True, help="random encoder init (offline smoke tests)")
+@click.option("--max-iters", type=int, default=None)
+@click.option("--workers", default=2, show_default=True)
+@click.option("--device", default=None)
+def ml_train(data, out, init, epochs, batch, crop, lr, encoder, no_pretrained, max_iters, workers, device):
+    """Train (or fine-tune with --init) the U-Net; best checkpoint by validation mIoU."""
+    from .learned.train import train
+
+    r = train(
+        list(data),
+        out,
+        epochs=epochs,
+        batch=batch,
+        crop=crop,
+        lr=lr,
+        encoder=encoder,
+        encoder_weights=None if no_pretrained else "imagenet",
+        init=init,
+        max_iters=max_iters,
+        workers=workers,
+        device=device,
+    )
+    click.echo(json.dumps({k: v for k, v in r.items() if k != "log"}))
+
+
+@ml.command("eval")
+@click.option("--data", multiple=True, required=True)
+@click.option("--weights", required=True)
+@click.option("--split", default="test", show_default=True)
+def ml_eval(data, weights, split) -> None:
+    """Per-class IoU of a checkpoint on a mask dataset split."""
+    from .learned.model import load_checkpoint
+    from .learned.train import evaluate
+
+    model, ck = load_checkpoint(weights)
+    click.echo(json.dumps(evaluate(model, list(data), split, tile=int(ck.get("crop", 512))), indent=1))
+
+
 if __name__ == "__main__":
     main()

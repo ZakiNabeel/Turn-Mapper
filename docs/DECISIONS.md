@@ -72,3 +72,11 @@ Decision: a floor may declare `scale_like: <floor>`; if it has no measured evide
 ## ADR-016 — Circulation classification
 Status: Proposed (2026-10-04)
 Decision: circulation = the largest space plus spaces that connect to ≥3 *distinct* neighbouring spaces and are reachable from it through doors. Prevents rooms with several doors into one hall, and closed cubicle clusters, from becoming corridors.
+
+## ADR-017 — Style-generic classical segmentation; measured door size only on line drawings
+Status: Proposed (2026-10-11)
+Decision: walls come from an ink map (darkness relative to local paper colour) with two modes: thick (solid walls) and thin (straight strokes, double lines fused). Plans whose floor is paper-coloured get their outside geometrically from the closed wall outline. Without scale, the door gap is measured from wall-end pairs on paper-floor plans; filled plans keep `door_gap_wall_ratio × wall thickness` (measuring there inflated gaps on FAST and broke A-F2/B-F1). Evidence: docs/RESULTS_GENERALITY_2026-10-11.md.
+
+## ADR-018 — Learned segmenter = per-pixel U-Net behind the Segmenter interface
+Status: Proposed (2026-10-11)
+Decision: the network predicts 9 navigation classes per pixel (bg, wall, room, walkable, door, stairs, lift, escalator, other); the rest of the pipeline is unchanged and its validators still gate output. U-Net/ResNet-34 (segmentation_models_pytorch), grey input, CE + Dice, pre-trained on CubiCasa5K (CC BY-NC, non-commercial, never in git), fine-tuned on own annotated plans (never A block). Inference rescales plans to the training wall thickness and tiles them. Rejected: end-to-end graph prediction (needs far more labels, can't reuse validators); raster-to-vector models (e.g. CubiCasa's multi-task heads) as a first step: more complex for no navigation benefit yet.

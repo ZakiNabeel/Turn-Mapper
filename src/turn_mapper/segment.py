@@ -182,7 +182,18 @@ def detect_stairs(g: np.ndarray, lv: dict, exclude: np.ndarray, params: Pipeline
     return np.isin(lab, keep) & ~exclude
 
 
-SEGMENTERS: dict[str, Segmenter] = {"classical": ClassicalSegmenter()}
+class _LazyLearned:
+    """Imports torch only when the learned segmenter is actually used."""
+
+    name = "learned"
+
+    def segment(self, pre: Preprocessed, params: PipelineParams) -> Segmentation:
+        from .learned.segmenter import LearnedSegmenter
+
+        return LearnedSegmenter().segment(pre, params)
+
+
+SEGMENTERS: dict[str, Segmenter] = {"classical": ClassicalSegmenter(), "learned": _LazyLearned()}
 
 
 def detect_partitions(

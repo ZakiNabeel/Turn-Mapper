@@ -2,7 +2,7 @@
 
 Floor plan → navigation graph module of **TURN** (FAST-NUCES Islamabad FYP, infrastructure-minimised indoor navigation).
 
-Give it a floor plan (PDF, image, later DXF; one or many buildings/floors). It produces a `.turnmap` package with metric walkable geometry, walls, doors, rooms, destinations and a routeable graph. The TURN Android app imports that package and adds positioning (PDR, particle filter, Wi-Fi) on top.
+Give it a floor plan (PDF, image, later DXF; one or many buildings/floors). It produces a JSON map (`venue.json`, or a zipped `.turnmap`) with metric walkable geometry, walls, doors, rooms, destinations and a routeable graph. The TURN Android app imports that package and adds positioning (PDR, particle filter, Wi-Fi) on top.
 
 AI-assisted, human-verified: every automatic result is checked by validators and a QA report, and corrected by an operator where needed.
 
@@ -11,11 +11,12 @@ AI-assisted, human-verified: every automatic result is checked by validators and
 - Pipeline design: [`docs/PIPELINE1_SPEC.md`](docs/PIPELINE1_SPEC.md)
 - Status and plan: [`docs/ROADMAP_AND_WORKFLOW.md`](docs/ROADMAP_AND_WORKFLOW.md), [`docs/SESSION_LOG.md`](docs/SESSION_LOG.md)
 
-Status: **v0.2 classical pipeline**: 14/14 FAST floors give valid packages; C block is the main test building. See [`docs/RESULTS_CBLOCK_2026-10-04.md`](docs/RESULTS_CBLOCK_2026-10-04.md) (latest) and [`docs/RESULTS_2026-10-04.md`](docs/RESULTS_2026-10-04.md).
+Status: **v0.3**. Classical pipeline: 14/14 FAST floors give valid output, 11/12 synthetic drawing styles fully correct ([`docs/RESULTS_GENERALITY_2026-10-11.md`](docs/RESULTS_GENERALITY_2026-10-11.md)). Learned segmenter (U-Net, CubiCasa5K → fine-tune) scaffolded and tested offline, training pending: [`docs/ML_GUIDE.md`](docs/ML_GUIDE.md).
 
 ```bash
 pip install -e ".[dev]"        # also needs the tesseract binary
-turn-mapper run plan.png --out runs/try1      # -> runs/try1/venue.turnmap + runs/try1/qa/index.html
+turn-mapper run plan.png --out runs/try1      # -> runs/try1/venue.json (+ images/) + runs/try1/qa/index.html
+pip install -e ".[ml]"                         # optional: learned segmenter (see docs/ML_GUIDE.md)
 ```
 
 Team: Zaki Nabeel (map intelligence / CV, module owner), Shehryar Faisal (platform / app integration), M Sameer (positioning).

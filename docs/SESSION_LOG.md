@@ -17,6 +17,20 @@ Newest entry at the top. Every Claude Code session (and every human session that
 
 ---
 
+## 2026-10-11 — Zaki (+Claude in claude.ai) — generality, JSON output, learned segmenter scaffold
+**Goal:** verify the pipeline is generic, JSON output, start the CubiCasa-trained DL model.
+**Changed:** api/export/cli/schema (venue.json default output, `--format`, embedded floors), segment.py/vectorize.py/preprocess.py (style-generic segmentation, ADR-017), synthetic.render_style + scripts/style_stress.py + tests/test_generality.py, src/turn_mapper/learned/* + `turn-mapper ml ...` + tests/test_learned.py + notebooks/train_segmenter_colab.ipynb, docs/ML_GUIDE.md, docs/RESULTS_GENERALITY_2026-10-11.md, ADR-017/018.
+**Verified:**
+- style stress: 11/12 synthetic style cases fully correct (was 2/12), runs/stress_v12.
+- FAST 14/14 valid (runs/fast_regress_7); C-F1/F3/F4/B1, B-GF/F2 equal to reference.
+- ML path offline: fake CubiCasa SVGs -> masks (transforms handled) -> CPU training -> `--segmenter learned` runs.
+- pytest + ruff green.
+**Not verified / unknown:** any accuracy of the learned model (no GPU training done; CubiCasa download blocked from this sandbox, must run on Colab).
+**Broken or risky:** C-F2 now 4 graph pieces (was 1), B-F1 slightly fewer rooms/doors; one extra door on the "scanned" style; A block (test) has been run repeatedly as regression check.
+**Next step:** Colab: prepare CubiCasa + pre-train; annotate 5–10 B/C floors with `ml bootstrap-masks`; fine-tune; compare classical vs learned on A.
+
+---
+
 ## 2026-10-04 — Zaki (+Claude in claude.ai) — C-block pass
 **Goal:** make all 7 C floors (main testing building) produce good graphs before site measurements.
 **Changed:** segment (stairs, partitions), transitions.py (new), preprocess (3-orientation OCR, colour mask), vectorize (door-slab carving, partition/door-band logic, circulation by distinct neighbours), graph (validator-consistent region, greedy simplification, split lines, routed bridging), api (scale_like footprint transfer), schema (+transition, +footprint_transfer), config (door_max_width 1.2, splits dev=B+C/test=A), tests (+5).
