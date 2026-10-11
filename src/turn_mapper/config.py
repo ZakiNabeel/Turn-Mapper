@@ -23,6 +23,9 @@ class PipelineParams:
     # segmentation (grey levels are estimated per image; these are tolerances)
     floor_tolerance: int = 8
     wall_max_gray: int = 210
+    ink_threshold: float = 0.08  # min darkness relative to local paper/fill to count as a stroke
+    wall_min_run_frac: float = 0.025  # straight run length (of the short side) that marks a wall stroke
+    stairs_max_noise: float = 2.5  # stairs/partition detectors need a clean (non-scanned) drawing
     # vectorize
     door_max_width_m: float = 1.2  # largest opening closed as a (single) door; double doors via partitions
     door_gap_wall_ratio: float = 8.5  # before scale is known: max door gap = ratio x wall thickness

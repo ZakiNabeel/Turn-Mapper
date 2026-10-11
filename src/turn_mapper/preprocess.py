@@ -68,9 +68,9 @@ def _dominant_light_gray(gray: np.ndarray) -> int:
 
 
 def erase_text(gray: np.ndarray, boxes: list[TextBox], min_conf: float) -> np.ndarray:
-    """Paint text boxes with the surrounding floor grey, only where the box sits on floor."""
+    """Paint each text box with the colour around it, only where that surround is uniform and light
+    (text sitting inside a space, not across walls). Works for any floor colour (grey, white, tinted)."""
     out = gray.copy()
-    floor_level = _dominant_light_gray(gray)
     for tb in boxes:
         if tb.conf < min_conf * 0.5 and len(tb.text) < 2:
             continue
@@ -80,9 +80,9 @@ def erase_text(gray: np.ndarray, boxes: list[TextBox], min_conf: float) -> np.nd
         if x1 <= x0 or y1 <= y0:
             continue
         ring = np.concatenate([gray[y0, x0:x1], gray[y1 - 1, x0:x1], gray[y0:y1, x0], gray[y0:y1, x1 - 1]])
-        # only erase if the border of the box is mostly floor (text inside a space, not across walls)
-        if np.mean(np.abs(ring.astype(int) - floor_level) <= 10) > 0.8:
-            out[y0:y1, x0:x1] = floor_level
+        fill = int(np.median(ring))
+        if fill > 150 and np.mean(np.abs(ring.astype(int) - fill) <= 10) > 0.8:
+            out[y0:y1, x0:x1] = fill
     return out
 
 

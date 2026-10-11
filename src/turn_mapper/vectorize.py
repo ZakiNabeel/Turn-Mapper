@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import cv2
 import numpy as np
+from scipy import ndimage
 from shapely.geometry import LineString, MultiPolygon, Point, Polygon
 from shapely.ops import unary_union
 from skimage.morphology import skeletonize
@@ -96,6 +97,49 @@ def carve_door_slabs(
     return out, carved
 
 
+def estimate_door_width_px(wall: np.ndarray, t: float) -> tuple[float | None, int]:
+    """Measure door openings directly. From every wall-line end, march straight on along the wall until the
+    next wall. A real opening shows up as a *mutual pair*: the end on one side reaches the end on the other
+    side and vice versa (junction artefacts and corridor crossings rarely do). The median mutual distance is
+    the door width, independent of how thick walls are drawn. Returns (width px or None, #pairs)."""
+    from .graph import skeleton_polylines
+
+    sk = skeletonize(wall)
+    h, w = wall.shape
+    reach = int(0.12 * min(h, w))
+    ends = []  # (end_xy, hit_xy, distance)
+    for line in skeleton_polylines(sk):
+        if len(line) < 6:
+            continue
+        for end, back in ((line[0], line[min(5, len(line) - 1)]), (line[-1], line[max(-6, -len(line))])):
+            d = np.subtract(end, back)
+            n = np.hypot(*d)
+            if n == 0:
+                continue
+            # skeleton ends hook slightly: snap the direction to the nearest multiple of 45 degrees
+            ang = np.round(np.arctan2(d[1], d[0]) / (np.pi / 4)) * (np.pi / 4)
+            if abs(np.arctan2(d[1], d[0]) - ang) > np.deg2rad(25):
+                continue
+            d = np.array([np.cos(ang), np.sin(ang)])
+            for s in range(int(t) + 2, reach):
+                x, y = int(round(end[0] + d[0] * s)), int(round(end[1] + d[1] * s))
+                if not (0 <= x < w and 0 <= y < h):
+                    break
+                if wall[y, x]:
+                    ends.append((np.asarray(end, float), np.array([x, y], float), s))
+                    break
+    tol = t + 4
+    dists = []
+    for i, (ei, hi, si) in enumerate(ends):
+        for j, (ej, hj, _sj) in enumerate(ends):
+            if i < j and np.hypot(*(ej - hi)) <= tol + si * 0.15 and np.hypot(*(hj - ei)) <= tol + si * 0.15:
+                dists.append(float(np.hypot(*(ej - ei))) - t)
+    dists = np.array([x for x in dists if x >= 4])
+    if len(dists) < 2:
+        return None, len(dists)
+    return float(np.median(dists)), len(dists)
+
+
 def mask_to_polygons(mask: np.ndarray, simplify_px: float = 1.0, min_area: float = 4.0) -> list[Polygon]:
     """Outer boundaries + holes of a binary mask as valid shapely polygons (pixel coords)."""
     m = mask.astype(np.uint8)
@@ -143,10 +187,20 @@ def vectorize(
     color_mask: np.ndarray | None = None,
 ) -> GeometryPx:
     t = wall_thickness_px(seg.wall)
+    door_w, n_door_meas = (None, 0)
     if m_per_px:
         gap_px = int(round(params.door_max_width_m / m_per_px))
+        gap_src = "scale"
     else:
-        gap_px = int(round(params.door_gap_wall_ratio * t))
+        door_w, n_door_meas = estimate_door_width_px(seg.wall, t)
+        filled = seg.levels.get("filled", True)
+        if door_w is not None and n_door_meas >= 3 and not filled:
+            # line drawings: wall thickness says little about door size, so measure the openings.
+            # Filled plans keep the thickness ratio, which is reliable there (wall-end pairs on dense
+            # real plans also catch furniture and corridor ends and inflate the gap).
+            gap_px, gap_src = int(round(1.35 * door_w)), "measured_openings"
+        else:
+            gap_px, gap_src = int(round(params.door_gap_wall_ratio * t)), "wall_thickness_ratio"
     gap_px = int(np.clip(gap_px, 5, max(seg.wall.shape) // 8))
     walls_all, carved = carve_door_slabs(
         seg.wall, gray_raw, seg.levels, seg.background, t, gap_px, ignore=color_mask
@@ -164,11 +218,22 @@ def vectorize(
         parts = np.isin(lab_p, keep_p)
         walls_all = walls_all | (cv2.dilate(parts.astype(np.uint8), np.ones((3, 3), np.uint8)) > 0)
     wall_c = close_wall_gaps(walls_all, gap_px, t) | carved  # carved slabs are known door openings
+    if not seg.levels.get("filled", True):
+        # floor drawn in the paper colour: the outside is whatever the closed wall outline leaves connected
+        # to the image border (colour cannot tell inside from outside)
+        from .segment import border_connected
+
+        seg.background = border_connected(~wall_c)
 
     free = ~wall_c & ~seg.background
     n, lab, stats, _ = cv2.connectedComponentsWithStats(free.astype(np.uint8), connectivity=4)
     min_area_px = (params.min_region_area_m2 / (m_per_px**2)) if m_per_px else (gap_px * 0.6) ** 2
     keep = [i for i in range(1, n) if stats[i, cv2.CC_STAT_AREA] >= min_area_px]
+    # drop slivers no person fits in (the cavity between the two lines of a double-line wall)
+    dt = cv2.distanceTransform(free.astype(np.uint8), cv2.DIST_L2, 3)
+    min_width = max(2.5 * t, 0.3 * gap_px)
+    widest = ndimage.maximum(dt, lab, keep) if keep else []
+    keep = [i for i, r in zip(keep, np.atleast_1d(widest), strict=False) if 2 * r >= min_width]
 
     # doors = pixels added by closing, between spaces
     added = wall_c & ~walls_all & ~seg.background
@@ -270,6 +335,9 @@ def vectorize(
         debug={
             "wall_thickness_px": t,
             "door_gap_px": gap_px,
+            "door_gap_source": gap_src,
+            "door_width_measured_px": door_w,
+            "door_measurements": n_door_meas,
             "door_slabs_carved": n_slabs,
             "walk_mask": walk,
             "region_masks": masks,

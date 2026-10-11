@@ -144,3 +144,121 @@ def make_plan(variant: str = "basic") -> SynthPlan:
         corridor=corridor,
         extra={"origin_px": (_px(ox), _px(oy))},
     )
+
+
+STYLES = ("greyfill", "blackwalls", "thinlines", "doubleline", "colored", "scanned")
+
+
+def render_style(plan: SynthPlan, style: str, seed: int = 0) -> np.ndarray:
+    """Re-draw a synthetic plan in another drawing convention, keeping the same geometry.
+
+    greyfill   - floor-planner export (grey floor, grey walls) - the original rendering
+    blackwalls - CAD-like: white floor, solid black walls, black labels
+    thinlines  - single-line drawing: 2 px black walls, white everything else
+    doubleline - architectural: each wall drawn as two thin parallel lines, white in between
+    colored    - every room filled with its own pastel colour, dark grey walls
+    scanned    - blackwalls printed and scanned: yellowed paper, uneven light, blur, noise, 1.5 deg tilt, JPEG
+    """
+    rng = np.random.default_rng(seed)
+    g = plan.rgb[:, :, 0]
+    wall = g == 191
+    bg = g == 255
+    text = g < 150
+    h, w = g.shape
+    ox, oy = plan.extra["origin_px"]
+
+    def arcs(img, color, th=1):
+        for r in plan.rooms:
+            if not r.door:
+                continue
+            side, off = r.door
+            d = _px(DOOR_M)
+            if side in ("top", "bottom"):
+                y = oy + _px(r.y0 if side == "top" else r.y1)
+                x = ox + _px(r.x0 + off)
+                sgn = 1 if side == "top" else -1
+                cv2.ellipse(
+                    img,
+                    (x, y),
+                    (d, d),
+                    0,
+                    0 if sgn > 0 else 270,
+                    90 if sgn > 0 else 360,
+                    color,
+                    th,
+                    cv2.LINE_AA,
+                )
+            else:
+                x = ox + _px(r.x0 if side == "left" else r.x1)
+                y = oy + _px(r.y0 + off)
+                sgn = 1 if side == "left" else -1
+                cv2.ellipse(
+                    img,
+                    (x, y),
+                    (d, d),
+                    0,
+                    0 if sgn > 0 else 90,
+                    90 if sgn > 0 else 180,
+                    color,
+                    th,
+                    cv2.LINE_AA,
+                )
+
+    if style == "greyfill":
+        return plan.rgb.copy()
+    out = np.full((h, w, 3), 255, np.uint8)
+    if style in ("blackwalls", "scanned"):
+        out[wall] = 20
+        arcs(out, (90, 90, 90))
+        out[text] = 30
+    elif style == "thinlines":
+        from skimage.morphology import skeletonize
+
+        skel = skeletonize(wall)
+        thin = cv2.dilate(skel.astype(np.uint8), np.ones((2, 2), np.uint8)) > 0
+        out[thin] = 0
+        arcs(out, (120, 120, 120))
+        out[text] = 40
+    elif style == "doubleline":
+        fat = cv2.dilate(wall.astype(np.uint8), np.ones((5, 5), np.uint8)) > 0
+        outline = fat & ~cv2.erode(fat.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
+        out[outline] = 0
+        arcs(out, (120, 120, 120))
+        out[text] = 40
+    elif style == "colored":
+        out[~bg] = (245, 245, 240)
+        palette = [
+            (255, 220, 200),
+            (200, 230, 255),
+            (210, 245, 210),
+            (255, 245, 190),
+            (235, 210, 245),
+            (250, 200, 215),
+            (200, 245, 240),
+            (230, 230, 200),
+            (220, 220, 250),
+        ]
+        for i, r in enumerate(plan.rooms):
+            x0, y0, x1, y1 = (ox + _px(r.x0), oy + _px(r.y0), ox + _px(r.x1), oy + _px(r.y1))
+            region = np.zeros((h, w), bool)
+            region[y0:y1, x0:x1] = True
+            out[region & ~wall & ~bg] = palette[i % len(palette)]
+        out[wall] = (70, 70, 70)
+        arcs(out, (110, 110, 110))
+        out[text] = (40, 40, 40)
+    else:
+        raise ValueError(f"unknown style {style}")
+    if style == "scanned":
+        paper = np.array([238, 232, 215], np.float32)
+        img = out.astype(np.float32) / 255.0 * paper
+        yy, xx = np.mgrid[0:h, 0:w]
+        light = 1.0 - 0.12 * ((xx / w - 0.3) ** 2 + (yy / h - 0.4) ** 2)
+        img *= light[..., None]
+        img = cv2.GaussianBlur(img, (3, 3), 0.8)
+        img += rng.normal(0, 6, img.shape)
+        img = np.clip(img, 0, 255).astype(np.uint8)
+        M = cv2.getRotationMatrix2D((w / 2, h / 2), 1.5, 1.0)
+        img = cv2.warpAffine(img, M, (w, h), borderValue=tuple(int(v) for v in paper))
+        ok, buf = cv2.imencode(".jpg", img, [cv2.IMWRITE_JPEG_QUALITY, 70])
+        out = cv2.imdecode(buf, cv2.IMREAD_COLOR)
+    return out

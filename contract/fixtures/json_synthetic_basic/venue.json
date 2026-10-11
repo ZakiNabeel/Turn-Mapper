@@ -3,8 +3,8 @@
  "generator": {
   "name": "turn-mapper",
   "version": "0.1.0",
-  "git_commit": "5d092b1",
-  "run_id": "2026-10-11T08-34-50Z_basic",
+  "git_commit": "9b6030d",
+  "run_id": "2026-10-11T09-10-50Z_basic",
   "model": {
    "name": "classical",
    "checksum": null

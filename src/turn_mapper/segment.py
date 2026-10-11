@@ -45,24 +45,114 @@ def border_connected(mask: np.ndarray) -> np.ndarray:
     return np.isin(lab, list(border)) & mask
 
 
+def _odd(n: int) -> int:
+    return int(n) | 1
+
+
+def ink_map(g: np.ndarray) -> np.ndarray:
+    """Darkness relative to the local paper/fill colour (0 = paper, 1 = black).
+
+    A grey closing wider than any wall estimates the paper/room-fill colour under the strokes, so room
+    fills (coloured rooms, grey floors) and uneven scan lighting are flattened away and only strokes
+    remain."""
+    k = _odd(max(15, int(0.03 * min(g.shape))))
+    paper = cv2.morphologyEx(g, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_RECT, (k, k)))
+    paper = cv2.blur(paper, (k, k))
+    return np.clip((paper.astype(np.float32) - g) / np.maximum(paper, 1), 0, 1)
+
+
+def noise_level(g: np.ndarray) -> float:
+    """Robust pixel-noise estimate (scans/JPEG high, clean exports ~0)."""
+    resid = g.astype(np.float32) - cv2.medianBlur(g, 3).astype(np.float32)
+    return float(np.median(np.abs(resid)) / 0.6745 + np.mean(np.abs(resid)))
+
+
+def straight_strokes(mask: np.ndarray, length: int) -> np.ndarray:
+    """Pixels of ``mask`` lying on straight runs at least ``length`` long (h, v, both diagonals)."""
+    m = mask.astype(np.uint8)
+    out = np.zeros_like(m)
+    d = _odd(max(3, int(round(length / np.sqrt(2)))))
+    for k in (
+        np.ones((1, length), np.uint8),
+        np.ones((length, 1), np.uint8),
+        np.eye(d, dtype=np.uint8),
+        np.fliplr(np.eye(d, dtype=np.uint8)).copy(),
+    ):
+        out |= cv2.morphologyEx(m, cv2.MORPH_OPEN, k)
+    return out > 0
+
+
 class ClassicalSegmenter:
     name = "classical"
 
     def segment(self, pre: Preprocessed, params: PipelineParams) -> Segmentation:
         g = pre.gray
+        h, w = g.shape
         lv = estimate_levels(g)
-        floor = np.abs(g.astype(int) - lv["floor"]) <= params.floor_tolerance
-        # fill thin dark strokes (door arcs, residual text) inside floor
-        floor = cv2.morphologyEx(floor.astype(np.uint8), cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8)) > 0
+        gi = g.astype(int)
+        floor_mass = float(
+            np.mean(
+                (np.abs(gi - lv["floor"]) <= params.floor_tolerance) & (np.abs(gi - lv["background"]) > 3)
+            )
+        )
+        # "filled" = floors drawn in their own colour (floor-planner exports); else floor = paper colour
+        filled = (lv["background"] - lv["floor"] >= 6) and floor_mass >= 0.10
+        noise = noise_level(g)
+        lv.update({"filled": bool(filled), "noise": round(noise, 2)})
+
+        ink = ink_map(g)
+        dark = ink > params.ink_threshold
+        k3 = np.ones((3, 3), np.uint8)
+        thick = cv2.morphologyEx(dark.astype(np.uint8), cv2.MORPH_OPEN, k3) > 0
+        L = max(12, int(min(h, w) * params.wall_min_run_frac))
+        thick_frac = thick.sum() / max(dark.sum(), 1)
+        if thick_frac >= 0.35 and thick.sum() >= 0.004 * h * w:
+            mode = "thick"
+            # half-maximum trim: blur (scans, photos) spreads a wall's ink sideways and would inflate the
+            # measured thickness (and every size derived from it); crisp walls are unaffected
+            # Only for paper-floor plans: on filled plans the fill and thin grey walls sit near the
+            # threshold and trimming breaks walls (measured on FAST, see RESULTS_GENERALITY).
+            wall = thick
+            if not filled and thick.any():
+                peak = float(np.percentile(ink[thick], 90))
+                core = thick & (ink >= 0.5 * peak)
+                wall = cv2.morphologyEx(core.astype(np.uint8), cv2.MORPH_OPEN, k3) > 0
+            # drop isolated thick blobs that are not straight runs (bold text, symbols, furniture icons)
+            n, lab, st, _ = cv2.connectedComponentsWithStats(wall.astype(np.uint8), connectivity=8)
+            if n > 2:
+                straight = straight_strokes(wall, L)
+                main = int(np.argmax(st[1:, cv2.CC_STAT_AREA])) + 1
+                has_run = np.zeros(n, bool)
+                has_run[np.unique(lab[straight])] = True
+                keep = has_run.copy()
+                keep[main] = True
+                keep[0] = False
+                wall = keep[lab]
+        else:
+            mode = "thin"  # single- or double-line drawings: walls are thin straight strokes
+            wall = straight_strokes(dark, L)
+            # fuse the two lines of a double-line wall into one solid wall (a single line is unaffected)
+            wall = cv2.morphologyEx(wall.astype(np.uint8), cv2.MORPH_CLOSE, np.ones((11, 11), np.uint8))
+            wall = cv2.dilate(wall, k3) > 0
+        lv["wall_mode"] = mode
+
+        if filled:
+            floor = np.abs(g.astype(int) - lv["floor"]) <= params.floor_tolerance
+            floor = cv2.morphologyEx(floor.astype(np.uint8), cv2.MORPH_CLOSE, k3) > 0
+            floor &= ~wall
+            light = g >= lv["background"] - 6
+            background = border_connected(light & ~floor)
+        else:
+            floor = ~wall & (ink < params.ink_threshold)
+            background = np.zeros_like(wall)  # decided geometrically in vectorize (needs closed walls)
+        clean = filled and noise <= params.stairs_max_noise
+        stairs = detect_stairs(g, lv, wall | background, params) if clean else np.zeros_like(wall)
         wall_thr = min(params.wall_max_gray, (lv["floor"] + lv["wall"]) // 2 + 8)
-        wall = g <= wall_thr
-        # walls are thick; remove 1-2 px strokes (arcs, outlines of door slabs, text)
-        wall = cv2.morphologyEx(wall.astype(np.uint8), cv2.MORPH_OPEN, np.ones((3, 3), np.uint8)) > 0
-        floor &= ~wall
-        light = g >= lv["background"] - 6
-        background = border_connected(light & ~floor)
-        stairs = detect_stairs(g, lv, wall | background, params)
-        partitions = detect_partitions(g, lv, wall_thr, wall, background, stairs, params)
+        partitions = (
+            detect_partitions(g, lv, wall_thr, wall, background, stairs, params)
+            if clean and mode == "thick"
+            else np.zeros_like(wall)
+        )
         return Segmentation(
             wall=wall,
             floor=floor,
@@ -78,7 +168,10 @@ def detect_stairs(g: np.ndarray, lv: dict, exclude: np.ndarray, params: Pipeline
     """Stairs in floor-planner exports are a smooth grey gradient near the floor colour, while real floor
     is flat. Dense 'near-but-not-equal to floor' pixels over a window = stair texture."""
     d = np.abs(g.astype(int) - lv["floor"])
-    near = ((d >= 2) & (d <= 16) & ~exclude).astype(np.float32)
+    gf = g.astype(np.float32)
+    local_std = np.sqrt(np.maximum(cv2.blur(gf * gf, (7, 7)) - cv2.blur(gf, (7, 7)) ** 2, 0))
+    textured = local_std > 1.0  # a uniform fill (coloured room) is near the floor colour but flat
+    near = ((d >= 2) & (d <= 16) & textured & ~exclude).astype(np.float32)
     k = max(9, int(min(g.shape) * params.stairs_window_frac))
     dens = cv2.blur(near, (k, k))
     m = cv2.morphologyEx(
@@ -107,7 +200,9 @@ def detect_partitions(
     (short/curved), door-slab outlines (next to a white slab), stair arrows (inside stairs), and the
     image border (next to background)."""
     k3 = np.ones((3, 3), np.uint8)
-    thin = ((g <= lv["floor"] - 12) & ~cv2.dilate(wall.astype(np.uint8), k3).astype(bool)).astype(np.uint8)
+    # thin = a stroke darker than the local fill (not a whole region drawn in a darker colour)
+    stroke = ink_map(g) > 0.05
+    thin = (stroke & ~cv2.dilate(wall.astype(np.uint8), k3).astype(bool)).astype(np.uint8)
     L = max(25, int(min(g.shape) * params.partition_min_len_frac))
     part = np.zeros_like(thin)
     for k in (np.ones((1, L), np.uint8), np.ones((L, 1), np.uint8)):
