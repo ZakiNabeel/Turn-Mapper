@@ -80,3 +80,26 @@ def test_bootstrap_masks(tmp_path):
     export_dataset({"F1": process_floor(cfg.floors[0], cfg)}, tmp_path / "ds")
     m = cv2.imread(str(tmp_path / "ds" / "masks" / "F1.png"), cv2.IMREAD_UNCHANGED)
     assert set(np.unique(m)) >= {0, 1, 2, 3, 4}
+
+
+def test_svg_size_attribute_does_not_rescale_labels(tmp_path):
+    """Regression (Kaggle run 2026-10-12): the SVG width/height is the drawing's bounding box, not the
+    image size. Labels must be painted at raw pixel coordinates of F1_scaled.png."""
+    import cv2
+
+    from turn_mapper.learned.classes import WALL
+    from turn_mapper.learned.cubicasa import load_sample
+
+    d = tmp_path / "s"
+    d.mkdir()
+    img = np.full((200, 300), 255, np.uint8)
+    img[50:60, 40:240] = 30  # one dark wall
+    cv2.imwrite(str(d / "F1_scaled.png"), img)
+    (d / "model.svg").write_text(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="250" height="120">'
+        '<g id="Wall" class="Wall "><polygon points="40,50 240,50 240,60 40,60"/></g></svg>'
+    )
+    g, m = load_sample(d)
+    assert g.shape == m.shape == (200, 300)
+    wall = m == WALL
+    assert wall.sum() > 0 and g[wall].mean() < 60  # labels sit on the dark wall

@@ -110,22 +110,17 @@ def rasterize(polys: list[tuple[str, str, np.ndarray]], shape: tuple[int, int], 
 def load_sample(folder: str | Path) -> tuple[np.ndarray, np.ndarray]:
     """(grey image HxW uint8, class mask HxW uint8) for one CubiCasa folder.
 
-    The SVG is drawn in the coordinates of one of the two images; pick the one whose size matches the
-    SVG size (else F1_scaled, which the original CubiCasa loader uses) and scale if needed."""
+    The polygon coordinates are pixel coordinates of ``F1_scaled.png``, used as they are (this is what the
+    official CubiCasa loader does). The SVG's width/height attributes are only the drawing's bounding box
+    and must NOT be used to rescale: doing so stretched the labels off the walls (measured on Kaggle,
+    2026-10-12: wall pixels averaged grey 220 with rescaling vs 146 without; see docs/RESULTS_ML)."""
     folder = Path(folder)
-    polys, size = parse_svg(folder / "model.svg")
-    cands = [folder / n for n in ("F1_scaled.png", "F1_original.png") if (folder / n).exists()]
-    if not cands:
-        raise FileNotFoundError(f"no F1_*.png in {folder}")
-    best_err, img = math.inf, None
-    for c in cands:
-        im = cv2.imread(str(c), cv2.IMREAD_GRAYSCALE)
-        err = abs(im.shape[1] - size[0]) + abs(im.shape[0] - size[1]) if size else 0.0
-        if err < best_err:
-            best_err, img = err, im
-    h, w = img.shape
-    sx, sy = (w / size[0], h / size[1]) if size and best_err > 2 else (1.0, 1.0)
-    return img, rasterize(polys, (h, w), sx, sy)
+    polys, _ = parse_svg(folder / "model.svg")
+    for name in ("F1_scaled.png", "F1_original.png"):
+        if (folder / name).exists():
+            img = cv2.imread(str(folder / name), cv2.IMREAD_GRAYSCALE)
+            return img, rasterize(polys, img.shape)
+    raise FileNotFoundError(f"no F1_*.png in {folder}")
 
 
 def _list_split(root: Path, split: str) -> list[Path]:
