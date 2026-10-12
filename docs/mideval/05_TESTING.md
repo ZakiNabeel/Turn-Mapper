@@ -86,6 +86,16 @@
 - **Reproduced locally:** with torch hidden (44 passed, 1 skipped, the same as CI).
 - **Lesson:** CI runs in a clean environment, which is why it exists.
 
+### F8. Caught by evaluation: CubiCasa labels misaligned (first GPU training run)
+
+- **Symptom:** the first CubiCasa5K training run (25 epochs on a Kaggle T4) reached only val mIoU 0.32 and wall IoU 0.12. Walls should be the easiest class.
+- **Check:** pixels labelled *wall* averaged grey 220, almost white. The labels were off the walls.
+- **Cause:** the loader rescaled the SVG polygons by the SVG width/height. That size is the drawing's bounding box, not the image size.
+- **Fix:** commit `4a084d8` uses the raw coordinates on `F1_scaled.png`, as the official loader does. Wall pixels now average grey 146.
+- **Guard:** regression test `test_svg_size_attribute_does_not_rescale_labels`. Retraining with the fix is in progress.
+- **Details:** [`../RESULTS_ML_2026-10-12.md`](../RESULTS_ML_2026-10-12.md).
+- **Lesson:** "the training ran" is not "the training worked". Per-class metrics plus a label sanity check caught a silent data bug.
+
 ### F7. Unusable input (graceful rejection)
 
 | Input | Result |

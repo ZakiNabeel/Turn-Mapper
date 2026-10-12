@@ -19,7 +19,7 @@ Status values: ✅ done, 🟡 in progress, ⏳ not started, 🔁 re-planned.
 | — | JSON output + contract 0.1.1 | ZN | not in plan (request from integration) | ✅ 2026-10-11 | commit `9b6030d`, `contract/CHANGELOG.md` |
 | — | Generality check + ground-truth evaluation script | ZN | part of M8 | ✅ 2026-10-11 / 2026-10-12 (early) | `scripts/style_stress.py`, `eval/evaluate_synthetic.py` |
 | M4 | Data: CubiCasa mapped, institutional plans annotated, splits frozen | ZN (+team) | wk 2–6 | 🟡 CubiCasa → mask converter done and tested; FAST split frozen (ADR-009); annotation not started | `learned/cubicasa.py`, `test_svg_masks_match_drawing` |
-| M5 | Learned segmentation behind the interface | ZN | wk 6–9 | 🟡 code complete and tested offline; GPU training not run | `learned/`, `notebooks/train_segmenter_colab.ipynb`, `docs/ML_GUIDE.md` |
+| M5 | Learned segmentation behind the interface | ZN | wk 6–9 | 🟡 code complete; first CubiCasa GPU run done 2026-10-12 (test mIoU 0.32, label bug found and fixed); retraining in progress | `learned/`, `notebooks/train_segmenter_colab.ipynb`, `docs/ML_GUIDE.md` |
 | M3 | App import of the map package | SF (+ZN) | wk 4–5 | ⏳ (owner to update) | contract + fixtures ready for the importer |
 | M7 | Vector PDF / DXF adapters | ZN | wk 10–12 | 🔁 deferred: the FAST PDF is raster, so no vector input is needed for the pilot | `PLAN_INVENTORY.md` (0 vector drawings) |
 | M8 | Evaluation: FAST ground truth, routes, effort study | All | wk 12–14 | 🟡 synthetic Level B/C done; FAST ground truth blocked on site measurements | `05_TESTING.md` |
