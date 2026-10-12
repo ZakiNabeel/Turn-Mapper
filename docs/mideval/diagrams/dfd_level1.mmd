@@ -1,0 +1,40 @@
+flowchart LR
+  OP(["Operator / mapper"])
+  SRC(["Floor plan source<br/>PDF / image"])
+  APP(["TURN Android app"])
+  CCD(["CubiCasa5K dataset"])
+
+  P1(("1<br/>Ingest floors"))
+  P2(("2<br/>Preprocess<br/>+ OCR"))
+  P3(("3<br/>Segment"))
+  P4(("4<br/>Vectorize<br/>+ scale"))
+  P5(("5<br/>Build graph<br/>+ POIs"))
+  P6(("6<br/>Validate<br/>+ report"))
+  P7(("7<br/>Export map"))
+  P8(("8<br/>Train<br/>segmenter"))
+
+  D1[("D1 venue config YAML")]
+  D2[("D2 runs/: floors/*.json, qa/, manifest")]
+  D3[("D3 weights/ + manifest")]
+  D4[("D4 mask datasets")]
+
+  SRC -- "plan file" --> P1
+  OP -- "venue config, floors, split" --> D1
+  D1 -- "page / image index, labels" --> P1
+  P1 -- "floor image + source sha256" --> P2
+  P2 -- "clean grey image, text boxes" --> P3
+  D3 -- "U-Net weights" --> P3
+  P3 -- "wall / floor / outside / stairs masks" --> P4
+  P4 -- "rooms, doors, walls (px) + m/px" --> P5
+  P2 -- "text boxes" --> P5
+  P5 -- "floor dict in metres" --> P6
+  P6 -- "errors / warnings, overlays" --> D2
+  P6 -- "passed floors" --> P7
+  P7 -- "venue.json / .turnmap" --> D2
+  D2 -- "map package" --> APP
+  D2 -- "QA report" --> OP
+  CCD -- "SVG labels + images" --> D4
+  P5 -. "bootstrap masks" .-> D4
+  OP -- "corrected masks" --> D4
+  D4 -- "training crops" --> P8
+  P8 -- "checkpoint" --> D3

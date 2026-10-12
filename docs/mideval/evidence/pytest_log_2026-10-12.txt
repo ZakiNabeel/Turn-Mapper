@@ -1,0 +1,92 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0 -- /usr/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/claude/TURN-Mapper
+configfile: pyproject.toml
+testpaths: tests
+plugins: anyio-4.15.1, cov-7.1.0
+collecting ... collected 47 items
+
+tests/test_cblock_features.py::test_stairs_texture_detected_and_flat_floor_ignored PASSED [  2%]
+tests/test_cblock_features.py::test_thin_partition_kept_door_arc_like_short_stroke_dropped PASSED [  4%]
+tests/test_cblock_features.py::test_door_slab_over_unbroken_wall_is_carved PASSED [  6%]
+tests/test_cblock_features.py::test_rotated_ocr_box_mapping_round_trip PASSED [  8%]
+tests/test_cblock_features.py::test_footprint_scale_transfer PASSED      [ 10%]
+tests/test_contract.py::test_schema_copy_in_sync PASSED                  [ 12%]
+tests/test_contract.py::test_valid_fixtures[valid_synthetic_basic.turnmap] PASSED [ 14%]
+tests/test_contract.py::test_valid_fixtures[valid_synthetic_lshape.turnmap] PASSED [ 17%]
+tests/test_contract.py::test_invalid_fixtures[invalid_edge_dangling.floor.json] PASSED [ 19%]
+tests/test_contract.py::test_invalid_fixtures[invalid_edge_length.floor.json] PASSED [ 21%]
+tests/test_contract.py::test_invalid_fixtures[invalid_poi_bad_node.floor.json] PASSED [ 23%]
+tests/test_contract.py::test_invalid_fixtures[invalid_schema_bad_scale_source.floor.json] PASSED [ 25%]
+tests/test_contract.py::test_invalid_fixtures[invalid_schema_missing_graph.floor.json] PASSED [ 27%]
+tests/test_contract.py::test_fixtures_exist PASSED                       [ 29%]
+tests/test_contract.py::test_valid_json_fixtures[json_synthetic_basic] PASSED [ 31%]
+tests/test_contract.py::test_valid_json_fixtures[json_synthetic_lshape] PASSED [ 34%]
+tests/test_edge_cases.py::test_blank_page_is_rejected_not_crashed PASSED [ 36%]
+tests/test_edge_cases.py::test_random_noise_is_rejected PASSED           [ 38%]
+tests/test_edge_cases.py::test_unsupported_file_gives_clear_cli_error PASSED [ 40%]
+tests/test_edge_cases.py::test_missing_learned_weights_gives_clear_cli_error PASSED [ 42%]
+tests/test_edge_cases.py::test_floor_runtime_under_budget PASSED         [ 44%]
+tests/test_generality.py::test_style_basic[greyfill] PASSED              [ 46%]
+tests/test_generality.py::test_style_basic[blackwalls] PASSED            [ 48%]
+tests/test_generality.py::test_style_basic[thinlines] PASSED             [ 51%]
+tests/test_generality.py::test_style_basic[doubleline] PASSED            [ 53%]
+tests/test_generality.py::test_style_basic[colored] PASSED               [ 55%]
+tests/test_learned.py::test_svg_masks_match_drawing PASSED               [ 57%]
+tests/test_learned.py::test_train_and_run_learned PASSED                 [ 59%]
+tests/test_learned.py::test_bootstrap_masks PASSED                       [ 61%]
+tests/test_pipeline.py::test_chain_produces_valid_routable_package[basic] PASSED [ 63%]
+tests/test_pipeline.py::test_chain_produces_valid_routable_package[lshape] PASSED [ 65%]
+tests/test_pipeline.py::test_ocr_labels_rooms PASSED                     [ 68%]
+tests/test_pipeline.py::test_door_prior_scale_close_to_truth PASSED      [ 70%]
+tests/test_pipeline.py::test_metric_lengths_and_bounds PASSED            [ 72%]
+tests/test_pipeline.py::test_validator_catches_wall_crossing_and_dangling PASSED [ 74%]
+tests/test_pipeline.py::test_cli_inspect_and_validate PASSED             [ 76%]
+tests/test_requirements.py::test_qa_report_and_run_manifest PASSED       [ 78%]
+tests/test_requirements.py::test_deterministic_output PASSED             [ 80%]
+tests/test_requirements.py::test_every_element_has_provenance PASSED     [ 82%]
+tests/test_requirements.py::test_no_private_data_in_git PASSED           [ 85%]
+tests/test_stages.py::test_levels_estimated_from_image PASSED            [ 87%]
+tests/test_stages.py::test_levels_when_floor_outnumbers_paper PASSED     [ 89%]
+tests/test_stages.py::test_segmentation_masks PASSED                     [ 91%]
+tests/test_stages.py::test_gap_closing_closes_doors_but_not_narrow_rooms PASSED [ 93%]
+tests/test_stages.py::test_vectorize_finds_rooms_and_doors PASSED        [ 95%]
+tests/test_stages.py::test_scale_from_two_points_and_residuals PASSED    [ 97%]
+tests/test_stages.py::test_graph_edges_keep_their_geometry_regardless_of_direction PASSED [100%]
+
+- generated xml file: /home/claude/TURN-Mapper/docs/mideval/evidence/pytest_junit.xml -
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.13.16-final-0 _______________
+
+Name                                       Stmts   Miss  Cover
+--------------------------------------------------------------
+src/turn_mapper/__init__.py                    1      0   100%
+src/turn_mapper/api.py                       156      8    95%
+src/turn_mapper/cli.py                       104     38    63%
+src/turn_mapper/config.py                     59      0   100%
+src/turn_mapper/export.py                    102     12    88%
+src/turn_mapper/graph.py                     417     98    76%
+src/turn_mapper/ingest.py                     98     49    50%
+src/turn_mapper/ir.py                        130      3    98%
+src/turn_mapper/learned/__init__.py            0      0   100%
+src/turn_mapper/learned/annotate.py           41      0   100%
+src/turn_mapper/learned/classes.py            20      3    85%
+src/turn_mapper/learned/cubicasa.py          129     28    78%
+src/turn_mapper/learned/data.py               96     14    85%
+src/turn_mapper/learned/fake_cubicasa.py      69      2    97%
+src/turn_mapper/learned/model.py              57      3    95%
+src/turn_mapper/learned/segmenter.py          59      2    97%
+src/turn_mapper/learned/train.py              87      3    97%
+src/turn_mapper/pois.py                       83      8    90%
+src/turn_mapper/preprocess.py                 69      9    87%
+src/turn_mapper/report.py                     76      0   100%
+src/turn_mapper/scale.py                      37      2    95%
+src/turn_mapper/segment.py                   150     19    87%
+src/turn_mapper/synthetic.py                 158      1    99%
+src/turn_mapper/transitions.py                54     18    67%
+src/turn_mapper/validate.py                   97      5    95%
+src/turn_mapper/vectorize.py                 248     18    93%
+--------------------------------------------------------------
+TOTAL                                       2597    343    87%
+======================== 47 passed in 70.82s (0:01:10) =========================

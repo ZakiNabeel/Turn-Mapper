@@ -1,0 +1,34 @@
+sequenceDiagram
+  autonumber
+  actor Op as Operator
+  participant CLI as cli.run
+  participant API as api.convert
+  participant PF as api.process_floor
+  participant SG as Segmenter
+  participant V as vectorize / scale / graph / pois
+  participant VAL as validate_floor
+  participant EX as export + report
+  Op->>CLI: turn-mapper run plan.pdf --venue fast_isb.yaml --split dev
+  CLI->>API: convert(inputs, venue_config, floors, method, output_format)
+  API->>API: load venue config, order floors (scale_like after reference)
+  loop every selected floor
+    API->>PF: process_floor(spec, cfg, method, ref)
+    PF->>PF: load_floor (adapter) → preprocess (OCR 0/90/270°, erase text)
+    PF->>SG: segment(pre, params)
+    SG-->>PF: Segmentation(wall, floor, background, stairs, partitions, levels)
+    PF->>V: vectorize → scale (evidence / transfer / door prior) → labels → transitions → graph → POIs
+    V-->>PF: GeometryPx, NavGraph, POIs, warnings
+    PF-->>API: FloorResult
+    API->>API: floor_to_dict (pixels → metres)
+    API->>VAL: validate_floor(fd)
+    VAL-->>API: errors, warnings
+    alt no errors (or --force)
+      API->>API: add floor to package
+    else errors
+      API->>API: keep floors/<id>.json + QA only (not packaged)
+    end
+    API->>EX: overlay + sample routes PNG
+  end
+  API->>EX: write qa/index.html, venue.json (+images/) or venue.turnmap, run_manifest.json
+  API-->>CLI: ConvertResult(floors summary)
+  CLI-->>Op: PASS/FAIL per floor, exit code 0/1

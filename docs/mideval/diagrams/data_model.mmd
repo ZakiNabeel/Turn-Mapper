@@ -1,0 +1,37 @@
+erDiagram
+  VENUE ||--o{ BUILDING : has
+  VENUE ||--o{ FLOOR : has
+  VENUE ||--o{ TRANSITION : "links floors (reserved)"
+  BUILDING ||--o{ FLOOR : contains
+  FLOOR ||--|| TRANSFORM : "px to metres"
+  FLOOR ||--|| IMAGE : "rendered from"
+  FLOOR ||--o{ WALL : has
+  FLOOR ||--o{ ROOM : has
+  FLOOR ||--o{ DOOR : has
+  FLOOR ||--|| WALKABLE : "circulation area"
+  FLOOR ||--|| GRAPH : has
+  FLOOR ||--|| VALIDATION : "checked by"
+  ROOM ||--o{ DOOR : "entered through"
+  GRAPH ||--o{ NODE : has
+  GRAPH ||--o{ EDGE : has
+  EDGE }o--|| NODE : "starts at"
+  EDGE }o--|| NODE : "ends at"
+  NODE |o--o| DOOR : "door node"
+  POI }o--|| NODE : "routed to"
+  POI }o--o| ROOM : "describes"
+  FLOOR ||--o{ POI : has
+
+  VENUE { string schema_version "0.1.1" string venue_id object generator "name, version, git_commit, run_id, model" }
+  BUILDING { string id string name }
+  FLOOR { string floor_id string building_id int level object source "adapter, file, sha256" bool validation_passed }
+  TRANSFORM { matrix px_to_m "2x3 affine" float scale_m_per_px string scale_source "measured | footprint_transfer | door_width_prior" array scale_evidence }
+  IMAGE { string file "images/ID.png" int width_px int height_px }
+  WALL { string id point a point b float thickness_m object provenance }
+  ROOM { string id polygon polygon string label string name string category object provenance "source, confidence, ocr_confidence" }
+  DOOR { string id point a point b string room_id object provenance }
+  WALKABLE { geojson MultiPolygon }
+  NODE { string id float x float y string kind "corridor | door | transition" string door_id string transition }
+  EDGE { string id string from string to float length_m string type bool bidirectional }
+  POI { string id string name string label string category string node_id string room_id bool needs_review }
+  VALIDATION { bool passed bool forced array errors "code, message, ref" array warnings }
+  TRANSITION { string id string type "stairs | lift | escalator" object from object to float length_m }

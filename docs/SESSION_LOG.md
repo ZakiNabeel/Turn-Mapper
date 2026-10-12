@@ -17,6 +17,15 @@ Newest entry at the top. Every Claude Code session (and every human session that
 
 ---
 
+## 2026-10-12 — Zaki (+Claude in claude.ai) — mid-evaluation package
+**Goal:** verifiable evidence for every mid-eval rubric item (mapping module).
+**Changed:** docs/mideval/* (index, action register, milestone log, requirements FR/NFR with acceptance tests, design + 7 diagrams from code, testing with failure cases, demo script, report sections, Q&A prep, task log), eval/evaluate_synthetic.py (Level B/C metrics vs exact truth), tests/test_edge_cases.py + tests/test_requirements.py, CLI clean errors, scripts/demo_prepare.py, notebooks/train_segmenter_kaggle.ipynb, contract 0.1.1 (embedded-floor JSON) + tool 0.3.0, CODEOWNERS, tags v0.1.0/v0.2.0/v0.3.0; removed unused style_hints from the venue config.
+**Verified:** pytest 47 passed, 87 % coverage (docs/mideval/evidence/); synthetic eval: room/door recall 1.0, free-space IoU 0.983, 0 wall crossings, label acc 0.70, mean |scale err| 8.7 %; FAST 14/14 valid.
+**Not verified / unknown:** FAST geometric accuracy (no ground truth), learned model accuracy (no GPU training yet), panel feedback rows PA-03+ (need the official sheet).
+**Next step:** Kaggle pre-training; fill the action register; request site measurements; rehearse the demo.
+
+---
+
 ## 2026-10-11 — Zaki (+Claude in claude.ai) — generality, JSON output, learned segmenter scaffold
 **Goal:** verify the pipeline is generic, JSON output, start the CubiCasa-trained DL model.
 **Changed:** api/export/cli/schema (venue.json default output, `--format`, embedded floors), segment.py/vectorize.py/preprocess.py (style-generic segmentation, ADR-017), synthetic.render_style + scripts/style_stress.py + tests/test_generality.py, src/turn_mapper/learned/* + `turn-mapper ml ...` + tests/test_learned.py + notebooks/train_segmenter_colab.ipynb, docs/ML_GUIDE.md, docs/RESULTS_GENERALITY_2026-10-11.md, ADR-017/018.

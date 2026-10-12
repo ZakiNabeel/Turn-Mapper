@@ -1,0 +1,53 @@
+flowchart TB
+  subgraph L1["1 · Interface layer"]
+    CLI["CLI: turn-mapper inspect | run | validate | ml ...<br/>(cli.py)"]
+    API["Python API: convert() · process_floor() · validate_package() · load_package()<br/>(api.py)"]
+  end
+  subgraph L2["2 · Configuration"]
+    CFG["Venue YAML + PipelineParams<br/>(config.py)"]
+  end
+  subgraph L3["3 · Pipeline stages (per floor)"]
+    ING["Ingest adapters<br/>PDF embedded image · PDF render · raster image<br/>(ingest.py)"]
+    PRE["Preprocess<br/>grey, OCR at 0/90/270°, text erase, colour mask<br/>(preprocess.py)"]
+    SEG{{"Segmenter interface<br/>(segment.py)"}}
+    CSEG["ClassicalSegmenter<br/>ink map · thick/thin walls · fills"]
+    LSEG["LearnedSegmenter<br/>U-Net, lazy torch import<br/>(learned/segmenter.py)"]
+    VEC["Vectorize<br/>wall-gap closing → doors, rooms, circulation<br/>(vectorize.py)"]
+    SCL["Scale<br/>two-point evidence · footprint transfer · door prior<br/>(scale.py, api.py)"]
+    TRN["Transitions<br/>stairs texture · lift OCR<br/>(transitions.py)"]
+    GRA["Graph<br/>skeleton → pruned graph → wall-safe door links<br/>(graph.py)"]
+    POI["Labels + POIs<br/>(pois.py)"]
+  end
+  subgraph L4["4 · Quality gate"]
+    VAL["Validators on metric JSON<br/>schema + geometry + routes<br/>(validate.py)"]
+    REP["QA report: overlays, sample routes<br/>(report.py)"]
+  end
+  subgraph L5["5 · Export + contract"]
+    EXP["venue.json (+images/) or .turnmap<br/>(export.py)"]
+    SCH[("contract/turnmap.schema.json<br/>v0.1.1 + fixtures")]
+  end
+  subgraph ML["ML tooling (offline, optional extra)"]
+    CC["CubiCasa5K reader<br/>(learned/cubicasa.py)"]
+    DS["Mask datasets + restyling<br/>(learned/data.py)"]
+    TR["Train / eval U-Net<br/>(learned/train.py, model.py)"]
+    AN["Bootstrap masks from classical<br/>(learned/annotate.py)"]
+  end
+  APP["TURN Android app<br/>(separate repo: importer, PDR, Wi-Fi, routing UI)"]
+
+  CLI --> API
+  API --> CFG
+  API --> ING --> PRE --> SEG
+  SEG --> CSEG
+  SEG --> LSEG
+  CSEG --> VEC
+  LSEG --> VEC
+  VEC --> SCL --> POI
+  SCL --> TRN
+  TRN --> GRA
+  POI --> GRA
+  GRA --> VAL --> REP
+  VAL --> EXP
+  EXP -. "validated against" .-> SCH
+  EXP ==> APP
+  CC --> DS --> TR -- "weights + manifest" --> LSEG
+  AN --> DS

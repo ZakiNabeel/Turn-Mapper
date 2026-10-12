@@ -9,14 +9,17 @@ AI-assisted, human-verified: every automatic result is checked by validators and
 - Module boundary and integration: [`docs/INTEGRATION_CONTRACT.md`](docs/INTEGRATION_CONTRACT.md)
 - Output format: [`docs/MAP_PACKAGE_SCHEMA.md`](docs/MAP_PACKAGE_SCHEMA.md)
 - Pipeline design: [`docs/PIPELINE1_SPEC.md`](docs/PIPELINE1_SPEC.md)
+- **Mid-evaluation evidence index:** [`docs/mideval/00_INDEX.md`](docs/mideval/00_INDEX.md)
 - Status and plan: [`docs/ROADMAP_AND_WORKFLOW.md`](docs/ROADMAP_AND_WORKFLOW.md), [`docs/SESSION_LOG.md`](docs/SESSION_LOG.md)
 
-Status: **v0.3**. Classical pipeline: 14/14 FAST floors give valid output, 11/12 synthetic drawing styles fully correct ([`docs/RESULTS_GENERALITY_2026-10-11.md`](docs/RESULTS_GENERALITY_2026-10-11.md)). Learned segmenter (U-Net, CubiCasa5K → fine-tune) scaffolded and tested offline, training pending: [`docs/ML_GUIDE.md`](docs/ML_GUIDE.md).
+Status: **v0.3.0**. Classical pipeline: 14/14 FAST floors give valid output, 11/12 synthetic drawing styles fully correct ([`docs/RESULTS_GENERALITY_2026-10-11.md`](docs/RESULTS_GENERALITY_2026-10-11.md)). Learned segmenter (U-Net, CubiCasa5K → fine-tune) scaffolded and tested offline, training pending: [`docs/ML_GUIDE.md`](docs/ML_GUIDE.md).
 
 ```bash
 pip install -e ".[dev]"        # also needs the tesseract binary
 turn-mapper run plan.png --out runs/try1      # -> runs/try1/venue.json (+ images/) + runs/try1/qa/index.html
 pip install -e ".[ml]"                         # optional: learned segmenter (see docs/ML_GUIDE.md)
+python eval/evaluate_synthetic.py --out runs/eval   # accuracy vs exact ground truth (6 drawing styles)
+# GPU training: notebooks/train_segmenter_kaggle.ipynb (or _colab)
 ```
 
 Team: Zaki Nabeel (map intelligence / CV, module owner), Shehryar Faisal (platform / app integration), M Sameer (positioning).

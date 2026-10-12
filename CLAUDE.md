@@ -44,7 +44,8 @@ src/turn_mapper/
 contract/        # turnmap.schema.json, fixtures/, CHANGELOG.md  ← the public contract
 configs/venues/  # per-venue configs (fast_isb.yaml)
 scripts/         # make_fixtures.py, style_stress.py (generality check)
-notebooks/       # train_segmenter_colab.ipynb
+notebooks/       # train_segmenter_kaggle.ipynb (recommended), train_segmenter_colab.ipynb
+eval/            # evaluate_synthetic.py (ground-truth metrics)
 tests/           # pytest (synthetic + contract)
 docs/
 data/ runs/ weights/ samples/private/ scratch/   # gitignored
@@ -75,7 +76,7 @@ Stages are flat modules; the learned segmenter lives in `learned/` and is import
 ```bash
 # needs the tesseract binary (apt install tesseract-ocr / brew install tesseract / Windows installer)
 pip install -e ".[dev]"
-python3 -m pytest -q                          # ~40 tests; ML tests skip without .[ml]
+python3 -m pytest -q                          # 47 tests; ML tests skip without .[ml]
 ruff check . && ruff format --check .
 python scripts/make_fixtures.py               # regenerate contract/fixtures
 turn-mapper inspect samples/private/fast_blocks.pdf
@@ -83,6 +84,8 @@ turn-mapper run samples/private/fast_blocks.pdf --venue configs/venues/fast_isb.
 turn-mapper run any_plan.png --out runs/<name>                # single image, no config
 turn-mapper validate runs/<name>/venue.json                 # default output is venue.json (+ images/); --format turnmap|both
 python scripts/style_stress.py --out runs/<name>              # generality: 2 layouts x 6 drawing styles
+python eval/evaluate_synthetic.py --out runs/<name>           # Level B/C metrics vs exact ground truth
+python scripts/demo_prepare.py --out demo_inputs              # inputs for the live demo (docs/mideval/06)
 turn-mapper run plan.png --segmenter learned                  # needs TURN_SEG_WEIGHTS (docs/ML_GUIDE.md)
 turn-mapper ml prepare-cubicasa | bootstrap-masks | train | eval
 ```

@@ -1,0 +1,22 @@
+stateDiagram-v2
+  [*] --> Ingested: adapter reads page / image
+  Ingested --> Segmented: segment()
+  Segmented --> Vectorized: rooms, doors, walls
+  Vectorized --> Scaled
+  state Scaled {
+    [*] --> Estimated: door-width prior
+    [*] --> Transferred: scale_like footprint
+    [*] --> Measured: two-point evidence
+    Estimated --> Measured: site measurements added, re-run
+    Transferred --> Measured: site measurements added, re-run
+  }
+  Scaled --> GraphBuilt: graph + POIs
+  GraphBuilt --> Validated: validate_floor()
+  Validated --> Packaged: no errors
+  Validated --> Rejected: errors (WALKABLE_EMPTY, EDGE_CROSSES_WALL, ...)
+  Rejected --> Packaged: operator --force (flagged)
+  Rejected --> Ingested: fix config / plan, re-run
+  Packaged --> Imported: Android importer (M3)
+  Imported --> Corrected: operator edits (planned)
+  Corrected --> Imported: re-export, provenance = corrected
+  Imported --> [*]

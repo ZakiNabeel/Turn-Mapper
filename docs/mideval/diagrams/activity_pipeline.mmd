@@ -1,0 +1,36 @@
+flowchart TD
+  A([start: floor spec]) --> B[load image via adapter]
+  B --> C[OCR text in 3 orientations, erase text]
+  C --> D{segmenter?}
+  D -- "learned" --> L[U-Net: rescale to training wall thickness, tiled inference]
+  D -- "classical" --> E[ink map vs local paper colour]
+  E --> F{floors drawn in own colour?}
+  F -- "yes: filled" --> G[floor = estimated floor grey]
+  F -- "no: paper floor" --> H[outside decided later from closed walls]
+  G --> I{thick strokes dominate?}
+  H --> I
+  I -- "yes" --> J[thick walls; paper-floor: half-max trim for blur]
+  I -- "no" --> K[straight strokes + fuse double lines]
+  J --> M
+  K --> M
+  L --> M[wall thickness t]
+  M --> N{scale known?}
+  N -- "measured evidence" --> N1[door gap = 1.2 m / scale]
+  N -- no, paper floor, >=3 openings --> N2[door gap = 1.35 x measured opening]
+  N -- "no" --> N3[door gap = 8.5 x t]
+  N1 --> O
+  N2 --> O
+  N3 --> O[orientation-aware gap closing; closed gaps = doors]
+  O --> P[spaces: rooms vs circulation; drop slivers]
+  P --> Q{scale source}
+  Q -- "two-point evidence" --> Q1[measured]
+  Q -- "scale_like floor" --> Q2[footprint transfer + warning]
+  Q -- "none" --> Q3[door-width prior, flagged estimate]
+  Q1 --> R
+  Q2 --> R
+  Q3 --> R[labels, stairs/lift transitions, graph, POIs]
+  R --> S[export floor dict in metres]
+  S --> T{validators pass?}
+  T -- "yes" --> U([packaged in venue.json])
+  T -- "no, --force" --> U2([packaged, marked forced])
+  T -- "no" --> V([rejected: errors shown in QA report])

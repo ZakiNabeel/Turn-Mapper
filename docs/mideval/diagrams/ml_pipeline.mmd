@@ -1,0 +1,19 @@
+flowchart LR
+  subgraph S1["Stage 1 · pre-train (Colab / Kaggle GPU)"]
+    A[CubiCasa5K<br/>5k plans, SVG labels] -->|ml prepare-cubicasa| B[images/ + masks/<br/>9 TURN classes]
+    B -->|crops 512, flips, rot90,<br/>contrast, blur, JPEG,<br/>restyle p=0.3| C[U-Net ResNet-34<br/>ImageNet init<br/>CE + Dice, AdamW]
+    C -->|best val mIoU| D[(turn_seg_cubicasa.pt<br/>+ manifest sha256)]
+  end
+  subgraph S2["Stage 2 · fine-tune on own plans"]
+    E[B/C floors, never A] -->|ml bootstrap-masks| F[classical result as<br/>starting masks]
+    F -->|operator corrects| G[fast_masks]
+    D -->|--init| H[fine-tune, lr 5e-5]
+    G --> H --> I[(turn_seg.pt)]
+  end
+  subgraph S3["Stage 3 · inference in the pipeline"]
+    J[floor image] --> K[estimate wall thickness,<br/>rescale to training thickness]
+    K --> L[tiled softmax, Hann blending]
+    I --> L
+    L --> M[wall / floor / outside / stairs masks]
+    M --> N[same vectorize → graph → validate → export]
+  end
