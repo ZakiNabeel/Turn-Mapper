@@ -17,6 +17,15 @@ Newest entry at the top. Every Claude Code session (and every human session that
 
 ---
 
+## 2026-10-12 (evening) — Zaki (+Claude) — CubiCasa pre-training on Kaggle
+**Goal:** train the learned segmenter.
+**Changed:** scripts/kaggle_train.sh, Kaggle notebook (attached dataset qmarva/cubicasa5k), fix learned/cubicasa.py label alignment (+ regression test), docs/RESULTS_ML_2026-10-12.md, evidence files.
+**Verified (Kaggle console output):** run 1 test mIoU 0.323 (labels misaligned); run 2 test mIoU 0.650 (wall 0.745, door 0.635); learned in-pipeline synthetic: room R 0.833, door R 0.819, 1.42 wall-crossing edges/case (classical: 1.0/1.0/0). Outputs saved in the Kaggle notebook version.
+**Not verified / unknown:** learned model on FAST floors (no ground truth); weights not in git.
+**Next step:** annotate B/C floors, fine-tune, add thin/double-line restyling.
+
+---
+
 ## 2026-10-12 — Zaki (+Claude in claude.ai) — mid-evaluation package
 **Goal:** verifiable evidence for every mid-eval rubric item (mapping module).
 **Changed:** docs/mideval/* (index, action register, milestone log, requirements FR/NFR with acceptance tests, design + 7 diagrams from code, testing with failure cases, demo script, report sections, Q&A prep, task log), eval/evaluate_synthetic.py (Level B/C metrics vs exact truth), tests/test_edge_cases.py + tests/test_requirements.py, CLI clean errors, scripts/demo_prepare.py, notebooks/train_segmenter_kaggle.ipynb, contract 0.1.1 (embedded-floor JSON) + tool 0.3.0, CODEOWNERS, tags v0.1.0/v0.2.0/v0.3.0; removed unused style_hints from the venue config.

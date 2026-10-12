@@ -42,5 +42,5 @@ Open this page in the meeting. Every rubric item links to evidence you can open 
   Source: [evidence/eval_synthetic_METRICS.md](evidence/eval_synthetic_METRICS.md).
 - Generality: 11/12 style cases fully correct. Source: [evidence/style_stress_RESULTS.md](evidence/style_stress_RESULTS.md).
 - FAST plans: 14/14 floors valid, 3.6–13.2 s per floor. There is no ground truth yet. Source: [evidence/fast_regression_summary.md](evidence/fast_regression_summary.md).
-- Learned segmenter: first CubiCasa run trained on Kaggle (test mIoU 0.32) exposed a label-alignment bug (fixed, regression test added); retraining in progress. Source: [../RESULTS_ML_2026-10-12.md](../RESULTS_ML_2026-10-12.md).
+- Learned segmenter (U-Net, CubiCasa5K, trained on a Kaggle T4): **test mIoU 0.65** (wall 0.75, door 0.64). Run 1 (0.32) exposed a label-alignment bug, which is fixed and has a regression test. In the pipeline it matches classical on filled, solid-wall, coloured and scanned plans but fails on thin and double-line drawings, so classical stays the default. Source: [../RESULTS_ML_2026-10-12.md](../RESULTS_ML_2026-10-12.md).
 - Known failures: C-F2 graph in 4 pieces; weak labels on thin-line plans. See [05_TESTING.md](05_TESTING.md) §3.

@@ -1,0 +1,8 @@
+{
+ "run": 2,
+ "checkpoint": "turn_seg_cubicasa.pt",
+ "checkpoint_sha256_prefix": "2a1c4277d65aba1b",
+ "best_val": {"epoch_index": 23, "mIoU": 0.6265, "per_class": {"background": 0.7424, "wall": 0.7006, "room": 0.7332, "walkable": 0.4748, "door": 0.6127, "stairs": null, "lift": null, "escalator": null, "other": 0.495}},
+ "test": {"mIoU": 0.6503, "per_class": {"background": 0.7167, "wall": 0.7452, "room": 0.7315, "walkable": 0.5195, "door": 0.635, "stairs": null, "lift": null, "escalator": null, "other": 0.5537}},
+ "source": "Kaggle notebook zakinabeel1/turn-segmenter-cubicasa-pretrain, quick-saved version output out/eval_cubicasa_test.json and out/turn_seg_cubicasa.json (2026-10-12)"
+}

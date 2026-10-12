@@ -1,5 +1,7 @@
 # ML guide: the learned segmenter (CubiCasa5K pre-training → fine-tuning on our plans)
 
+> **Status (2026-10-12):** pre-trained on Kaggle, CubiCasa test mIoU **0.65**. See [RESULTS_ML_2026-10-12.md](RESULTS_ML_2026-10-12.md). Recommended runner: `notebooks/train_segmenter_kaggle.ipynb` with the Kaggle dataset `qmarva/cubicasa5k` attached, or `bash scripts/kaggle_train.sh` from the notebook console.
+
 ## 1. What the model does, and what it does not
 
 The pipeline has one step that has to *understand the drawing*: segmentation, i.e. deciding for every pixel whether it is wall, room, corridor, door, stairs, lift or outside. Everything after that is geometry and stays the same: closing wall gaps, doors, rooms, the graph, POIs, validators and the JSON export.

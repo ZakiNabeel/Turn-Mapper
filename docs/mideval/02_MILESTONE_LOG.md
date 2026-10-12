@@ -19,7 +19,7 @@ Status values: ✅ done, 🟡 in progress, ⏳ not started, 🔁 re-planned.
 | — | JSON output + contract 0.1.1 | ZN | not in plan (request from integration) | ✅ 2026-10-11 | commit `9b6030d`, `contract/CHANGELOG.md` |
 | — | Generality check + ground-truth evaluation script | ZN | part of M8 | ✅ 2026-10-11 / 2026-10-12 (early) | `scripts/style_stress.py`, `eval/evaluate_synthetic.py` |
 | M4 | Data: CubiCasa mapped, institutional plans annotated, splits frozen | ZN (+team) | wk 2–6 | 🟡 CubiCasa → mask converter done and tested; FAST split frozen (ADR-009); annotation not started | `learned/cubicasa.py`, `test_svg_masks_match_drawing` |
-| M5 | Learned segmentation behind the interface | ZN | wk 6–9 | 🟡 code complete; first CubiCasa GPU run done 2026-10-12 (test mIoU 0.32, label bug found and fixed); retraining in progress | `learned/`, `notebooks/train_segmenter_colab.ipynb`, `docs/ML_GUIDE.md` |
+| M5 | Learned segmentation behind the interface | ZN | wk 6–9 | 🟡 CubiCasa pre-training done 2026-10-12: test mIoU 0.65 (run 1, 0.32, exposed a label bug, which was fixed); fine-tuning on own floors next | `learned/`, `notebooks/train_segmenter_colab.ipynb`, `docs/ML_GUIDE.md` |
 | M3 | App import of the map package | SF (+ZN) | wk 4–5 | ⏳ (owner to update) | contract + fixtures ready for the importer |
 | M7 | Vector PDF / DXF adapters | ZN | wk 10–12 | 🔁 deferred: the FAST PDF is raster, so no vector input is needed for the pilot | `PLAN_INVENTORY.md` (0 vector drawings) |
 | M8 | Evaluation: FAST ground truth, routes, effort study | All | wk 12–14 | 🟡 synthetic Level B/C done; FAST ground truth blocked on site measurements | `05_TESTING.md` |
@@ -33,7 +33,7 @@ The new dates below are proposed. The team confirms them at the next supervisor 
 | Item | Delay | Reason | Recovery action | New date |
 |---|---|---|---|---|
 | Metric scale from site measurements (FR-07a) | ~1 week | Measurements need management permission (request pending) | Footprint transfer + flagged door prior keep the maps usable; measure 2 distances per C floor in one visit | request sent by 2026-10-14, measured by **2026-10-23** |
-| CubiCasa pre-training (M5) | ~1 week | Dataset download is blocked from the dev sandbox; needs a GPU notebook | Notebook ready; run on Colab or Kaggle (≈ 4 GPU-hours) | **2026-10-19** |
+| CubiCasa pre-training (M5) | none (done early, 2026-10-12) | — | Kaggle T4: 2 runs, ≈ 7 GPU-hours in total | ✅ done |
 | Annotation of 5–8 B/C floors (M4) | ~1 week | Waiting for the pipeline to stabilise so that bootstrap masks are good | `ml bootstrap-masks` gives starting masks; ~30 min correction per floor | **2026-10-26** |
 | Fine-tune + learned vs classical evaluation (M5/M8) | — | depends on the two rows above | run notebook stage 2; `ml eval` + A-block comparison | **2026-11-02** |
 | App import (M3) | owner SF | app team priority was the positioning demo | contract 0.1.1 and fixtures handed over; importer reads `venue.json` | SF to confirm (target **2026-11-09**) |

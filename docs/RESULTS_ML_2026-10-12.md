@@ -39,6 +39,45 @@ This is far worse than the classical segmenter (room/door recall 1.0, 0 wall cro
 
 Run-1 outputs are kept in the Kaggle session as `out_run1_misaligned/`.
 
-## Run 2: corrected labels
+## Run 2: corrected labels (current model)
 
-Started 17:28 UTC with the same settings. Results are added here when the run finishes. Only numbers printed by the script are reported.
+Started 17:28 UTC, same settings. Training ended about 19:40 UTC and everything finished at 20:24 UTC.
+
+- Checkpoint `turn_seg_cubicasa.pt` (98 MB), sha256 `2a1c4277d65aba1b…`.
+- Kept in the saved Kaggle notebook version's output, under `out/`. Run 1 is under `out_run1_misaligned/`.
+- Weights stay out of git (ADR-018).
+
+| split | mIoU | background | wall | room | walkable | door | other |
+|---|---|---|---|---|---|---|---|
+| val (best, epoch 24 of 25) | 0.627 | 0.742 | 0.701 | 0.733 | 0.475 | 0.613 | 0.495 |
+| **test (CubiCasa test split)** | **0.650** | 0.717 | 0.745 | 0.732 | 0.520 | 0.635 | 0.554 |
+| *run 1 test, for comparison* | *0.323* | *0.525* | *0.134* | *0.594* | *0.297* | *0.041* | *0.346* |
+
+Stairs, lift and escalator are `null` because CubiCasa has almost no such labels. Those classes need our own annotated floors.
+
+### In our pipeline (synthetic ground truth, 12 layout × style cases)
+
+Per-case table: [`mideval/evidence/ml_run2_learned_synthetic_METRICS.md`](mideval/evidence/ml_run2_learned_synthetic_METRICS.md).
+
+| metric (mean of 12) | classical | learned run 1 | **learned run 2** |
+|---|---|---|---|
+| free-space IoU | 0.983 | 0.877 | 0.922 |
+| corridor IoU | 0.976 | 0.402 | 0.726 |
+| room precision / recall | 1.000 / 1.000 | 0.274 / 0.251 | 0.714 / 0.833 |
+| door precision / recall | 0.988 / 1.000 | n/a / 0.264 | 0.738 / 0.819 |
+| destination pairs routable | 1.000 | n/a | 0.667 |
+| route edges through a true wall | 0 | 10.75 | 1.42 |
+
+### What this means
+
+- Pre-training now works. CubiCasa test **mIoU 0.65**, with walls at 0.75 and doors at 0.64, is a usable starting point for fine-tuning.
+- On the synthetic styles, the learned model alone **matches classical on 6 cases**: basic greyfill, blackwalls, colored and scanned all come out with every room and door correct, all routes found and 0 wall crossings.
+- It **fails on thin-line and double-line drawings**: rooms are merged, doors are missed, and the thin-line plans get wall-crossing edges. CubiCasa has no plans drawn that way. This is the domain gap that fine-tuning on our own annotated floors and adding thin-line restyling are meant to close (next steps).
+- **The classical segmenter remains the default.** The learned one is selectable with `--segmenter learned`. The comparison above becomes the M5/M8 evaluation once FAST floors are annotated.
+
+### Next
+
+1. Annotate 5–8 B/C floors (`turn-mapper ml bootstrap-masks`, then correct them).
+2. Fine-tune from this checkpoint (`--init`).
+3. Add thin-line and double-line drawing styles to `data.restyle`.
+4. Compare classical vs CubiCasa-only vs fine-tuned on the A block (held out) and on the synthetic styles.
