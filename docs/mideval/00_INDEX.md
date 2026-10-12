@@ -13,7 +13,7 @@ Open this page in the meeting. Every rubric item links to evidence you can open 
 | Live demo (25) | [06_DEMO_SCRIPT.md](06_DEMO_SCRIPT.md) (11 live steps incl. 3 failure cases) · inputs: `python scripts/demo_prepare.py` |
 | Requirements (10) | [03_REQUIREMENTS.md](03_REQUIREMENTS.md) (FR-01…19, NFR-01…10, each with an acceptance test + status) |
 | Design artefacts (15) | [04_DESIGN.md](04_DESIGN.md): architecture, DFD, sequence, activity, state, data model, ML flow, each explained; changes since the proposal in §8 · sources in [diagrams/](diagrams/) |
-| Repository (10) | tags `v0.1.0`, `v0.2.0`, `v0.3.0` · [TASK_LOG.md](TASK_LOG.md) · [`.github/CODEOWNERS`](../../.github/CODEOWNERS) · CI in `.github/workflows/ci.yml` · `docs/SESSION_LOG.md` |
+| Repository (10) | tags `v0.1.0`, `v0.2.0`, `v0.3.0` (**run `bash scripts/create_release_tags.sh` once on your laptop to publish them**) · [TASK_LOG.md](TASK_LOG.md) · [`.github/CODEOWNERS`](../../.github/CODEOWNERS) · CI in `.github/workflows/ci.yml` · `docs/SESSION_LOG.md` |
 | Testing (10) | [05_TESTING.md](05_TESTING.md) (plan, logged results, 6 failure cases) · [evidence/pytest_log_2026-10-12.txt](evidence/pytest_log_2026-10-12.txt) · [evidence/pytest_junit.xml](evidence/pytest_junit.xml) |
 | Q&A and ownership (10) | [08_QA_PREP.md](08_QA_PREP.md) |
 
