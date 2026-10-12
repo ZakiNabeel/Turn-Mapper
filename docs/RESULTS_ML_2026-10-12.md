@@ -71,7 +71,7 @@ Per-case table: [`mideval/evidence/ml_run2_learned_synthetic_METRICS.md`](mideva
 ### What this means
 
 - Pre-training now works. CubiCasa test **mIoU 0.65**, with walls at 0.75 and doors at 0.64, is a usable starting point for fine-tuning.
-- On the synthetic styles, the learned model alone **matches classical on 6 cases**: basic greyfill, blackwalls, colored and scanned all come out with every room and door correct, all routes found and 0 wall crossings.
+- On the synthetic styles, the learned model alone **matches classical on 4 of 12 cases**: basic greyfill, blackwalls, colored and scanned, with every room and door correct, all routes found and 0 wall crossings. On the four filled L-shape cases it still finds every room and door and all routes (0 wall crossings) but splits off extra room pieces (room precision 0.69–0.75).
 - It **fails on thin-line and double-line drawings**: rooms are merged, doors are missed, and the thin-line plans get wall-crossing edges. CubiCasa has no plans drawn that way. This is the domain gap that fine-tuning on our own annotated floors and adding thin-line restyling are meant to close (next steps).
 - **The classical segmenter remains the default.** The learned one is selectable with `--segmenter learned`. The comparison above becomes the M5/M8 evaluation once FAST floors are annotated.
 
