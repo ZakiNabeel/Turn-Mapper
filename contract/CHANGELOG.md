@@ -1,5 +1,12 @@
 # Contract changelog — .turnmap
 
+## 0.1.1 (2026-10-11, backward compatible)
+- JSON output: `venue.json` may embed each floor under `floors[i].floor` (and reference `images/<id>.png`
+  via `floor.image.file`) instead of pointing to `floors[i].path` in a zip. Exactly one of `path` / `floor`
+  is required. Readers that only support `.turnmap` keep working on `.turnmap` packages.
+- New fixtures: `fixtures/json_synthetic_{basic,lshape}/venue.json`.
+- Tool versions: package `0.3.0`.
+
 ## Unreleased
 - 0.1.0 (implemented, not tagged): venue-level package (venue.json + floors/<id>/floor.json + floorplan.png).
   JSON Schema in turnmap.schema.json. Fixtures: valid_synthetic_basic/lshape.turnmap, invalid_*.floor.json

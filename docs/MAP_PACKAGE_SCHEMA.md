@@ -1,6 +1,6 @@
 # TURN Map Package (`.turnmap`) — Schema v0.1 (draft)
 
-Status: **v0.1.0 implemented** in `contract/turnmap.schema.json` + `src/turn_mapper/export.py`; fixtures in `contract/fixtures/`. Not tagged yet. Items marked `VERIFY` must be reconciled with the Android app's Room entities (via the app audit, Prompt A1) before `contract-v0.1.0` is tagged.
+Status: **v0.1.1 implemented** (0.1.1 adds embedded-floor JSON output, backward compatible) in `contract/turnmap.schema.json` + `src/turn_mapper/export.py`; fixtures in `contract/fixtures/`. Not tagged yet. Items marked `VERIFY` must be reconciled with the Android app's Room entities (via the app audit, Prompt A1) before `contract-v0.1.0` is tagged.
 
 Machine-checkable source of truth: `contract/turnmap.schema.json` (JSON Schema 2020-12). This document explains it.
 
@@ -35,8 +35,8 @@ The app's v1 importer may import one floor at a time (user picks from `venue.jso
 
 ```jsonc
 {
-  "schema_version": "0.1.0",
-  "generator": { "name": "turn-mapper", "version": "0.1.0", "git_commit": "…", "run_id": "…",
+  "schema_version": "0.1.1",
+  "generator": { "name": "turn-mapper", "version": "0.3.0", "git_commit": "…", "run_id": "…",
                  "model": { "name": "classical", "checksum": null } },
   "venue": { "id": "fast-isb", "name": "FAST-NUCES Islamabad" },
   "buildings": [ { "id": "A", "name": "A Block" }, { "id": "B", "name": "B Block" }, { "id": "C", "name": "C Block" } ],
@@ -52,6 +52,12 @@ The app's v1 importer may import one floor at a time (user picks from `venue.jso
   ]
 }
 ```
+
+### 3.1 JSON output (default since 0.1.1)
+
+`turn-mapper run` writes `venue.json` with every floor **embedded**: each `floors[i]` has `"floor": { …floor.json… }`
+instead of `"path"`, and the floor image is a sibling file referenced by `floor.image.file` (`images/<id>.png`).
+Exactly one of `path` (zipped `.turnmap`) or `floor` (plain JSON) is present. `--format turnmap|both` still writes the zip.
 
 ## 4. `floor.json`
 

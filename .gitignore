@@ -30,3 +30,6 @@ Thumbs.db
 
 # throwaway exploration scripts
 scratch/
+
+.coverage
+demo_inputs/
