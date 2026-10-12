@@ -51,8 +51,10 @@ class LearnedSegmenter:
 
     def __init__(self, device: str | None = None):
         if device is None:
-            import torch
-
+            try:
+                import torch
+            except ImportError as e:
+                raise ImportError('learned segmenter needs the ML extra: pip install -e ".[ml]"') from e
             device = "cuda" if torch.cuda.is_available() else "cpu"
         self.device = device
 
