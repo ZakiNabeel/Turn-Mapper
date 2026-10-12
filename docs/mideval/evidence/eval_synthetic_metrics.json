@@ -15,7 +15,7 @@
   "layout": "basic",
   "style": "greyfill",
   "valid": true,
-  "seconds": 2.0
+  "seconds": 2.3
  },
  {
   "free_space_iou": 1.0,
@@ -33,7 +33,7 @@
   "layout": "basic",
   "style": "blackwalls",
   "valid": true,
-  "seconds": 2.2
+  "seconds": 1.9
  },
  {
   "free_space_iou": 0.983,
@@ -87,7 +87,7 @@
   "layout": "basic",
   "style": "colored",
   "valid": true,
-  "seconds": 2.1
+  "seconds": 1.9
  },
  {
   "free_space_iou": 0.992,
@@ -105,7 +105,7 @@
   "layout": "basic",
   "style": "scanned",
   "valid": true,
-  "seconds": 3.9
+  "seconds": 3.7
  },
  {
   "free_space_iou": 1.0,
@@ -123,7 +123,7 @@
   "layout": "lshape",
   "style": "greyfill",
   "valid": true,
-  "seconds": 2.8
+  "seconds": 2.5
  },
  {
   "free_space_iou": 1.0,
@@ -159,7 +159,7 @@
   "layout": "lshape",
   "style": "thinlines",
   "valid": true,
-  "seconds": 2.5
+  "seconds": 2.4
  },
  {
   "free_space_iou": 0.924,
@@ -177,7 +177,7 @@
   "layout": "lshape",
   "style": "doubleline",
   "valid": true,
-  "seconds": 3.2
+  "seconds": 2.7
  },
  {
   "free_space_iou": 1.0,
@@ -195,7 +195,7 @@
   "layout": "lshape",
   "style": "colored",
   "valid": true,
-  "seconds": 2.8
+  "seconds": 2.6
  },
  {
   "free_space_iou": 0.993,
@@ -213,6 +213,6 @@
   "layout": "lshape",
   "style": "scanned",
   "valid": true,
-  "seconds": 5.2
+  "seconds": 5.0
  }
 ]

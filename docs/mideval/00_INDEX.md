@@ -41,5 +41,5 @@ Open this page in the meeting. Every rubric item links to evidence you can open 
 
   Source: [evidence/eval_synthetic_METRICS.md](evidence/eval_synthetic_METRICS.md).
 - Generality: 11/12 style cases fully correct. Source: [evidence/style_stress_RESULTS.md](evidence/style_stress_RESULTS.md).
-- FAST plans: 14/14 floors valid, 3.6–15.5 s per floor. There is no ground truth yet. Source: [evidence/fast_regression_summary.md](evidence/fast_regression_summary.md).
+- FAST plans: 14/14 floors valid, 3.6–13.2 s per floor. There is no ground truth yet. Source: [evidence/fast_regression_summary.md](evidence/fast_regression_summary.md).
 - Known failures: C-F2 graph in 4 pieces; weak labels on thin-line plans. See [05_TESTING.md](05_TESTING.md) §3.

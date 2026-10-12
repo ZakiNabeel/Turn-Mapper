@@ -42,7 +42,7 @@ How to run the acceptance tests:
 
 | ID | Requirement | Measure / acceptance test | Current evidence | Status |
 |---|---|---|---|---|
-| NFR-01 | Performance: one floor in < 2 min on a laptop CPU (classical). | `test_floor_runtime_under_budget` (< 30 s synthetic); timings in `run_manifest.json` | FAST floors: 3.6–15.5 s each (`runs/fast_regress_7`) | ✅ |
+| NFR-01 | Performance: one floor in < 2 min on a laptop CPU (classical). | `test_floor_runtime_under_budget` (< 30 s synthetic); timings in `run_manifest.json` | FAST floors: 3.6–13.2 s each (`runs/fast_v030`) | ✅ |
 | NFR-02 | Generality: works on drawing conventions it was not tuned for. | ≥ 10/12 synthetic layout×style cases fully correct (`scripts/style_stress.py`) | 11/12 ([results](../RESULTS_GENERALITY_2026-10-11.md)) | ✅ |
 | NFR-03 | Geometric accuracy on ground truth. | synthetic eval: room recall ≥ 0.95, door recall ≥ 0.95, free-space IoU ≥ 0.9, mean \|scale error\| ≤ 15% without evidence | 1.00 / 1.00 / 0.983 / 8.7% | ✅ synthetic; FAST ground truth ⏳ |
 | NFR-04 | Safety of routes: an exported route never crosses a wall. | validator `EDGE_CROSSES_WALL` is an error; `test_validator_catches_wall_crossing_and_dangling`; eval wall crossings = 0 | 0 in all 12 synthetic cases | ✅ |
