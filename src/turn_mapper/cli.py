@@ -57,15 +57,18 @@ def run(plans, venue, out, floors, split, force, fmt, segmenter) -> None:
         cfg = load_venue_config(venue)
         wanted = set((cfg.splits or {}).get(split, []))
         sel = [f.id for f in cfg.floors if f.building in wanted and (not sel or f.id in sel)]
-    res = convert(
-        list(plans),
-        venue_config=venue,
-        out_dir=out,
-        floors=sel,
-        force=force,
-        output_format=fmt,
-        method=segmenter,
-    )
+    try:
+        res = convert(
+            list(plans),
+            venue_config=venue,
+            out_dir=out,
+            floors=sel,
+            force=force,
+            output_format=fmt,
+            method=segmenter,
+        )
+    except (ValueError, FileNotFoundError, ImportError) as e:  # bad input / missing weights: clear message
+        raise click.ClickException(str(e)) from e
     for f in res.floors:
         status = "PASS" if f["passed"] else "FAIL"
         click.echo(

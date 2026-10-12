@@ -1,4 +1,5 @@
-# DRAFT from docs/PLAN_INVENTORY.md (2026-10-04). Verify page/image_index order before use.
+# FAST-NUCES Islamabad venue config. Only *where* the floors are in the PDF and venue facts live here;
+# no drawing colours or thresholds (the pipeline estimates them per image).
 venue:
   id: fast-isb
   name: FAST-NUCES Islamabad
@@ -6,10 +7,6 @@ source:
   file: samples/private/fast_blocks.pdf   # = Floor_Plans_2.pdf (gitignored until permission confirmed)
   sha256: 8316d9d778c7468d54d3de471216a95c5d340b5f9d95c1ddc2656a47070cd38d
   kind: pdf_embedded_images          # take embedded images at native resolution; don't re-render the page
-style_hints:                         # optional; the pipeline must work without these
-  floor_gray: [226, 240]
-  wall_gray: [120, 205]
-  background_gray: [250, 255]
 label_patterns:
   A: '^A-?\d{2,3}[A-Z]?$'
   B: '^B-?\d{2,3}[A-Z]?$'

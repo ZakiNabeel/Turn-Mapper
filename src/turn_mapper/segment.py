@@ -111,7 +111,7 @@ class ClassicalSegmenter:
             # half-maximum trim: blur (scans, photos) spreads a wall's ink sideways and would inflate the
             # measured thickness (and every size derived from it); crisp walls are unaffected
             # Only for paper-floor plans: on filled plans the fill and thin grey walls sit near the
-            # threshold and trimming breaks walls (measured on FAST, see RESULTS_GENERALITY).
+            # threshold and trimming breaks walls (measured on real filled plans, see RESULTS_GENERALITY).
             wall = thick
             if not filled and thick.any():
                 peak = float(np.percentile(ink[thick], 90))

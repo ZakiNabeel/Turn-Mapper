@@ -1,11 +1,11 @@
 """Mask datasets for training: ``<dir>/images/<id>.png`` (any image) + ``<dir>/masks/<id>.png`` (uint8 class
 ids from ``classes.CLASSES``, 255 = ignore) + optional ``<dir>/{train,val,test}.txt`` id lists.
 
-CubiCasa5K is converted into this format by ``cubicasa.prepare``; our own annotated plans (FAST floors, or
-any venue) use the same format, so pre-training and fine-tuning share one loader.
+CubiCasa5K is converted into this format by ``cubicasa.prepare``; our own annotated plans (any venue)
+use the same format, so pre-training and fine-tuning share one loader.
 
 Images are converted to grey: colour conventions differ between plan sources and carry little information
-for walls/doors, and FAST plans are effectively grey.
+for walls/doors, and many institutional plans are effectively grey.
 """
 
 from __future__ import annotations
