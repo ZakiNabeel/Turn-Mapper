@@ -78,6 +78,14 @@
 - 43–56% label accuracy on thin-line and double-line drawings, where OCR is confused by thin strokes touching text.
 - Scale error of up to +28.6% on double-line plans when no measurement is given. That error disappears when two measured points are supplied (FR-07a).
 
+### F7. Caught by CI: the error message when torch is missing (commit `0bab651`)
+
+- **Symptom:** locally (with torch installed) all tests passed, but GitHub Actions failed on `test_missing_learned_weights_gives_clear_cli_error`.
+- **Cause:** CI installs only `.[dev]`, so the learned segmenter hit a bare `No module named 'torch'` instead of our message.
+- **Fix:** the segmenter now raises "learned segmenter needs the ML extra: `pip install -e ".[ml]"`".
+- **Reproduced locally:** with torch hidden (44 passed, 1 skipped, the same as CI).
+- **Lesson:** CI runs in a clean environment, which is why it exists.
+
 ### F6. Unusable input (graceful rejection)
 
 | Input | Result |
