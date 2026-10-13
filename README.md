@@ -15,7 +15,7 @@ AI-assisted, human-verified: every automatic result is checked by validators and
 Status: **v0.3.0**. Classical pipeline: 14/14 FAST floors give valid output, 11/12 synthetic drawing styles fully correct ([`docs/RESULTS_GENERALITY_2026-10-11.md`](docs/RESULTS_GENERALITY_2026-10-11.md)). Learned segmenter (U-Net, CubiCasa5K → fine-tune) scaffolded and tested offline, training pending: [`docs/ML_GUIDE.md`](docs/ML_GUIDE.md).
 
 ```bash
-pip install -e ".[dev]"        # also needs the tesseract binary
+pip install -e ".[dev]"        # also needs the tesseract binary, version 5.x (4.x changes results on line drawings, see docs/mideval/05_TESTING.md F9)
 turn-mapper run plan.png --out runs/try1      # -> runs/try1/venue.json (+ images/) + runs/try1/qa/index.html
 pip install -e ".[ml]"                         # optional: learned segmenter (see docs/ML_GUIDE.md)
 python eval/evaluate_synthetic.py --out runs/eval   # accuracy vs exact ground truth (6 drawing styles)

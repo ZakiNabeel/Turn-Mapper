@@ -96,6 +96,14 @@
 - **Details:** [`../RESULTS_ML_2026-10-12.md`](../RESULTS_ML_2026-10-12.md).
 - **Lesson:** "the training ran" is not "the training worked". Per-class metrics plus a label sanity check caught a silent data bug.
 
+### F9. Found on a second machine: results depend on the OCR engine version (2026-10-13)
+
+- **Symptom:** the suite passed in the cloud (tesseract 5.3.4) but on the laptop's Linux workspace (tesseract 4.1.1) `test_style_basic[doubleline]` failed: 11 rooms and 7 doors instead of 7 and 6. The other 43 tests passed.
+- **Check:** the same double-line plan with OCR turned off gives 12 rooms and 11 doors, even with tesseract 5. Room labels drawn in thin strokes split rooms unless OCR finds and erases them. Tesseract 4 reads the labels differently (20 boxes, including spurious "or" reads, against 18), so some labels survive erasure.
+- **Handling now:** the install notes require tesseract 5.x. The Windows installer (UB-Mannheim) and current Ubuntu/Homebrew packages ship 5.x.
+- **Planned fix:** make room splitting independent of OCR, e.g. by removing small text-sized ink components inside a room before closing gaps. This is the same weakness as F5's low label accuracy on thin-line plans.
+- **Lesson:** run the suite on a second machine. An external binary is part of the system and has to be pinned like a Python package.
+
 ### F7. Unusable input (graceful rejection)
 
 | Input | Result |
