@@ -2,6 +2,21 @@
 
 Newest entry at the top. Every Claude Code session (and every human session that changes the module) adds one. `/handoff` writes it.
 
+## Template
+
+```markdown
+## YYYY-MM-DD — <who> — <milestone/step>
+**Goal:**
+**Changed:** (files / modules)
+**Verified:** (exact commands and real results; QA report paths)
+**Not verified / unknown:**
+**Broken or risky:**
+**Decisions / ADRs proposed:**
+**Next step:**
+```
+
+---
+
 ## 2026-10-16 — Zaki (+Claude) — master plan, TURN Studio, CAD inputs, S2 training data
 **Goal:** a GUI to convert/correct/export maps on the laptop; CAD/vector inputs; plan and data for fine-tuning.
 **Changed:** docs/MASTER_PLAN.md (new), src/turn_mapper/studio/* (new), ingest.py (DxfAdapter, SvgAdapter,
@@ -24,21 +39,6 @@ merged rooms; default now chosen from the drawing scale) → log as D-11. Re-run
 classical partition/stairs detectors (rooms 8 vs 7 on one synthetic case).
 **Next step:** Zaki runs notebooks/finetune_s2_kaggle.ipynb on Kaggle (attach the S1 notebook output);
 correct 8–10 B/C floors in Studio and export training annotations (S3); try Studio on the laptop.
-
----
-
-## Template
-
-```markdown
-## YYYY-MM-DD — <who> — <milestone/step>
-**Goal:**
-**Changed:** (files / modules)
-**Verified:** (exact commands and real results; QA report paths)
-**Not verified / unknown:**
-**Broken or risky:**
-**Decisions / ADRs proposed:**
-**Next step:**
-```
 
 ---
 
