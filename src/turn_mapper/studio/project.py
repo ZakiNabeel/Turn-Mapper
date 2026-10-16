@@ -34,9 +34,10 @@ from .. import __version__
 from ..api import process_floor
 from ..config import PipelineParams, VenueConfig
 from ..export import floor_to_dict, png_bytes, venue_dict, write_json_package, write_package
-from ..ingest import inspect_file, load_floor
+from ..ingest import dwg_to_dxf, inspect_file, load_floor
 from ..ir import FloorSpec, Segmentation
 from ..learned.classes import BG, DOOR, ROOM, STAIRS, WALKABLE, WALL
+from ..link import link_floors
 from ..segment import estimate_levels
 from ..validate import route_lengths, validate_floor
 
@@ -121,7 +122,10 @@ class Studio:
             raise ValueError(f"unsupported file type {Path(name).suffix}; use PDF, image, DXF or SVG")
         dest = self.pdir(pid) / "input" / name
         dest.write_bytes(data)
-        info = inspect_file(str(dest))  # raises a clear error for DWG
+        if dest.suffix.lower() == ".dwg":  # needs ODA converter or dwg2dxf
+            dest = dwg_to_dxf(dest, dest.parent)
+            name = dest.name
+        info = inspect_file(str(dest))
         d["files"] = [f for f in d["files"] if f["name"] != name] + [{"name": name, "kind": info["kind"]}]
         self._save(d)
         return info
@@ -462,6 +466,30 @@ class Studio:
                 out.append((rec, fdict))
         return out
 
+    def links(self, pid: str) -> dict:
+        """Cross-floor links: manual ones plus auto proposals, with candidate transition nodes per floor."""
+        d = self.project(pid)
+        floors = self._ready_floors(pid, include_failed=True)
+        meta = [({**r, "building_id": r["building"]}, f) for r, f in floors]
+        links, warns = link_floors(meta, d.get("manual_links", []))
+        nodes = {
+            r["id"]: [
+                {"id": n["id"], "type": n["transition"]} for n in f["graph"]["nodes"] if n.get("transition")
+            ]
+            for r, f in floors
+        }
+        return {"links": links, "warnings": warns, "nodes": nodes, "manual": d.get("manual_links", [])}
+
+    def set_manual_links(self, pid: str, manual: list[dict]) -> dict:
+        d = self.project(pid)
+        d["manual_links"] = [
+            {"from": m["from"], "to": m["to"], **({"type": m["type"]} if m.get("type") else {})}
+            for m in manual
+        ]
+        d["updated"] = _now()
+        self._save(d)
+        return self.links(pid)
+
     def _venue(self, pid: str, floors: list[tuple[dict, dict]]) -> dict:
         d = self.project(pid)
         vfloors = [
@@ -485,6 +513,9 @@ class Studio:
             f"studio-{_now()}",
             None,
             "studio",
+            link_floors(
+                [({**r, "building_id": r["building"]}, f) for r, f in floors], d.get("manual_links", [])
+            )[0],
         )
 
     def export(self, pid: str, fmt: str, include_failed: bool = False) -> tuple[bytes, str, str]:

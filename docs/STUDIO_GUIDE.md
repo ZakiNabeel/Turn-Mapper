@@ -25,7 +25,7 @@ weights are installed (`pip install -e ".[ml]"`, `TURN_SEG_WEIGHTS=...`).
 | PNG / JPG / TIFF | as is | door-width estimate until you measure |
 | **DXF** (AutoCAD) | chosen layers drawn at 2 cm/px; dimension/annotation/furniture layers off by default | **measured from the drawing units** |
 | SVG | rendered | measured if you type the drawing scale |
-| DWG | not readable (closed format): save as DXF in AutoCAD/LibreCAD or use the free ODA File Converter | — |
+| DWG | converted to DXF on upload **if** the free ODA File Converter (`ODAFileConverter`) or libredwg (`dwg2dxf`) is installed (or `TURN_DWG_CONVERTER` points at one); otherwise a clear message: save as DXF | measured, as DXF (conversion path tested with a stand-in converter only) |
 
 ## Workflow
 
@@ -44,7 +44,11 @@ weights are installed (`pip install -e ".[ml]"`, `TURN_SEG_WEIGHTS=...`).
    - select a room to set its label, name and category, make it non-walkable, or create a place for it.
 5. **Scale** tab: click two points with a known real distance (tape-measured on site), type metres; add more
    pairs as checks (residuals shown) → *Apply scale*. All geometry is rescaled; your edits are kept.
-6. **Check** tab: errors (block export) and warnings; click one to jump to it.
+6. **Check** tab: errors (block export) and warnings; click one to jump to it. Below them, **Floor links**: with two or
+   more floors in a project, stairs and lifts on adjacent levels of a building are paired automatically
+   (same type, nearest position after aligning the floors' corners, 4 m cap). Unpaired ones are listed as
+   warnings, never guessed. Pick two nodes on different floors and *Add manual link* to override. Links go into
+   `venue.json` → `transitions`. Lengths are flagged estimates (stairs 6 m, lift 4 m) until measured.
 7. **Export ▾**: `venue.json` + images (what the Android app imports), `.turnmap`, GeoJSON (QGIS / debugging),
    SVG (print, report), **training annotations** (image + class mask per floor, for fine-tuning the learned
    segmenter). Copies are also kept in the project's `exports/` folder.

@@ -49,6 +49,16 @@ const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<
 const uid = (prefix, list) => { let i = list.length + 1; const ids = new Set(list.map((x) => x.id)); while (ids.has(prefix + i)) i++; return prefix + i; };
 const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
 
+document.addEventListener("DOMContentLoaded", () => {
+  const b = $("#addLink"); if (!b) return;
+  b.onclick = async () => {
+    const [fa, na, ta] = ($("#linkA").value || "").split(":"), [fb, nb] = ($("#linkB").value || "").split(":");
+    if (!fa || !fb || (fa === fb)) { status("Pick nodes on two different floors."); return; }
+    const manual = [...((S.links && S.links.manual) || []), { from: { floor_id: fa, node_id: na }, to: { floor_id: fb, node_id: nb }, type: ta }];
+    await api(`${P()}/links`, { method: "PUT", json: { manual } }); renderLinks();
+  };
+});
+
 // ---------------------------------------------------------------- projects & files
 async function loadInfo() {
   S.info = await api("/api/info");
@@ -240,7 +250,7 @@ function renderPanels() {
     ["Run time", S.rec.stats && S.rec.stats.seconds ? S.rec.stats.seconds + " s" : "–"],
   ]);
   $("#scaleNow").innerHTML = s ? kv([["Current", `${(s.scale_m_per_px * 100).toFixed(3)} cm/px`], ["Source", s.scale_source]]) : "Run the floor first.";
-  renderPairs(); renderChecks(); renderProps();
+  renderPairs(); renderChecks(); renderProps(); renderLinks();
 }
 function renderPairs() {
   const ul = $("#pairList"); ul.innerHTML = "";
@@ -280,6 +290,28 @@ function renderChecks() {
     };
     ul.appendChild(li);
   }
+}
+async function renderLinks() {
+  const ul = $("#linkList"); if (!S.pid) return; ul.innerHTML = "";
+  let L; try { L = await api(`${P()}/links`); } catch (_) { return; }
+  S.links = L;
+  const key = (e) => `${e.floor_id}:${e.node_id}`;
+  if (!L.links.length) ul.appendChild(h("li", { className: "empty" }, "No links (needs 2+ floors with stairs or lifts)."));
+  L.links.forEach((k) => {
+    const li = h("li", {}, `${esc(k.type)} · ${esc(key(k.from))} ⇄ ${esc(key(k.to))} <span class="badge ${k.provenance.source === "manual" ? "edit" : ""}">${esc(k.provenance.source)}</span>`);
+    if (k.provenance.source === "manual") {
+      const b = h("button", { className: "act danger" }, "×");
+      b.onclick = async () => {
+        const rest = (L.manual || []).filter((m) => !(key(m.from) === key(k.from) && key(m.to) === key(k.to)));
+        await api(`${P()}/links`, { method: "PUT", json: { manual: rest } }); renderLinks();
+      };
+      li.prepend(b);
+    }
+    ul.appendChild(li);
+  });
+  L.warnings.forEach((w) => ul.appendChild(h("li", { className: "issue" }, `<code>${esc(w.code)}</code><br>${esc(w.message)}`)));
+  const opts = Object.entries(L.nodes).flatMap(([f, ns]) => ns.map((n) => `<option value="${esc(f)}:${esc(n.id)}:${esc(n.type)}">${esc(f)} · ${esc(n.id)} (${esc(n.type)})</option>`)).join("");
+  $("#linkA").innerHTML = opts; $("#linkB").innerHTML = opts;
 }
 function selected() {
   if (!S.sel || !S.fd) return null;

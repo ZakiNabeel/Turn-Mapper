@@ -336,6 +336,46 @@ ADAPTERS: list[Adapter] = [
 ]
 
 
+def find_dwg_converter() -> list[str] | None:
+    """Command prefix of a DWG->DXF converter, or None. Env ``TURN_DWG_CONVERTER`` overrides the search.
+    Supported: ODA File Converter (``ODAFileConverter``) and libredwg (``dwg2dxf``)."""
+    import os
+    import shutil
+
+    cand = [os.environ.get("TURN_DWG_CONVERTER") or "", "ODAFileConverter", "dwg2dxf"]
+    for c in cand:
+        exe = shutil.which(c) if c else None
+        if exe:
+            return [exe]
+    return None
+
+
+def dwg_to_dxf(path: str | Path, out_dir: str | Path) -> Path:
+    """Convert a DWG to DXF with an installed converter; clear error when none is available."""
+    import subprocess
+    import tempfile
+
+    src, out = Path(path), Path(out_dir)
+    conv = find_dwg_converter()
+    if conv is None:
+        raise ValueError(
+            "DWG is a closed format and no converter was found. Install the free ODA File Converter "
+            "(or libredwg's dwg2dxf) and restart, or 'Save As DXF' in AutoCAD/LibreCAD, then load the DXF"
+        )
+    out.mkdir(parents=True, exist_ok=True)
+    dest = out / (src.stem + ".dxf")
+    if Path(conv[0]).name.lower().startswith("dwg2dxf"):
+        cmd = [*conv, "-y", "-o", str(dest), str(src)]
+    else:  # ODAFileConverter works on folders: in, out, version, type, recurse, audit
+        tmp = Path(tempfile.mkdtemp())
+        (tmp / src.name).write_bytes(src.read_bytes())
+        cmd = [*conv, str(tmp), str(out), "ACAD2018", "DXF", "0", "1"]
+    r = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+    if not dest.exists():
+        raise ValueError(f"DWG conversion failed: {(r.stderr or r.stdout).strip()[:300]}")
+    return dest
+
+
 def load_floor(spec: FloorSpec) -> FloorImage:
     best = max(ADAPTERS, key=lambda a: a.can_handle(spec))
     if best.can_handle(spec) <= 0:
@@ -357,10 +397,7 @@ def inspect_file(path: str) -> dict:
         info["pages"].append({"page": 1, "images": [], "branch": "vector"})
         return info
     if p.suffix.lower() == ".dwg":
-        raise ValueError(
-            "DWG is a closed format: convert it to DXF first (free ODA File Converter, "
-            "or 'Save As DXF' in AutoCAD/LibreCAD), then load the DXF"
-        )
+        raise ValueError("DWG must be converted to DXF first (Studio does this if a converter exists)")
     if p.suffix.lower() != ".pdf":
         rgb = _decode(p.read_bytes())
         info["kind"] = "image"

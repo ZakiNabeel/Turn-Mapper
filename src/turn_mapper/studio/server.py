@@ -52,7 +52,7 @@ def create_app(root: str | Path) -> FastAPI:
             "version": __version__,
             "root": str(st.root.resolve()),
             "segmenters": {"classical": {"available": True}, "learned": {"available": ok, "detail": why}},
-            "accept": ".pdf,.png,.jpg,.jpeg,.bmp,.tif,.tiff,.webp,.dxf,.svg",
+            "accept": ".pdf,.png,.jpg,.jpeg,.bmp,.tif,.tiff,.webp,.dxf,.dwg,.svg",
         }
 
     @app.get("/api/projects")
@@ -152,6 +152,14 @@ def create_app(root: str | Path) -> FastAPI:
     @app.post("/api/projects/{pid}/floors/{fid}/revert")
     def revert(pid: str, fid: str):
         return guard(st.revert, pid, fid)
+
+    @app.get("/api/projects/{pid}/links")
+    def links(pid: str):
+        return guard(st.links, pid)
+
+    @app.put("/api/projects/{pid}/links")
+    def set_links(pid: str, body: dict = Body(...)):
+        return guard(st.set_manual_links, pid, body.get("manual", []))
 
     @app.get("/api/projects/{pid}/export/{fmt}")
     def export(pid: str, fmt: str, include_failed: bool = False):

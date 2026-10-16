@@ -73,3 +73,30 @@ def test_dwg_gets_a_clear_message(tmp_path):
     f.write_bytes(b"AC1032")
     with pytest.raises(ValueError, match="DXF"):
         inspect_file(str(f))
+
+
+def test_dwg_without_converter_gives_clear_error(tmp_path, monkeypatch):
+    from turn_mapper.ingest import dwg_to_dxf
+
+    monkeypatch.setenv("PATH", str(tmp_path))
+    monkeypatch.delenv("TURN_DWG_CONVERTER", raising=False)
+    (tmp_path / "a.dwg").write_bytes(b"AC1032")
+    with pytest.raises(ValueError, match="no converter was found"):
+        dwg_to_dxf(tmp_path / "a.dwg", tmp_path / "out")
+
+
+def test_dwg_converted_by_external_tool_then_read(tmp_path, monkeypatch):
+    """A stand-in `dwg2dxf` (copies a DXF) proves the Studio/ingest path end to end."""
+    import stat
+
+    from turn_mapper.ingest import dwg_to_dxf
+    from turn_mapper.synthetic import plan_to_dxf
+
+    good = plan_to_dxf(make_plan("basic"), str(tmp_path / "good.dxf"))
+    tool = tmp_path / "dwg2dxf"
+    tool.write_text(f'#!/bin/sh\n[ "$1" = "-y" ] && cp "{good}" "$3"\n')
+    tool.chmod(tool.stat().st_mode | stat.S_IEXEC)
+    monkeypatch.setenv("TURN_DWG_CONVERTER", str(tool))
+    (tmp_path / "plan.dwg").write_bytes(b"AC1032")
+    dxf = dwg_to_dxf(tmp_path / "plan.dwg", tmp_path / "out")
+    assert dxf.name == "plan.dxf" and inspect_file(str(dxf))["kind"] == "dxf"

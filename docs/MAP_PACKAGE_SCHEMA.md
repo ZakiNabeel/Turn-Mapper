@@ -47,8 +47,10 @@ The app's v1 importer may import one floor at a time (user picks from `venue.jso
       "validation_passed": true }
   ],
   "transitions": [
-    // reserved for multi-floor; empty in v0.1
+    // filled by turn-mapper >= 0.3.x multi-floor linking (docs/MASTER_PLAN.md W4.1); empty for one floor
     // { "id": "t1", "type": "stairs", "from": {"floor_id":"C-GF","node_id":"n12"}, "to": {"floor_id":"C-F1","node_id":"n3"}, "length_m": 6.0, "accessible": null }
+    // extra informational keys written today: length_estimated (true until measured), provenance {source: auto|manual,
+    // confidence}, match_distance_m. Lift links have accessible=true, stairs false. The schema types this array loosely.
   ]
 }
 ```

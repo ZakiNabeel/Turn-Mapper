@@ -17,6 +17,17 @@ Newest entry at the top. Every Claude Code session (and every human session that
 
 ---
 
+## 2026-10-16 (later) — Zaki (+Claude) — multi-floor links, DWG, stairs filter, tests
+**Goal:** execute the cloud-doable remainder of docs/MASTER_PLAN.md.
+**Changed:** src/turn_mapper/link.py (new), export.py (`venue_dict(transitions=)`), api.py (links + `link_warnings` in manifest), transitions.py (min-area filter), ingest.py (`dwg_to_dxf`), studio/{project,server}.py + static (links tab, DWG upload), tests/test_link.py, tests/test_cli_links_studio.py, tests/test_adapters_cad.py, docs (MASTER_PLAN, STUDIO_GUIDE, MAP_PACKAGE_SCHEMA, contract/CHANGELOG note).
+**Verified:** `pytest -q` 83 passed; ruff clean. FAST re-run (`runs` in /tmp): 10 floors valid, 12 auto stair links, same per-floor transition counts as before the stairs filter. Style stress 11/12 as recorded.
+**Not verified / unknown:** links against real geometry (no ground truth; confidence is a distance heuristic); real DWG (only a stand-in converter); the learned-model door-arc false positive (not reproduced here); S2 training (needs Kaggle); Studio on Windows.
+**Broken or risky:** D-10 not auto-fixed (2-4 graph parts on B-F1, C-GF, C-F2, C-F5); C-B1 vs C-GF footprints differ 39% so not linked; D-11 vector-PDF DPI sensitivity open.
+**Decisions:** a fat-blob stair filter was tried and reverted (removed a real staircase on C-F2); only a 1 m2 minimum stays.
+**Next step:** Zaki runs the Kaggle S2 notebook; correct B/C floors in Studio; team site measurements.
+
+---
+
 ## 2026-10-16 — Zaki (+Claude) — master plan, TURN Studio, CAD inputs, S2 training data
 **Goal:** a GUI to convert/correct/export maps on the laptop; CAD/vector inputs; plan and data for fine-tuning.
 **Changed:** docs/MASTER_PLAN.md (new), src/turn_mapper/studio/* (new), ingest.py (DxfAdapter, SvgAdapter,

@@ -25,7 +25,12 @@ def _nearest_pixel(mask: np.ndarray, xy: tuple[float, float]) -> tuple[float, fl
 
 
 def find_transitions(
-    geom: GeometryPx, seg: Segmentation, m_per_px: float, max_reach_m: float = 2.0
+    geom: GeometryPx,
+    seg: Segmentation,
+    m_per_px: float,
+    max_reach_m: float = 2.0,
+    min_area_m2: float = 1.0,
+    min_inradius_m: float = 0.0,
 ) -> list[Issue]:
     issues: list[Issue] = []
     walk = geom.debug["walk_mask"]
@@ -37,6 +42,15 @@ def find_transitions(
     n, lab = cv2.connectedComponents(stairs.astype(np.uint8))
     for i in range(1, n):
         blob = lab == i
+        # D-07: a flight of stairs is a fat blob; a door swing arc or a text stroke labelled 'stairs' by a
+        # learned model is a thin ring/line with little area. Drop what cannot be a flight.
+        area_m2 = float(blob.sum()) * m_per_px**2
+        inradius_m = float(cv2.distanceTransform(blob.astype(np.uint8), cv2.DIST_L2, 3).max()) * m_per_px
+        if area_m2 < min_area_m2 or inradius_m < min_inradius_m:
+            issues.append(
+                Issue("STAIRS_TOO_SMALL", f"stair-like blob of {area_m2:.1f} m2 ignored (arc/symbol)")
+            )
+            continue
         polys = mask_to_polygons(blob, simplify_px=1.5)
         if not polys:
             continue

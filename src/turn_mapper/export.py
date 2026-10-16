@@ -160,6 +160,7 @@ def venue_dict(
     run_id: str | None,
     git_commit: str | None,
     method: str,
+    transitions: list[dict] | None = None,
 ) -> dict:
     return {
         "schema_version": SCHEMA_VERSION,
@@ -173,7 +174,7 @@ def venue_dict(
         "venue": {"id": venue_id, "name": venue_name},
         "buildings": buildings,
         "floors": floors,
-        "transitions": [],
+        "transitions": transitions or [],
     }
 
 

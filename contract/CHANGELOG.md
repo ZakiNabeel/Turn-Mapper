@@ -8,6 +8,10 @@
 - Tool versions: package `0.3.0`.
 
 ## Unreleased
+- No schema change: `venue.transitions` (reserved, loosely typed) is now populated by multi-floor linking with the
+  shape documented in `MAP_PACKAGE_SCHEMA.md` section 3. Note for the Android team: readers may ignore it
+  (single-floor import is unaffected); when multi-floor routing is added, treat `length_estimated: true` links
+  as placeholders.
 - 0.1.0 (implemented, not tagged): venue-level package (venue.json + floors/<id>/floor.json + floorplan.png).
   JSON Schema in turnmap.schema.json. Fixtures: valid_synthetic_basic/lshape.turnmap, invalid_*.floor.json
   (`_expect_error` gives the code the consumer must report). scale_source includes `door_width_prior` (an estimate).

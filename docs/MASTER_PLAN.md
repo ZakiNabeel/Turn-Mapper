@@ -60,7 +60,7 @@ recorded in `docs/RESULTS_*.md`; nothing here is a promise of a result.
 | 1.8 | Scale tool | click two points, type metres; repeat for more pairs; residuals shown | scale_source = `measured` |
 | 1.9 | Validate | schema + geometry validators + route sampling after every save; errors block export | |
 | 1.10 | Export | `venue.json`, `.turnmap`, **GeoJSON** (for GIS/debug), **SVG** (for printing/report), annotation PNG pair | app fixtures still validate |
-| 1.11 | Multi-floor | several floors per project/venue, one export | 3 C floors in one venue.json |
+| 1.11 | Multi-floor | several floors per project/venue, one export; **floor links** (auto + manual) in the Check tab | **done 10-16**: 10 FAST floors in one `venue.json` with 12 auto links (unverified vs truth) |
 
 ### W2 — Input formats · **2.1–2.4 done 10-16**
 
@@ -70,7 +70,7 @@ recorded in `docs/RESULTS_*.md`; nothing here is a promise of a result.
 | 2.2 | **Vector PDF** | detect vector content (`page.get_drawings()`); render at chosen DPI; if the PDF declares a scale/units, convert to measured scale; keep the line widths as a wall hint | now |
 | 2.3 | **DXF** (AutoCAD exchange) | `ezdxf`: read units (`$INSUNITS`), list layers; rasterise selected layers (default: all except text/dimension/hatch); scale = known units → **measured**; layer names like `WALL`, `DOOR` give wall/door hints | now |
 | 2.4 | **SVG** | render with PyMuPDF; units from viewBox if given | now |
-| 2.5 | DWG | proprietary; convert to DXF with the free ODA File Converter if installed (auto-detected), else a clear message | next |
+| 2.5 | DWG | convert to DXF with ODA File Converter or libredwg if installed (auto-detected), else a clear message | **done 10-16** (tested with a stand-in converter; try a real DWG) |
 | 2.6 | Photos of printed plans | perspective correction (4 clicks in Studio) | later |
 
 ### W3 — Data and fine-tuning · **S2 data + Kaggle notebook ready 10-16; S2 run next**
@@ -104,12 +104,12 @@ block it has 0 wall-crossing edges and routable % ≥ classical, and on syntheti
 
 | # | Item | Plan |
 |---|---|---|
-| 4.1 | FR-18 multi-floor linking | match stair/lift anchors across levels by position + label; manual link tool in Studio |
+| 4.1 | FR-18 multi-floor linking | **done 10-16** (`link.py`): stair/lift nodes on adjacent levels paired by type + position; manual link tool in Studio; 5 tests. On FAST: 12 links; C-B1/C-GF footprints differ 39%, so unmatched and flagged |
 | 4.2 | FR-19 correction step | = W1 |
-| 4.3 | D-07 stairs FP on door arcs | require parallel-tread spacing + minimum area; style test |
+| 4.3 | D-07 stairs FP on door arcs | **partly done 10-16**: blobs under 1 m2 (arcs, symbols) are dropped, tested on a synthetic arc; FAST results unchanged (12 links, same transitions). A stricter fat-blob test was tried and rejected: it removed a real staircase on C-F2. The learned-model arc case itself is not reproduced (no weights here) |
 | 4.4 | D-08 voids | Studio "not walkable" tool now; learned class `other` later |
-| 4.5 | D-09 coverage | tests for rendered PDF, DXF, SVG adapters and `ml`/`studio` CLI |
-| 4.6 | D-10 C-F2 disconnected | Studio door tool now; re-check after S3 |
+| 4.5 | D-09 coverage | **mostly done 10-16**: adapters, DWG, CLI run/validate/inspect/make-institutional, Studio links; 83 tests pass |
+| 4.6 | D-10 C-F2 disconnected | not auto-fixed: latest run still has 2-4 graph parts on B-F1, C-GF, C-F2, C-F5. Fix by hand in Studio (door/edge tools); re-check after S3 |
 | 4.7 | Site measurements | 2–3 tape measurements per floor entered with the scale tool (team visit) |
 | 4.8 | Mapping-effort study | time to a valid map with Studio vs manual tracing, ≥ 2 operators |
 

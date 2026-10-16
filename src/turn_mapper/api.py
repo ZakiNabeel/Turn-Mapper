@@ -23,6 +23,7 @@ from .export import floor_to_dict, png_bytes, read_package, venue_dict, write_js
 from .graph import build_graph
 from .ingest import load_floor, sha256_file
 from .ir import FloorResult, FloorSpec, Issue, Segmentation
+from .link import link_floors
 from .pois import label_rooms, make_pois
 from .preprocess import preprocess
 from .report import overlay, route_overlay, write_html
@@ -272,8 +273,12 @@ def convert(
     )
     qa_files["index.html"] = report.read_bytes()
     pkg_path = out / ("venue.json" if output_format == "json" else "venue.turnmap")
+    link_warns: list[dict] = []
     if venue_floors:
-        vd = venue_dict(cfg.id, cfg.name, cfg.buildings, venue_floors, run_id, commit, method)
+        links, link_warns = link_floors(
+            [(v, pkg_floors[v["id"]][0]) for v in venue_floors if v["id"] in pkg_floors]
+        )
+        vd = venue_dict(cfg.id, cfg.name, cfg.buildings, venue_floors, run_id, commit, method, links)
         if output_format in ("turnmap", "both"):
             write_package(out / "venue.turnmap", vd, pkg_floors, qa_files)
         if output_format in ("json", "both"):
@@ -287,6 +292,7 @@ def convert(
         "inputs": {Path(i).name: sha256_file(i) for i in inputs if Path(i).exists()},
         "params": cfg.params.to_dict(),
         "floors": [{k: v for k, v in s.items() if k not in ("routes",)} for s in summaries],
+        "link_warnings": link_warns,
         "package": str(pkg_path) if venue_floors else None,
     }
     mpath = out / "run_manifest.json"
