@@ -11,18 +11,30 @@ import numpy as np
 from .ir import GeometryPx, Issue
 
 
-def scale_from_evidence(evidence: list[dict]) -> tuple[float, list[dict]]:
-    used = [e for e in evidence if e.get("used_for_fit", True)] or evidence[:1]
-    first = used[0]
-    d_px = float(np.hypot(*np.subtract(first["p2_px"], first["p1_px"])))
+def _two_point_scale(e: dict) -> float:
+    d_px = float(np.hypot(*np.subtract(e["p2_px"], e["p1_px"])))
     if d_px <= 0:
         raise ValueError("scale evidence points are identical")
-    s = float(first["distance_m"]) / d_px
+    return float(e["distance_m"]) / d_px
+
+
+def scale_from_evidence(evidence: list[dict]) -> tuple[float, list[dict]]:
+    """Scale from evidence. A ``cad_units`` entry (document units of a DXF/vector file, ``m_per_px``) wins;
+    otherwise the first two-point measurement fits the scale. Every other two-point entry is a held-out check
+    and gets a ``residual_m``."""
+    cad = [e for e in evidence if e.get("method") == "cad_units"]
+    if cad:
+        first = cad[0]
+        s = float(first["m_per_px"])
+    else:
+        used = [e for e in evidence if e.get("used_for_fit", True)] or evidence[:1]
+        first = used[0]
+        s = _two_point_scale(first)
     out = []
     for e in evidence:
         e2 = dict(e)
         e2["used_for_fit"] = e is first
-        if e is not first:
+        if e is not first and "p1_px" in e:
             dpx = float(np.hypot(*np.subtract(e["p2_px"], e["p1_px"])))
             e2["residual_m"] = round(dpx * s - float(e["distance_m"]), 3)
         out.append(e2)
@@ -38,7 +50,8 @@ def estimate_scale(
         big = [e for e in ev if abs(e.get("residual_m", 0)) > 0.5]
         for e in big:
             issues.append(Issue("SCALE_RESIDUAL_HIGH", f"held-out distance off by {e['residual_m']} m", None))
-        return s, "operator_two_point", ev, issues
+        src = "cad_units" if any(e.get("method") == "cad_units" for e in evidence) else "operator_two_point"
+        return s, src, ev, issues
     circ = {r.id for r in geom.regions if r.kind == "circulation"}
     widths = [d.width_px for d in geom.doors if len(d.regions) == 2 and circ & set(d.regions)]
     widths = widths or [d.width_px for d in geom.doors]

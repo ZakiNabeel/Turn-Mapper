@@ -86,6 +86,7 @@ def load_venue_config(path: str | Path, input_file: str | None = None) -> VenueC
                 scale_evidence=list(scale_ev.get(f["id"], []) or []),
                 crop=tuple(f["crop"]) if f.get("crop") else None,
                 scale_like=f.get("scale_like"),
+                options=dict(f.get("options") or {}),
             )
         )
     params = PipelineParams(**(raw.get("params") or {}))

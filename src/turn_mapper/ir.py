@@ -26,6 +26,9 @@ class FloorSpec:
     scale_evidence: list[dict] = field(default_factory=list)
     crop: tuple[int, int, int, int] | None = None  # x0, y0, x1, y1 in px
     scale_like: str | None = None  # floor id with the same building footprint to transfer scale from
+    # adapter options, e.g. {"dpi": 200} for rendered PDF/SVG, {"drawing_scale": 100} for a 1:100 vector PDF,
+    # {"layers_exclude": [...], "target_px": 3000} for DXF
+    options: dict = field(default_factory=dict)
 
 
 @dataclass

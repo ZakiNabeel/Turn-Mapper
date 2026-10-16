@@ -24,6 +24,8 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["pytest>=8", "ruff>=0.5"]
 ml = ["torch>=2.2", "segmentation-models-pytorch>=0.3.3"]
+cad = ["ezdxf>=1.1", "matplotlib>=3.7"]
+studio = ["fastapi>=0.110", "uvicorn>=0.27", "python-multipart>=0.0.9", "ezdxf>=1.1", "matplotlib>=3.7"]
 
 [project.scripts]
 turn-mapper = "turn_mapper.cli:main"
@@ -32,7 +34,7 @@ turn-mapper = "turn_mapper.cli:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-turn_mapper = ["py.typed", "schema/*.json"]
+turn_mapper = ["py.typed", "schema/*.json", "studio/static/*"]
 
 [tool.ruff]
 line-length = 110

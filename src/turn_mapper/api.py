@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 import subprocess
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -22,7 +22,7 @@ from .config import VenueConfig, load_venue_config, single_image_config
 from .export import floor_to_dict, png_bytes, read_package, venue_dict, write_json_package, write_package
 from .graph import build_graph
 from .ingest import load_floor, sha256_file
-from .ir import FloorResult, FloorSpec, Issue
+from .ir import FloorResult, FloorSpec, Issue, Segmentation
 from .pois import label_rooms, make_pois
 from .preprocess import preprocess
 from .report import overlay, route_overlay, write_html
@@ -65,22 +65,33 @@ def footprint_px(seg) -> tuple[float, float]:
 
 
 def process_floor(
-    spec: FloorSpec, cfg: VenueConfig, method: str = "classical", ref: FloorResult | None = None
+    spec: FloorSpec,
+    cfg: VenueConfig,
+    method: str = "classical",
+    ref: FloorResult | None = None,
+    seg_override: Segmentation | None = None,
 ) -> FloorResult:
     """Run every stage on one floor and return the pixel-space result (+ scale).
 
     ``ref``: an already-processed floor of the same building footprint (``scale_like`` in the venue config);
-    if this floor has no measured evidence, its scale is transferred by footprint width."""
+    if this floor has no measured evidence, its scale is transferred by footprint width.
+    ``seg_override``: use these (e.g. hand-corrected) wall/floor masks instead of running a segmenter; every
+    later stage runs as usual (the correction step, FR-19)."""
     p = cfg.params
     t: dict[str, float] = {}
     t0 = time.perf_counter()
     img = load_floor(spec)
+    cad_s = img.source_meta.get("cad_m_per_px")
+    if cad_s and not any(e.get("method") == "cad_units" for e in spec.scale_evidence):
+        cad_ev = {"method": "cad_units", "m_per_px": cad_s, "units": img.source_meta.get("units")}
+        spec = replace(spec, scale_evidence=[cad_ev, *spec.scale_evidence])
+        img = replace(img, spec=spec)
     t["ingest"] = time.perf_counter() - t0
     t0 = time.perf_counter()
     pre = preprocess(img, p)
     t["preprocess"] = time.perf_counter() - t0
     t0 = time.perf_counter()
-    seg = SEGMENTERS[method].segment(pre, p)
+    seg = seg_override if seg_override is not None else SEGMENTERS[method].segment(pre, p)
     t["segment"] = time.perf_counter() - t0
     t0 = time.perf_counter()
     s_known = scale_from_evidence(spec.scale_evidence)[0] if spec.scale_evidence else None

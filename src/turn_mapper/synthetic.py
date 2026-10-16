@@ -262,3 +262,36 @@ def render_style(plan: SynthPlan, style: str, seed: int = 0) -> np.ndarray:
         ok, buf = cv2.imencode(".jpg", img, [cv2.IMWRITE_JPEG_QUALITY, 70])
         out = cv2.imdecode(buf, cv2.IMREAD_COLOR)
     return out
+
+
+def plan_to_dxf(plan: SynthPlan, path: str, units: str = "mm", junk_layer: bool = True) -> str:
+    """Write a synthetic plan as an AutoCAD DXF in real units: wall outlines (double lines) on ``A-WALL``,
+    room labels as TEXT on ``A-AREA-IDEN`` and, if ``junk_layer``, a dimension line across the plan on
+    ``A-ANNO-DIMS`` that the DXF adapter must leave out. Needs ``ezdxf``."""
+    import ezdxf
+
+    unit_m = {"mm": 0.001, "cm": 0.01, "m": 1.0}[units]
+    k = plan.m_per_px / unit_m  # drawing units per pixel
+    h = plan.rgb.shape[0]
+    doc = ezdxf.new("R2010", setup=True)
+    doc.header["$INSUNITS"] = {"mm": 4, "cm": 5, "m": 6}[units]
+    for name in ("A-WALL", "A-AREA-IDEN", "A-ANNO-DIMS"):
+        doc.layers.add(name)
+    msp = doc.modelspace()
+    wall = (np.abs(plan.rgb[:, :, 0].astype(int) - 191) < 3).astype(np.uint8)
+    contours, _ = cv2.findContours(wall, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+    for c in contours:
+        pts = [(float(x) * k, float(h - y) * k) for x, y in c[:, 0, :]]
+        if len(pts) >= 3:
+            msp.add_lwpolyline(pts, close=True, dxfattribs={"layer": "A-WALL"})
+    ox, oy = plan.extra["origin_px"]
+    for r in plan.rooms:
+        cx = ox + (r.x0 + r.x1) / 2 / plan.m_per_px
+        cy = oy + (r.y0 + r.y1) / 2 / plan.m_per_px
+        t = msp.add_text(r.label, height=0.35 / unit_m, dxfattribs={"layer": "A-AREA-IDEN"})
+        t.set_placement((cx * k, (h - cy) * k), align=ezdxf.enums.TextEntityAlignment.MIDDLE_CENTER)
+    if junk_layer:
+        y = (h - (oy + 6.5 / plan.m_per_px)) * k
+        msp.add_line((0, y), (plan.rgb.shape[1] * k, y), dxfattribs={"layer": "A-ANNO-DIMS"})
+    doc.saveas(path)
+    return path
