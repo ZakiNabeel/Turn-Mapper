@@ -133,6 +133,31 @@ def ml_bootstrap(plans, venue, floors, out) -> None:
     click.echo(f"wrote {len(ids)} masks to {out}: {', '.join(ids)}")
 
 
+@ml.command("prepare-resplan")
+@click.argument("pkl", type=click.Path(exists=True))
+@click.option("--out", required=True, help="output mask dataset folder")
+@click.option("--split-json", type=click.Path(exists=True), default=None, help="ResPlan split.json")
+@click.option("--limit", type=int, default=None, help="only the first N plans")
+@click.option("--variants", default=1, show_default=True, help="drawings per plan (random style/resolution)")
+@click.option("--seed", default=0, show_default=True)
+def ml_prepare_resplan(pkl, out, split_json, limit, variants, seed) -> None:
+    """Render ResPlan vector plans (CC BY 4.0) in 8 drawing styles with exact masks."""
+    from .learned.resplan import prepare
+
+    click.echo(json.dumps(prepare(pkl, out, split_json, limit, variants, seed=seed), indent=1))
+
+
+@ml.command("make-institutional")
+@click.option("--out", required=True, help="output mask dataset folder")
+@click.option("-n", "n", default=2000, show_default=True, help="number of floors")
+@click.option("--seed", default=0, show_default=True)
+def ml_make_institutional(out, n, seed) -> None:
+    """Procedural institutional floors (corridors, halls, stair cores, lifts, voids) in 8 drawing styles."""
+    from .learned.institutional import prepare
+
+    click.echo(json.dumps(prepare(out, n, seed=seed), indent=1))
+
+
 @ml.command("train")
 @click.option("--data", multiple=True, required=True, help="mask dataset folder (repeatable)")
 @click.option("--out", required=True, help="checkpoint path, e.g. weights/turn_seg.pt")

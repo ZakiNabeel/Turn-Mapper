@@ -126,6 +126,27 @@ python scripts/style_stress.py --segmenter learned --out runs/stress_learned
 
 Compare validity, rooms, doors, graph pieces and the QA overlays, and report both honestly.
 
+## 3b. Stage S2: ResPlan + institutional floors in 8 drawing styles (2026-10-16)
+
+CubiCasa-only weights fail on thin-line and double-line drawings (`RESULTS_ML_2026-10-12.md`). S2 fine-tunes
+the S1 checkpoint on data drawn by us with exact masks, in eight conventions (`learned/styles.py`: greyfill,
+blackwalls, thinlines, doubleline, hatched, colored, scanned, cad — door swings, labels, furniture, dimension
+lines included):
+
+- **ResPlan** (`learned/resplan.py`, CC BY 4.0, 17K residential vector plans; opened with a restricted
+  unpickler) → `turn-mapper ml prepare-resplan ResPlan.pkl --split-json split.json --out data/rp`;
+- **procedural institutional floors** (`learned/institutional.py`: double-loaded corridors, wings, lecture halls,
+  stair cores, lifts, washroom blocks, lobbies with voids and balustrades, columns) →
+  `turn-mapper ml make-institutional --out data/inst -n 3000`;
+- a 1,500-plan CubiCasa replay so S1 skills are kept.
+
+Run it on Kaggle with `notebooks/finetune_s2_kaggle.ipynb` (it calls `scripts/kaggle_finetune_s2.sh`; attach the
+S1 notebook output). WAFFLE is **not** used for training: it has no pixel masks (only a 110-image benchmark) and
+no stated licence; it is reserved as an out-of-domain test set. Stage S3 then fine-tunes on FAST B/C floors
+corrected in TURN Studio (Export → Training annotations).
+
+![institutional floors in the eight styles](img/s2_institutional_styles.png)
+
 ## 4. What "done" looks like for the FYP
 
 | milestone | evidence |
