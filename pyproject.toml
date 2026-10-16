@@ -50,3 +50,4 @@ testpaths = ["tests"]
 
 [tool.ruff.lint.per-file-ignores]
 "src/turn_mapper/report.py" = ["E501"]  # inline HTML/CSS template
+"src/turn_mapper/studio/server.py" = ["B008"]  # FastAPI Body()/File() defaults are the idiom

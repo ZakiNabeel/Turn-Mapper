@@ -2,7 +2,7 @@
 
 Floor plan → navigation graph module of **TURN** (FAST-NUCES Islamabad FYP, infrastructure-minimised indoor navigation).
 
-Give it a floor plan (PDF, image, later DXF; one or many buildings/floors). It produces a JSON map (`venue.json`, or a zipped `.turnmap`) with metric walkable geometry, walls, doors, rooms, destinations and a routeable graph. The TURN Android app imports that package and adds positioning (PDR, particle filter, Wi-Fi) on top.
+Give it a floor plan (raster or vector PDF, image, DXF/CAD, SVG; one or many buildings/floors). It produces a JSON map (`venue.json`, or a zipped `.turnmap`) with metric walkable geometry, walls, doors, rooms, destinations and a routeable graph. The TURN Android app imports that package and adds positioning (PDR, particle filter, Wi-Fi) on top.
 
 AI-assisted, human-verified: every automatic result is checked by validators and a QA report, and corrected by an operator where needed.
 
@@ -12,7 +12,11 @@ AI-assisted, human-verified: every automatic result is checked by validators and
 - **Mid-evaluation evidence index:** [`docs/mideval/00_INDEX.md`](docs/mideval/00_INDEX.md)
 - Status and plan: [`docs/ROADMAP_AND_WORKFLOW.md`](docs/ROADMAP_AND_WORKFLOW.md), [`docs/SESSION_LOG.md`](docs/SESSION_LOG.md)
 
-Status: **v0.3.0**. Classical pipeline: 14/14 FAST floors give valid output, 11/12 synthetic drawing styles fully correct ([`docs/RESULTS_GENERALITY_2026-10-11.md`](docs/RESULTS_GENERALITY_2026-10-11.md)). Learned segmenter (U-Net, CubiCasa5K → fine-tune) scaffolded and tested offline, training pending: [`docs/ML_GUIDE.md`](docs/ML_GUIDE.md).
+Status: **v0.3.0**. Classical pipeline: 14/14 FAST floors give valid output, 11/12 synthetic drawing styles fully correct ([`docs/RESULTS_GENERALITY_2026-10-11.md`](docs/RESULTS_GENERALITY_2026-10-11.md)). Learned segmenter (U-Net) pre-trained on CubiCasa5K (test mIoU 0.65), fine-tuning next: [`docs/ML_GUIDE.md`](docs/ML_GUIDE.md).
+
+**TURN Studio** (GUI): `pip install -e ".[studio]"` then `turn-mapper studio` — upload, run, correct by hand
+(input masks and output graph), set the scale, export `venue.json` / `.turnmap` / GeoJSON / SVG / training masks.
+Guide: [`docs/STUDIO_GUIDE.md`](docs/STUDIO_GUIDE.md). Plan of record: [`docs/MASTER_PLAN.md`](docs/MASTER_PLAN.md).
 
 ```bash
 pip install -e ".[dev]"        # also needs the tesseract binary, version 5.x (4.x changes results on line drawings, see docs/mideval/05_TESTING.md F9)

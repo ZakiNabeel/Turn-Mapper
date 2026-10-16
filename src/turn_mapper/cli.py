@@ -180,5 +180,23 @@ def ml_eval(data, weights, split) -> None:
     click.echo(json.dumps(evaluate(model, list(data), split, tile=int(ck.get("crop", 512))), indent=1))
 
 
+@main.command()
+@click.option(
+    "--dir", "root", default="studio_projects", show_default=True, help="folder for Studio projects"
+)
+@click.option("--port", default=8765, show_default=True)
+@click.option("--host", default="127.0.0.1", show_default=True, help="127.0.0.1 keeps it on this computer")
+@click.option("--no-browser", is_flag=True, help="do not open a browser window")
+def studio(root, port, host, no_browser) -> None:
+    """Open TURN Studio: upload plans, run, correct by hand, export venue.json (local web app)."""
+    try:
+        from .studio.server import serve
+    except ImportError as e:
+        raise click.ClickException(
+            f'TURN Studio needs extra packages: pip install -e ".[studio]" ({e})'
+        ) from e
+    serve(root, host=host, port=port, open_browser=not no_browser)
+
+
 if __name__ == "__main__":
     main()

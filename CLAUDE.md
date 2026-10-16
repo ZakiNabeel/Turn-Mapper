@@ -27,7 +27,7 @@ src/turn_mapper/
   cli.py         # `turn-mapper inspect | run | validate`
   config.py      # PipelineParams (generic defaults) + venue YAML loader (ADR-010)
   ir.py          # intermediate representation dataclasses
-  ingest.py      # input adapters: pdf_embedded_image, pdf_render, image (+ inspect)
+  ingest.py      # input adapters: pdf_embedded_image, pdf_render (vector-aware), image, svg, dxf (+ inspect)
   preprocess.py  # grayscale, OCR text boxes, text erasure
   segment.py     # Segmenter interface; ClassicalSegmenter (histogram levels)
   vectorize.py   # orientation-aware wall-gap closing -> spaces, circulation, doors, walls
@@ -39,6 +39,7 @@ src/turn_mapper/
   export.py      # floor.json (metres) + .turnmap writer/reader
   report.py      # QA overlays + HTML
   synthetic.py   # synthetic plans with known answers + render_style (6 drawing conventions)
+  studio/        # TURN Studio GUI: FastAPI server + static page; projects, corrections, exports (.[studio])
   learned/       # U-Net segmenter: CubiCasa5K reader, datasets, training, inference (needs .[ml]); docs/ML_GUIDE.md
   schema/        # copy of contract/turnmap.schema.json (test keeps them in sync)
 contract/        # turnmap.schema.json, fixtures/, CHANGELOG.md  ← the public contract
@@ -76,7 +77,7 @@ Stages are flat modules; the learned segmenter lives in `learned/` and is import
 ```bash
 # needs the tesseract binary (apt install tesseract-ocr / brew install tesseract / Windows installer)
 pip install -e ".[dev]"
-python3 -m pytest -q                          # 47 tests; ML tests skip without .[ml]
+python3 -m pytest -q                          # ML/Studio/CAD tests skip without their extras
 ruff check . && ruff format --check .
 python scripts/make_fixtures.py               # regenerate contract/fixtures
 turn-mapper inspect samples/private/fast_blocks.pdf
@@ -88,6 +89,7 @@ python eval/evaluate_synthetic.py --out runs/<name>           # Level B/C metric
 python scripts/demo_prepare.py --out demo_inputs              # inputs for the live demo (docs/mideval/06)
 turn-mapper run plan.png --segmenter learned                  # needs TURN_SEG_WEIGHTS (docs/ML_GUIDE.md)
 turn-mapper ml prepare-cubicasa | bootstrap-masks | train | eval
+turn-mapper studio [--dir studio_projects] [--port 8765]  # GUI (needs .[studio]); docs/STUDIO_GUIDE.md
 ```
 
 ## Project skills and agents

@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TURN Studio</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">TURN <span>Studio</span></div>
+  <label class="fld">Project
+    <select id="projectSel"></select>
+  </label>
+  <button id="newProject" class="ghost">New project</button>
+  <div class="spacer"></div>
+  <button id="uploadBtn" class="primary" disabled>Upload plan…</button>
+  <input id="fileInput" type="file" hidden>
+  <div class="menu">
+    <button id="exportBtn" disabled>Export ▾</button>
+    <div id="exportMenu" class="menu-list" hidden>
+      <a data-fmt="venue.json">venue.json (+ images) — for the app</a>
+      <a data-fmt="turnmap">.turnmap package</a>
+      <a data-fmt="geojson">GeoJSON (GIS / debugging)</a>
+      <a data-fmt="svg">SVG drawing (print / report)</a>
+      <a data-fmt="annotations">Training annotations (masks)</a>
+      <label class="chk"><input type="checkbox" id="includeFailed"> include floors that fail validation</label>
+    </div>
+  </div>
+</header>
+
+<div class="body">
+  <aside class="left">
+    <section>
+      <h3>Files</h3>
+      <ul id="fileList" class="list"><li class="empty">Create or open a project, then upload a floor plan
+        (PDF, PNG/JPG, DXF, SVG).</li></ul>
+    </section>
+    <section>
+      <h3>Floors</h3>
+      <ul id="floorList" class="list"><li class="empty">No floors yet.</li></ul>
+    </section>
+  </aside>
+
+  <main id="viewport" class="viewport">
+    <div id="stage" class="stage">
+      <img id="planImg" alt="">
+      <canvas id="maskCanvas"></canvas>
+      <canvas id="eraseCanvas"></canvas>
+      <svg id="ov" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+    <div id="hint" class="hint">Open a floor to start.</div>
+    <div class="zoom">
+      <button id="zoomIn" title="Zoom in">+</button>
+      <button id="zoomOut" title="Zoom out">−</button>
+      <button id="zoomFit" title="Fit">Fit</button>
+    </div>
+  </main>
+
+  <aside class="right">
+    <div class="layers" id="layers">
+      <label><input type="checkbox" data-layer="walkable" checked> walkable</label>
+      <label><input type="checkbox" data-layer="rooms" checked> rooms</label>
+      <label><input type="checkbox" data-layer="walls"> walls</label>
+      <label><input type="checkbox" data-layer="doors" checked> doors</label>
+      <label><input type="checkbox" data-layer="graph" checked> graph</label>
+      <label><input type="checkbox" data-layer="pois" checked> places</label>
+      <label><input type="checkbox" data-layer="masks"> masks</label>
+    </div>
+    <nav class="tabs" id="tabs">
+      <button data-tab="run" class="on">Run</button>
+      <button data-tab="input">Input</button>
+      <button data-tab="map">Map</button>
+      <button data-tab="scale">Scale</button>
+      <button data-tab="check">Check</button>
+    </nav>
+
+    <section class="tab" data-tab="run">
+      <div id="floorMeta" class="meta"></div>
+      <label class="fld">Segmenter
+        <select id="segSel"><option value="classical">classical (default)</option>
+          <option value="learned">learned (U-Net)</option></select>
+      </label>
+      <button id="runBtn" class="primary wide" disabled>Run automatic mapping</button>
+      <button id="revertBtn" class="ghost wide" disabled>Discard edits (back to automatic)</button>
+      <div id="summary" class="summary"></div>
+    </section>
+
+    <section class="tab" data-tab="input" hidden>
+      <p class="note">Fix the <b>input</b> before mapping: crop, rotate, erase legends or marks, or paint the
+        wall / floor masks and re-run everything from them.</p>
+      <div class="row">
+        <button data-rot="270">⟲ 90°</button><button data-rot="90">⟳ 90°</button>
+        <button data-tool="crop">Crop</button>
+      </div>
+      <div class="group">
+        <div class="row tools">
+          <button data-tool="erase">Erase brush</button>
+          <button id="clearErase" class="ghost">Clear erase</button>
+        </div>
+      </div>
+      <div class="group">
+        <div class="label">Paint masks</div>
+        <div class="row tools">
+          <button data-tool="paint" data-cls="1" class="sw wall">Wall</button>
+          <button data-tool="paint" data-cls="2" class="sw floor">Floor</button>
+          <button data-tool="paint" data-cls="0" class="sw out">Outside</button>
+        </div>
+        <label class="fld">Brush <input id="brush" type="range" min="2" max="80" value="12"> <span id="brushV">12</span> px</label>
+        <button id="rerunMasks" class="primary wide" disabled>Re-run from edited masks</button>
+      </div>
+    </section>
+
+    <section class="tab" data-tab="map" hidden>
+      <p class="note">Correct the <b>output</b>. Edits save automatically and are validated each time.</p>
+      <div class="row tools wrap">
+        <button data-tool="select" title="S">Select / move</button>
+        <button data-tool="node" title="N">Add node</button>
+        <button data-tool="edge" title="E">Add edge</button>
+        <button data-tool="door" title="D">Add door</button>
+        <button data-tool="poi" title="P">Add place</button>
+        <button data-tool="void" title="V">Not walkable</button>
+        <button data-tool="walk" title="W">Add walkable</button>
+      </div>
+      <div class="row"><button id="undoBtn" class="ghost">Undo (Ctrl+Z)</button>
+        <button id="delBtn" class="ghost danger">Delete selected (Del)</button></div>
+      <div id="props" class="props"></div>
+    </section>
+
+    <section class="tab" data-tab="scale" hidden>
+      <p class="note">Click two points whose real distance you know (a measured wall, a door, a corridor), then
+        type the distance. The first pair sets the scale; extra pairs are checks.</p>
+      <div id="scaleNow" class="meta"></div>
+      <button data-tool="measure" class="wide">Pick two points</button>
+      <ul id="pairList" class="list small"></ul>
+      <button id="applyScale" class="primary wide" disabled>Apply scale</button>
+    </section>
+
+    <section class="tab" data-tab="check" hidden>
+      <div id="checkSummary" class="summary"></div>
+      <ul id="issueList" class="list small"></ul>
+    </section>
+  </aside>
+</div>
+
+<footer class="status"><span id="status">Ready.</span><span id="coords"></span></footer>
+
+<dialog id="addFloorDlg">
+  <form method="dialog" id="addFloorForm">
+    <h3>Add a floor from <span id="dlgFile"></span></h3>
+    <div id="pagePicker" class="pages"></div>
+    <div class="grid">
+      <label class="fld">Floor id <input name="id" required pattern="[A-Za-z0-9_\-]+" placeholder="C-F1"></label>
+      <label class="fld">Building <input name="building" value="B1" required></label>
+      <label class="fld">Level <input name="level" type="number" value="0"></label>
+      <label class="fld">Name <input name="name" placeholder="C Block – level 1"></label>
+    </div>
+    <div id="vectorOpts" class="grid" hidden>
+      <label class="fld">Drawing scale 1 : <input name="drawing_scale" type="number" min="1" placeholder="100 (optional)"></label>
+    </div>
+    <div id="dxfOpts" hidden>
+      <div class="label">DXF layers to draw</div>
+      <div id="dxfLayers" class="layerlist"></div>
+      <label class="fld">Units if missing
+        <select name="units"><option value="">from file</option><option>mm</option><option>cm</option>
+          <option>m</option><option>in</option><option>ft</option></select></label>
+    </div>
+    <div class="row end">
+      <button value="cancel" class="ghost" formnovalidate>Cancel</button>
+      <button value="ok" class="primary">Add floor</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
