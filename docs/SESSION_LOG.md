@@ -2,6 +2,31 @@
 
 Newest entry at the top. Every Claude Code session (and every human session that changes the module) adds one. `/handoff` writes it.
 
+## 2026-10-16 — Zaki (+Claude) — master plan, TURN Studio, CAD inputs, S2 training data
+**Goal:** a GUI to convert/correct/export maps on the laptop; CAD/vector inputs; plan and data for fine-tuning.
+**Changed:** docs/MASTER_PLAN.md (new), src/turn_mapper/studio/* (new), ingest.py (DxfAdapter, SvgAdapter,
+vector-aware PdfRasterPageAdapter), scale.py (cad_units), api.py (seg_override), ir.py (FloorSpec.options),
+learned/styles.py, learned/resplan.py, learned/institutional.py, cli.py (studio, ml prepare-resplan,
+ml make-institutional), scripts/kaggle_finetune_s2.sh, notebooks/finetune_s2_kaggle.ipynb, tests (+25).
+**Verified:**
+- `pytest -q` → all pass (73); ruff clean.
+- Studio driven in headless Chromium on FAST C-F3: run → valid (13 rooms, 23 doors, 15 POIs, 1 graph part,
+  30/30 routes, 4.5 s); node/edge/door/POI edits, void polygon, undo, scale (two points), mask paint + re-run,
+  venue.json export (validates).
+- DXF (synthetic plan written in mm and m): scale_source cad_units, exactly 0.02 m/px; 7 rooms/6 doors (basic),
+  9/8 (L-shape); corridor length 29.7 m vs 30 m drawn. Vector PDF at 1:100 → 7 rooms/6 doors.
+- ResPlan pickle opened with a restricted unpickler (only shapely from_wkb + numpy found); 300-plan and
+  100-institutional-floor smoke datasets train through `ml train` on CPU.
+**Not verified / unknown:** S2 training itself (needs the Kaggle GPU run); Studio on Windows (built with
+cross-platform stack, not yet run there); DXF files from real AutoCAD drawings (only synthetic DXFs tested).
+**Broken or risky:** vector PDFs without a drawing scale are sensitive to render DPI (at 130 dpi the test plan
+merged rooms; default now chosen from the drawing scale) → log as D-11. Re-running from masks drops the
+classical partition/stairs detectors (rooms 8 vs 7 on one synthetic case).
+**Next step:** Zaki runs notebooks/finetune_s2_kaggle.ipynb on Kaggle (attach the S1 notebook output);
+correct 8–10 B/C floors in Studio and export training annotations (S3); try Studio on the laptop.
+
+---
+
 ## Template
 
 ```markdown

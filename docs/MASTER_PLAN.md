@@ -16,9 +16,9 @@ recorded in `docs/RESULTS_*.md`; nothing here is a promise of a result.
 |---|---|
 | Classical pipeline | **done** (v0.3.0): 14/14 FAST floors valid, 11/12 drawing-style cases fully correct, 48 tests |
 | Learned segmenter | pre-trained on CubiCasa5K (Kaggle, run 2): test **mIoU 0.650** (wall 0.745, door 0.635). In the pipeline it matches classical on 4/12 synthetic cases and fails on thin/double-line drawings. Classical stays default |
-| Inputs | raster PDF (embedded image), rendered PDF page, PNG/JPG. **No** DXF, SVG or vector-aware PDF |
+| Inputs | raster PDF, PNG/JPG; **since 10-16:** DXF (measured `cad_units` scale), SVG, vector-aware PDF |
 | Output | `venue.json` / `.turnmap` (schema 0.1.1), QA HTML |
-| Editing | **none** (correction step FR-19 not started) |
+| Editing | **since 10-16:** TURN Studio (`turn-mapper studio`), input and output corrections |
 | Scale | two-point evidence in YAML, footprint transfer, door-width prior (flagged); site measurements pending |
 | Open defects | D-07 stairs false positive on door arcs, D-08 void marked walkable (A-F1), D-09 low ingest/cli coverage, D-10 C-F2 suites disconnected |
 
@@ -46,7 +46,7 @@ recorded in `docs/RESULTS_*.md`; nothing here is a promise of a result.
 
 ## 2. Workstreams
 
-### W1 — TURN Studio (GUI) · **now**
+### W1 — TURN Studio (GUI) · **1.1–1.10 done 10-16** (1.11 multi-floor linking next)
 
 | # | Feature | Detail | Done when |
 |---|---|---|---|
@@ -62,7 +62,7 @@ recorded in `docs/RESULTS_*.md`; nothing here is a promise of a result.
 | 1.10 | Export | `venue.json`, `.turnmap`, **GeoJSON** (for GIS/debug), **SVG** (for printing/report), annotation PNG pair | app fixtures still validate |
 | 1.11 | Multi-floor | several floors per project/venue, one export | 3 C floors in one venue.json |
 
-### W2 — Input formats · **now/next**
+### W2 — Input formats · **2.1–2.4 done 10-16**
 
 | # | Format | Approach | Status |
 |---|---|---|---|
@@ -73,7 +73,7 @@ recorded in `docs/RESULTS_*.md`; nothing here is a promise of a result.
 | 2.5 | DWG | proprietary; convert to DXF with the free ODA File Converter if installed (auto-detected), else a clear message | next |
 | 2.6 | Photos of printed plans | perspective correction (4 clicks in Studio) | later |
 
-### W3 — Data and fine-tuning · **now/next**
+### W3 — Data and fine-tuning · **S2 data + Kaggle notebook ready 10-16; S2 run next**
 
 **Datasets**
 
