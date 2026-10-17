@@ -8,13 +8,19 @@ and export the files the app imports. It runs on your own computer; nothing is u
 ## Install and start
 
 ```bash
-pip install -e ".[studio]"          # adds FastAPI, uvicorn, ezdxf, matplotlib
+pip install -e ".[studio]"          # adds FastAPI, uvicorn, ezdxf, matplotlib, RapidOCR (room labels)
 turn-mapper studio                   # opens http://127.0.0.1:8765 in your browser
 turn-mapper studio --dir D:/maps --port 8800 --no-browser   # options
 ```
 
 Projects are saved in `studio_projects/` (git-ignored). The learned segmenter appears when the ML extra and
 weights are installed (`pip install -e ".[ml]"`, `TURN_SEG_WEIGHTS=...`).
+
+**Room labels (OCR).** Labels such as *B-215A* or *Maker Lab* are read from the plan's own text. Studio uses
+Tesseract if it is installed (found on PATH, via `TESSERACT_CMD`, or in `C:\Program Files\Tesseract-OCR`),
+otherwise RapidOCR, which comes with `.[studio]` and needs no separate program. The header badge shows which
+one is active; **Labels: OFF** means neither is available and rooms will be "Unlabelled". Force one with
+`TURN_OCR=rapidocr|tesseract`.
 
 ## Inputs
 

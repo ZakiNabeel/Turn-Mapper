@@ -47,11 +47,14 @@ def create_app(root: str | Path) -> FastAPI:
 
     @app.get("/api/info")
     def info():
+        from ..ocr import status as ocr_status
+
         ok, why = _learned_available()
         return {
             "version": __version__,
             "root": str(st.root.resolve()),
             "segmenters": {"classical": {"available": True}, "learned": {"available": ok, "detail": why}},
+            "ocr": ocr_status(),
             "accept": ".pdf,.png,.jpg,.jpeg,.bmp,.tif,.tiff,.webp,.dxf,.dwg,.svg",
         }
 

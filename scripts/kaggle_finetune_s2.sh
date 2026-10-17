@@ -10,7 +10,8 @@ set -euo pipefail
 EPOCHS="${1:-20}"; VARIANTS="${2:-1}"; NINST="${3:-3000}"
 OUT=/kaggle/working/out_s2; W=/tmp/turn; mkdir -p "$OUT" "$W"
 date
-INIT=$(find /kaggle/input -name 'turn_seg_cubicasa.pt' 2>/dev/null | head -1 || true)
+# the S1 notebook output also keeps run 1 (label-misaligned, mIoU 0.32): never start from it
+INIT=$(find /kaggle/input -name 'turn_seg_cubicasa.pt' 2>/dev/null | grep -v -i misaligned | head -1 || true)
 [ -n "$INIT" ] || { echo "S1 checkpoint turn_seg_cubicasa.pt not found under /kaggle/input (attach the pre-train notebook output)"; exit 1; }
 echo "init: $INIT"; sha256sum "$INIT" | tee "$OUT/init_sha256.txt"
 

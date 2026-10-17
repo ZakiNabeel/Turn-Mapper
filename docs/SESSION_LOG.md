@@ -17,6 +17,16 @@ Newest entry at the top. Every Claude Code session (and every human session that
 
 ---
 
+## 2026-10-17 — Zaki (+Claude) — OCR without Tesseract, editable CAD export, S2 launch prep
+**Goal:** rooms were "Unlabelled" on Zaki's Windows laptop; any input -> editable CAD; start S2 on Kaggle.
+**Changed:** src/turn_mapper/ocr.py (new: engine choice Tesseract -> RapidOCR -> none, Windows Tesseract paths, `OCR_UNAVAILABLE` warning), preprocess.py, pois.py (page-level boxes per room for RapidOCR; label regex on spaced text first), api.py, studio (OCR badge; `Export -> Editable CAD (DXF)` via `floor_dxf`), pyproject (`.[studio]` adds rapidocr + onnxruntime), scripts/kaggle_finetune_s2.sh (never start from the misaligned run-1 checkpoint), tests (ocr, CAD round trip).
+**Verified:** pytest 91 passed; ruff clean. Root cause: `run_ocr` swallowed the missing-Tesseract error. FAST dev floors, unlabelled destinations: Tesseract 5/140, RapidOCR 6/134; with RapidOCR room/door counts move on some floors (C-F5 30->23 rooms, B-F2 42->39), so Tesseract stays first when installed. CAD round trip (PNG -> DXF -> pipeline): identical rooms/doors/places on synthetic, C-F3, C-F4; B-F1 36/37 rooms; C-F5 16/30.
+**Not verified / unknown:** RapidOCR on Zaki's Windows machine; real CAD edits by a person; S2 result (run pending).
+**Broken or risky:** RapidOCR geometry shift above; C-F5 CAD round trip lossy.
+**Next step:** S2 run on Kaggle; compare S1 vs S2 on CubiCasa/ResPlan/institutional test splits and the 12 synthetic cases.
+
+---
+
 ## 2026-10-16 (later) — Zaki (+Claude) — multi-floor links, DWG, stairs filter, tests
 **Goal:** execute the cloud-doable remainder of docs/MASTER_PLAN.md.
 **Changed:** src/turn_mapper/link.py (new), export.py (`venue_dict(transitions=)`), api.py (links + `link_warnings` in manifest), transitions.py (min-area filter), ingest.py (`dwg_to_dxf`), studio/{project,server}.py + static (links tab, DWG upload), tests/test_link.py, tests/test_cli_links_studio.py, tests/test_adapters_cad.py, docs (MASTER_PLAN, STUDIO_GUIDE, MAP_PACKAGE_SCHEMA, contract/CHANGELOG note).

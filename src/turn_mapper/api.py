@@ -136,7 +136,7 @@ def process_floor(
     t["_footprint"] = (fw, fh)
     t0 = time.perf_counter()
     patterns = [cfg.label_patterns[spec.building]] if spec.building in cfg.label_patterns else []
-    label_rooms(geom, pre.gray_raw, p, patterns)
+    label_rooms(geom, pre.gray_raw, p, patterns, pre.text)
     t["ocr_labels"] = time.perf_counter() - t0
     t_issues = find_transitions(geom, seg, s)
     t0 = time.perf_counter()
@@ -144,6 +144,12 @@ def process_floor(
     t["graph"] = time.perf_counter() - t0
     pois, p_issues = make_pois(geom, graph)
     warnings = issues + t_issues + g_issues + p_issues
+    if p.ocr:
+        from .ocr import status as ocr_status
+
+        st = ocr_status()
+        if not st["available"]:
+            warnings.append(Issue("OCR_UNAVAILABLE", st["detail"]))
     for r in geom.regions:
         if r.kind not in ("circulation", "transition") and not any(r.id in d.regions for d in geom.doors):
             warnings.append(Issue("ROOM_NO_DOOR", "no door detected for this room", r.id))

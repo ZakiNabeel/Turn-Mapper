@@ -67,6 +67,12 @@ async function loadInfo() {
   opt.disabled = !learned.available;
   if (!learned.available) opt.textContent = "learned (unavailable: " + learned.detail + ")";
   $("#fileInput").accept = S.info.accept;
+  const o = S.info.ocr, b = $("#ocrBadge");
+  if (o && b) {
+    b.textContent = o.available ? `Labels: ${o.engine}` : "Labels: OFF";
+    b.className = "badge " + (o.available ? "ok" : "err"); b.title = o.detail;
+    if (!o.available) status("Room labels are OFF: " + o.detail);
+  }
 }
 async function loadProjects(selectId) {
   const list = await api("/api/projects");
@@ -714,6 +720,6 @@ window.addEventListener("resize", () => S.w && applyView());
 
 // ---------------------------------------------------------------- start
 (async () => {
-  try { await loadInfo(); await loadProjects(); if (!S.pid) clearFloor(); status(`TURN Studio ${S.info.version} · projects in ${S.info.root}`); }
+  try { await loadInfo(); await loadProjects(); if (!S.pid) clearFloor(); if (S.info.ocr && S.info.ocr.available) status(`TURN Studio ${S.info.version} · projects in ${S.info.root}`); }
   catch (e) { status("Could not reach the Studio server: " + e.message); }
 })();

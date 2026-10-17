@@ -25,7 +25,10 @@ dependencies = [
 dev = ["pytest>=8", "ruff>=0.5"]
 ml = ["torch>=2.2", "segmentation-models-pytorch>=0.3.3"]
 cad = ["ezdxf>=1.1", "matplotlib>=3.7"]
-studio = ["fastapi>=0.110", "uvicorn>=0.27", "python-multipart>=0.0.9", "ezdxf>=1.1", "matplotlib>=3.7"]
+studio = [
+  "fastapi>=0.110", "uvicorn>=0.27", "python-multipart>=0.0.9", "ezdxf>=1.1", "matplotlib>=3.7",
+  "rapidocr>=3.4", "onnxruntime>=1.20",  # room labels without installing Tesseract (src/turn_mapper/ocr.py)
+]
 
 [project.scripts]
 turn-mapper = "turn_mapper.cli:main"
