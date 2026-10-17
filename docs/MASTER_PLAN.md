@@ -74,7 +74,7 @@ recorded in `docs/RESULTS_*.md`; nothing here is a promise of a result.
 | 2.7 | **Any input -> editable CAD** | Studio exports the extracted plan as DXF (`floor_dxf`), edited in any CAD tool, re-loaded as a measured DXF | **done 10-17**; round trip exact on synthetic, C-F3, C-F4; lossy on C-F5 |
 | 2.6 | Photos of printed plans | perspective correction (4 clicks in Studio) | later |
 
-### W3 — Data and fine-tuning · **S2 data + Kaggle notebook ready 10-16; S2 run next**
+### W3 — Data and fine-tuning · **S2 run started 10-17 on Kaggle (`turn-segmenter-s2-finetune`, v1, GPU T4)**
 
 **Datasets**
 
