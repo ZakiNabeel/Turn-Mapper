@@ -67,7 +67,12 @@ def train(
     workers: int = 2,
     device: str | None = None,
     seed: int = 0,
+    amp: bool = False,
+    max_minutes: float | None = None,
 ) -> dict:
+    """``amp``: mixed precision on CUDA (about 2x faster on a T4). ``max_minutes``: time budget for the
+    training loop; after 100 iterations the speed is measured and the schedule is shortened to fit, so a
+    Kaggle run ends with a finished learning-rate schedule and a saved best checkpoint, not a timeout."""
     torch, smp = _torch()
     torch.manual_seed(seed)
     np.random.seed(seed)
@@ -101,6 +106,8 @@ def train(
         "restyle_p": restyle_p,
         "wall_px_median": wall_px_median(data),
     }
+    use_amp = bool(amp) and str(device).startswith("cuda")
+    scaler = torch.amp.GradScaler("cuda", enabled=use_amp)
     best, it, log, t0 = -1.0, 0, [], time.time()
     out_p = Path(out)
     for ep in range(epochs):
@@ -108,13 +115,28 @@ def train(
         model.train()
         for x, y in loader:
             x, y = x.to(device), y.to(device)
-            logits = model(x)
-            loss = ce(logits, y) + dice(logits, y)
+            with torch.autocast("cuda", enabled=use_amp):
+                logits = model(x)
+                loss = ce(logits.float(), y) + dice(logits.float(), y)
             opt.zero_grad()
-            loss.backward()
-            opt.step()
+            scaler.scale(loss).backward()
+            scaler.step(opt)
+            scaler.update()
             sched.step()
             it += 1
+            if max_minutes and it == 100:
+                rate = 100 / (time.time() - t0)  # it/s, excluding validation
+                n_epochs_est = max(1, int((max_minutes * 60 * rate) // max(len(loader), 1)))
+                val_reserve = 1.0 + 0.04 * n_epochs_est  # validation passes + safety margin, in minutes
+                fit = int(max(0.0, max_minutes - val_reserve) * 60 * rate)
+                if fit < total:
+                    total = max(fit, 200)
+                    sched = torch.optim.lr_scheduler.OneCycleLR(
+                        opt, max_lr=lr, total_steps=total - it + 1, pct_start=0.02
+                    )
+                    print(
+                        f"time budget {max_minutes} min at {rate:.2f} it/s -> {total} iterations", flush=True
+                    )
             if it % 50 == 0 or it == 1:
                 print(f"ep {ep} it {it}/{total} loss {loss.item():.4f} {time.time() - t0:.0f}s", flush=True)
             if it >= total:
@@ -126,7 +148,7 @@ def train(
         score = metrics["mIoU"] if metrics["mIoU"] is not None else -float(loss.item())
         if score > best:
             best = score
-            save_checkpoint(out_p, model, {**meta, "epoch": ep, "iters": it, "val": metrics})
+            save_checkpoint(out_p, model, {**meta, "epoch": ep, "iters": it, "val": metrics, "amp": use_amp})
         if it >= total:
             break
     (out_p.with_suffix(".log.json")).write_text(json.dumps(log, indent=1))

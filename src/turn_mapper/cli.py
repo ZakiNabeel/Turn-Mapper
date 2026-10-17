@@ -169,9 +169,26 @@ def ml_make_institutional(out, n, seed) -> None:
 @click.option("--encoder", default="resnet34", show_default=True)
 @click.option("--no-pretrained", is_flag=True, help="random encoder init (offline smoke tests)")
 @click.option("--max-iters", type=int, default=None)
+@click.option("--amp/--no-amp", default=False, help="mixed precision on CUDA (faster on T4)")
+@click.option("--max-minutes", type=float, default=None, help="time budget; schedule shortened to fit")
 @click.option("--workers", default=2, show_default=True)
 @click.option("--device", default=None)
-def ml_train(data, out, init, epochs, batch, crop, lr, encoder, no_pretrained, max_iters, workers, device):
+def ml_train(
+    data,
+    out,
+    init,
+    epochs,
+    batch,
+    crop,
+    lr,
+    encoder,
+    no_pretrained,
+    max_iters,
+    amp,
+    max_minutes,
+    workers,
+    device,
+):
     """Train (or fine-tune with --init) the U-Net; best checkpoint by validation mIoU."""
     from .learned.train import train
 
@@ -188,6 +205,8 @@ def ml_train(data, out, init, epochs, batch, crop, lr, encoder, no_pretrained, m
         max_iters=max_iters,
         workers=workers,
         device=device,
+        amp=amp,
+        max_minutes=max_minutes,
     )
     click.echo(json.dumps({k: v for k, v in r.items() if k != "log"}))
 

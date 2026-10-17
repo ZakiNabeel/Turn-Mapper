@@ -8,6 +8,8 @@
 # Run from the repo root:  bash scripts/kaggle_finetune_s2.sh [epochs] [resplan_variants] [institutional_n]
 set -euo pipefail
 EPOCHS="${1:-20}"; VARIANTS="${2:-1}"; NINST="${3:-3000}"
+# training time budget (minutes): the whole run must fit Kaggle's 12 h limit incl. data prep (~40 min) and eval
+TRAIN_MIN="${4:-420}"
 OUT=/kaggle/working/out_s2; W=/tmp/turn; mkdir -p "$OUT" "$W"
 date
 # the S1 notebook output also keeps run 1 (label-misaligned, mIoU 0.32): never start from it
@@ -41,7 +43,7 @@ if [ -n "$CC" ]; then
 fi
 date
 turn-mapper ml train "${DATA[@]}" --init "$INIT" --out "$OUT/turn_seg_s2.pt" \
-  --epochs "$EPOCHS" --batch 8 --crop 512 --lr 2e-4 --workers 4 2>&1 | tee "$OUT/train_stdout.txt"
+  --epochs "$EPOCHS" --batch 8 --crop 512 --lr 2e-4 --workers 4 --amp --max-minutes "$TRAIN_MIN" 2>&1 | tee "$OUT/train_stdout.txt"
 date
 sha256sum "$OUT/turn_seg_s2.pt" | tee "$OUT/s2_sha256.txt"
 for d in rp inst cc; do
