@@ -49,7 +49,14 @@ weights are installed (`pip install -e ".[ml]"`, `TURN_SEG_WEIGHTS=...`).
    (same type, nearest position after aligning the floors' corners, 4 m cap). Unpaired ones are listed as
    warnings, never guessed. Pick two nodes on different floors and *Add manual link* to override. Links go into
    `venue.json` → `transitions`. Lengths are flagged estimates (stairs 6 m, lift 4 m) until measured.
-7. **Export ▾**: `venue.json` + images (what the Android app imports), `.turnmap`, GeoJSON (QGIS / debugging),
+7. **Edit as CAD** (any input -> editable CAD): *Export ▾ → Editable CAD (DXF)* writes the extracted plan in
+   metres: `A-WALL` (each wall a centre line with its thickness; door openings are gaps), `A-AREA-IDEN` (room
+   labels as text), and reference layers `TURN-DOORS`, `TURN-ROOMS`, `TURN-GRAPH`, `TURN-PLACES` that are ignored
+   on load. Open it in AutoCAD / LibreCAD / QCAD, move or delete walls, change labels, save, then **Upload** the
+   DXF as a new file: it is read with a *measured* scale and goes through the same pipeline. Tested: PNG -> DXF
+   -> back gives identical rooms/doors/places on the synthetic plan and on FAST C-F3 and C-F4; deleting a wall
+   in the DXF merges the two rooms. Messy floors lose some rooms on the way back (FAST C-F5: 16 of 30), so check.
+8. **Export ▾**: `venue.json` + images (what the Android app imports), `.turnmap`, GeoJSON (QGIS / debugging),
    SVG (print, report), **training annotations** (image + class mask per floor, for fine-tuning the learned
    segmenter). Copies are also kept in the project's `exports/` folder.
 

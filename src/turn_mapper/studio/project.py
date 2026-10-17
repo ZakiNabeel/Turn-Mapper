@@ -558,6 +558,18 @@ class Studio:
             data = json.dumps(gj, indent=1).encode()
             (out_dir / "venue.geojson").write_bytes(data)
             return data, f"{pid}.geojson", "application/geo+json"
+        if fmt == "dxf":
+            files = {}
+            for r, f in floors:
+                files[f"{pid}_{r['id']}.dxf"] = floor_dxf(f, str(out_dir / f"{pid}_{r['id']}.dxf"))
+            if len(files) == 1:
+                name, path = next(iter(files.items()))
+                return Path(path).read_bytes(), name, "application/dxf"
+            buf = io.BytesIO()
+            with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+                for name, path in files.items():
+                    z.write(path, name)
+            return buf.getvalue(), f"{pid}_dxf.zip", "application/zip"
         if fmt == "svg":
             if len(floors) == 1:
                 data = floor_svg(floors[0][1]).encode()
@@ -753,6 +765,100 @@ def floor_geojson(fid: str, fd: dict) -> list[dict]:
             category=p.get("category"),
         )
     return feats
+
+
+def _orthogonal_walls(walls: list[dict], angle_deg: float = 4.0, tol_m: float = 0.12) -> list[list]:
+    """Wall centre lines with near-horizontal/vertical ones snapped straight and collinear ones aligned
+    (extraction from a drawing leaves ~cm skews that would misalign the two ends of a door opening)."""
+    import math
+
+    segs = [[list(w["a"]), list(w["b"])] for w in walls]
+    for axis in (0, 1):  # 0: vertical walls share x; 1: horizontal walls share y
+        idx = []
+        for i, (a, b) in enumerate(segs):
+            dx, dy = b[0] - a[0], b[1] - a[1]
+            ang = math.degrees(
+                math.atan2(abs(dx) if axis == 0 else abs(dy), abs(dy) if axis == 0 else abs(dx))
+            )
+            if math.hypot(dx, dy) > 0 and ang <= angle_deg:
+                idx.append((((a[axis] + b[axis]) / 2), i))
+        idx.sort()
+        cluster: list[tuple[float, int]] = []
+        for v, i in [*idx, (math.inf, -1)]:
+            if cluster and v - cluster[-1][0] > tol_m:
+                m = sum(c[0] for c in cluster) / len(cluster)
+                for _, j in cluster:
+                    segs[j][0][axis] = segs[j][1][axis] = m
+                cluster = []
+            cluster.append((v, i))
+    return segs
+
+
+def floor_dxf(fd: dict, path: str) -> str:
+    """The extracted floor as an editable AutoCAD DXF, in metres (y up, origin bottom-left).
+
+    ``A-WALL``: wall outlines (merged, closed polylines; openings are gaps) and ``A-AREA-IDEN``: room labels
+    are what loading the DXF back reads. ``TURN-DOORS`` / ``TURN-ROOMS`` / ``TURN-GRAPH`` / ``TURN-PLACES``
+    are for reference and are ignored on load (door openings = gaps in ``A-WALL``)."""
+    import ezdxf
+    from shapely.geometry import LineString, shape
+    from shapely.ops import unary_union
+
+    top = fd["bounds_m"]["max_y"]
+
+    def P(p):
+        return (float(p[0]), float(top - p[1]))
+
+    doc = ezdxf.new("R2010", setup=True)
+    doc.header["$INSUNITS"] = 6  # metres
+    for name, color in (
+        ("A-WALL", 7),
+        ("A-AREA-IDEN", 3),
+        ("TURN-DOORS", 3),
+        ("TURN-ROOMS", 5),
+        ("TURN-GRAPH", 1),
+        ("TURN-PLACES", 4),
+    ):
+        doc.layers.add(name, color=color)
+    msp = doc.modelspace()
+    # walls = centre lines drawn as width polylines (easy to move/extend in CAD); every door is an opening
+    # cut through them, so the file shows (and re-loading finds) the gap
+    cuts = unary_union([LineString([d["a"], d["b"]]).buffer(0.3, cap_style=2) for d in fd["doors"]])
+    for w, seg in zip(fd["walls"], _orthogonal_walls(fd["walls"]), strict=True):
+        line = LineString(seg)
+        if line.length <= 0:
+            continue
+        rest = line.difference(cuts) if not cuts.is_empty else line
+        for piece in getattr(rest, "geoms", [rest]):
+            if piece.geom_type == "LineString" and piece.length > 0.05:
+                msp.add_lwpolyline(
+                    [P(c) for c in piece.coords],
+                    dxfattribs={"layer": "A-WALL", "const_width": max(w.get("thickness_m", 0.15), 0.05)},
+                )
+    for r in fd["rooms"]:
+        pts = [P(c) for c in r["polygon"][:-1]]
+        if len(pts) >= 3:
+            msp.add_lwpolyline(pts, close=True, dxfattribs={"layer": "TURN-ROOMS"})
+        text = (r.get("label") or r.get("name") or "").strip()
+        if text:
+            c = shape({"type": "Polygon", "coordinates": [r["polygon"]]}).representative_point()
+            t = msp.add_text(text, height=0.3, dxfattribs={"layer": "A-AREA-IDEN"})
+            t.set_placement(P((c.x, c.y)), align=ezdxf.enums.TextEntityAlignment.MIDDLE_CENTER)
+    for d in fd["doors"]:
+        msp.add_line(P(d["a"]), P(d["b"]), dxfattribs={"layer": "TURN-DOORS"})
+    nodes = {n["id"]: n for n in fd["graph"]["nodes"]}
+    for e in fd["graph"]["edges"]:
+        if e["from"] in nodes and e["to"] in nodes:
+            a, b = nodes[e["from"]], nodes[e["to"]]
+            msp.add_line(P((a["x"], a["y"])), P((b["x"], b["y"])), dxfattribs={"layer": "TURN-GRAPH"})
+    for q in fd["pois"]:
+        n = nodes.get(q["node_id"])
+        if n:
+            msp.add_text(q["name"], height=0.25, dxfattribs={"layer": "TURN-PLACES"}).set_placement(
+                P((n["x"], n["y"]))
+            )
+    doc.saveas(path)
+    return path
 
 
 def floor_svg(fd: dict, px_per_m: float = 20.0) -> str:

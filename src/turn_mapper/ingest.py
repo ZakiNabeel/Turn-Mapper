@@ -194,7 +194,7 @@ class SvgAdapter:
 
 # DXF $INSUNITS code -> metres per drawing unit
 DXF_UNITS = {1: ("in", 0.0254), 2: ("ft", 0.3048), 4: ("mm", 0.001), 5: ("cm", 0.01), 6: ("m", 1.0)}
-DXF_SKIP_LAYERS = ("DIM", "ANNO", "DEFPOINTS", "FURN", "GRID", "TITLE", "VIEWPORT", "XREF")
+DXF_SKIP_LAYERS = ("DIM", "ANNO", "DEFPOINTS", "FURN", "GRID", "TITLE", "VIEWPORT", "XREF", "TURN-")
 
 
 class DxfAdapter:

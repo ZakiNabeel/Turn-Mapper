@@ -71,6 +71,7 @@ recorded in `docs/RESULTS_*.md`; nothing here is a promise of a result.
 | 2.3 | **DXF** (AutoCAD exchange) | `ezdxf`: read units (`$INSUNITS`), list layers; rasterise selected layers (default: all except text/dimension/hatch); scale = known units → **measured**; layer names like `WALL`, `DOOR` give wall/door hints | now |
 | 2.4 | **SVG** | render with PyMuPDF; units from viewBox if given | now |
 | 2.5 | DWG | convert to DXF with ODA File Converter or libredwg if installed (auto-detected), else a clear message | **done 10-16** (tested with a stand-in converter; try a real DWG) |
+| 2.7 | **Any input -> editable CAD** | Studio exports the extracted plan as DXF (`floor_dxf`), edited in any CAD tool, re-loaded as a measured DXF | **done 10-17**; round trip exact on synthetic, C-F3, C-F4; lossy on C-F5 |
 | 2.6 | Photos of printed plans | perspective correction (4 clicks in Studio) | later |
 
 ### W3 — Data and fine-tuning · **S2 data + Kaggle notebook ready 10-16; S2 run next**

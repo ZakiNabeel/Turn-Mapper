@@ -136,3 +136,13 @@ def test_pure_helpers():
     assert rescale_floor(t, 2)["graph"]["nodes"][1]["x"] == 18
     cut = walkable_edit(t, [[8, 1], [10.5, 1], [10.5, 3], [8, 3]], "remove")
     assert [n["id"] for n in cut["graph"]["nodes"]] == ["a"]
+
+
+def test_export_editable_dxf(studio):
+    ezdxf = pytest.importorskip("ezdxf")
+    c, pid = studio
+    r = c.get(f"/api/projects/{pid}/export/dxf")
+    assert r.status_code == 200 and "dxf" in r.headers["content-disposition"]
+    doc = ezdxf.read(io.StringIO(r.content.decode("utf-8", "ignore")))
+    assert doc.header["$INSUNITS"] == 6
+    assert any(e.dxf.layer == "A-WALL" for e in doc.modelspace())
