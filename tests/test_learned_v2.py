@@ -94,3 +94,33 @@ def _pre(fr, params):
     from turn_mapper.preprocess import preprocess
 
     return preprocess(fr.image, params)
+
+
+def test_hybrid_runs_end_to_end_with_stand_in_network(monkeypatch, basic):
+    """Hybrid = classical walls + confident network walls + network doors; with a network that agrees with
+    the drawing, the map must be as good as classical."""
+    import turn_mapper.learned.model as model_mod
+    import turn_mapper.learned.segmenter as seg_mod
+    from turn_mapper.learned.classes import BG, CLASSES, ROOM, WALL
+
+    cfg, fr = basic
+
+    def fake_predict(model, gs, tile, device):
+        prob = np.full((len(CLASSES), *gs.shape), 0.01, np.float32)
+        dark = gs < 60  # solid ink only: grey door arcs are not walls
+        prob[WALL][dark] = 0.9
+        prob[ROOM][~dark] = 0.9
+        prob[BG][:2, :] = 1.0
+        return prob
+
+    monkeypatch.setattr(seg_mod, "_model", lambda device: (None, {"wall_px_median": None, "crop": 512}, "x"))
+    monkeypatch.setattr(model_mod, "predict_proba", fake_predict)
+    monkeypatch.setattr(
+        seg_mod.HybridSegmenter,
+        "__init__",
+        lambda self, device=None: setattr(self, "learned", seg_mod.LearnedSegmenter(device="cpu")),
+    )
+    cfg = replace(cfg, params=replace(cfg.params, learned_min_wall_frag_t2=6.0))  # text glyphs are not walls
+    out = process_floor(cfg.floors[0], cfg, "hybrid")
+    assert _rooms(out) == _rooms(fr) and len(out.geom.doors) == len(fr.geom.doors)
+    assert out.seg.levels["wall_mode"] == "hybrid"

@@ -9,7 +9,7 @@ pip -q install -e ".[ml]" 2>&1 | tail -2
 git log --oneline -1
 export TURN_SEG_WEIGHTS=$(find /kaggle/input -name 'turn_seg_s2.pt' | head -1)
 echo "weights: $TURN_SEG_WEIGHTS"
-python scripts/tune_learned.py --n "${1:-16}" --out /kaggle/working/tune 2>&1 | grep -v -i warning | tee /kaggle/working/tune_log.txt | grep -E "^(classical|v1|doors|BEST|DONE)"
+python scripts/tune_learned.py --n "${1:-16}" --set "${2:-learned}" --out /kaggle/working/tune 2>&1 | grep -v -i warning | tee /kaggle/working/tune_log.txt | grep -E "^(classical|v1|doors|hybrid|BEST|DONE)"
 python - <<'PY'
 import json
 R = json.load(open('/kaggle/working/tune/tune_results.json'))

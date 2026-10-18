@@ -63,9 +63,11 @@ document.addEventListener("DOMContentLoaded", () => {
 async function loadInfo() {
   S.info = await api("/api/info");
   const learned = S.info.segmenters.learned;
-  const opt = $('#segSel option[value="learned"]');
-  opt.disabled = !learned.available;
-  if (!learned.available) opt.textContent = "learned (unavailable: " + learned.detail + ")";
+  for (const v of ["learned", "hybrid"]) {
+    const opt = $(`#segSel option[value="${v}"]`); if (!opt) continue;
+    opt.disabled = !learned.available;
+    if (!learned.available) opt.textContent = v + " (unavailable: " + learned.detail + ")";
+  }
   $("#fileInput").accept = S.info.accept;
   const o = S.info.ocr, b = $("#ocrBadge");
   if (o && b) {

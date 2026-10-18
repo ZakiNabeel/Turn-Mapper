@@ -53,7 +53,11 @@ def create_app(root: str | Path) -> FastAPI:
         return {
             "version": __version__,
             "root": str(st.root.resolve()),
-            "segmenters": {"classical": {"available": True}, "learned": {"available": ok, "detail": why}},
+            "segmenters": {
+                "classical": {"available": True},
+                "learned": {"available": ok, "detail": why},
+                "hybrid": {"available": ok, "detail": why},
+            },
             "ocr": ocr_status(),
             "accept": ".pdf,.png,.jpg,.jpeg,.bmp,.tif,.tiff,.webp,.dxf,.dwg,.svg",
         }

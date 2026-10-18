@@ -15,22 +15,33 @@ import subprocess
 import sys
 from pathlib import Path
 
-CONFIGS = [
-    ("v1", {}),
-    ("doors", {"learned_doors": True}),
-    ("doors+scales", {"learned_doors": True, "learned_scales": [0.7, 1.0, 1.4]}),
-    ("doors+frag", {"learned_doors": True, "learned_min_wall_frag_t2": 6.0}),
-    ("doors+thr0.35", {"learned_doors": True, "learned_wall_thr": 0.35}),
-    (
-        "doors+scales+thr0.35+frag",
-        {
-            "learned_doors": True,
-            "learned_scales": [0.7, 1.0, 1.4],
-            "learned_wall_thr": 0.35,
-            "learned_min_wall_frag_t2": 6.0,
-        },
-    ),
-]
+CONFIG_SETS = {
+    "learned": [
+        ("v1", "learned", {}),
+        ("doors", "learned", {"learned_doors": True}),
+        ("doors+scales", "learned", {"learned_doors": True, "learned_scales": [0.7, 1.0, 1.4]}),
+        ("doors+frag", "learned", {"learned_doors": True, "learned_min_wall_frag_t2": 6.0}),
+        ("doors+thr0.35", "learned", {"learned_doors": True, "learned_wall_thr": 0.35}),
+        (
+            "doors+scales+thr0.35+frag",
+            "learned",
+            {
+                "learned_doors": True,
+                "learned_scales": [0.7, 1.0, 1.4],
+                "learned_wall_thr": 0.35,
+                "learned_min_wall_frag_t2": 6.0,
+            },
+        ),
+    ],
+    "hybrid": [
+        ("hybrid0.75", "hybrid", {}),
+        ("hybrid0.6", "hybrid", {"hybrid_wall_conf": 0.6}),
+        ("hybrid0.9", "hybrid", {"hybrid_wall_conf": 0.9}),
+        ("hybrid0.75+frag", "hybrid", {"learned_min_wall_frag_t2": 6.0}),
+        ("hybrid0.75-nodoors", "hybrid", {"hybrid_doors": False}),
+    ],
+}
+CONFIGS = CONFIG_SETS["learned"]  # kept for the first notebook run
 
 
 def dev_score(s: dict) -> float:
@@ -49,12 +60,14 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--n", type=int, default=16)
     ap.add_argument("--out", default="runs/tune")
+    ap.add_argument("--set", default="learned", choices=sorted(CONFIG_SETS))
     args = ap.parse_args()
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     py = sys.executable
     results = {}
-    runs = [("classical", "classical", {})] + [(n, "learned", p) for n, p in CONFIGS]
+    configs = CONFIG_SETS[args.set]
+    runs = [("classical", "classical", {})] + configs
     for name, seg, params in runs:
         d = out / f"dev_{name}"
         sh(
@@ -79,7 +92,7 @@ def main() -> None:
             "dev_score": round(dev_score(summ), 4),
         }
         print(name, json.dumps(results[name]), flush=True)
-    learned = [n for n, _ in CONFIGS]
+    learned = [n for n, _, _ in configs]
     best = max(learned, key=lambda n: (results[n]["dev_score"], -learned.index(n)))
     print("BEST (by the declared rule):", best, flush=True)
     # one test run on the 12 synthetic cases

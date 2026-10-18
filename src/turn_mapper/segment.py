@@ -193,7 +193,20 @@ class _LazyLearned:
         return LearnedSegmenter().segment(pre, params)
 
 
-SEGMENTERS: dict[str, Segmenter] = {"classical": ClassicalSegmenter(), "learned": _LazyLearned()}
+class _LazyHybrid:
+    name = "hybrid"
+
+    def segment(self, pre: Preprocessed, params: PipelineParams) -> Segmentation:
+        from .learned.segmenter import HybridSegmenter
+
+        return HybridSegmenter().segment(pre, params)
+
+
+SEGMENTERS: dict[str, Segmenter] = {
+    "classical": ClassicalSegmenter(),
+    "learned": _LazyLearned(),
+    "hybrid": _LazyHybrid(),
+}
 
 
 def detect_partitions(

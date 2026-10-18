@@ -58,8 +58,11 @@ class LearnedSegmenter:
             device = "cuda" if torch.cuda.is_available() else "cpu"
         self.device = device
 
-    def segment(self, pre: Preprocessed, params: PipelineParams) -> Segmentation:
-        from ..segment import ClassicalSegmenter, border_connected, estimate_levels
+    def predict(
+        self, pre: Preprocessed, params: PipelineParams
+    ) -> tuple[np.ndarray, float, float, float, str]:
+        """Class probabilities at image size, chosen scale, thickness-based scale, confidence, weights sha."""
+        from ..segment import ClassicalSegmenter
         from ..vectorize import wall_thickness_px
         from .model import predict_proba
 
@@ -85,6 +88,13 @@ class LearnedSegmenter:
         conf, s, prob = best
         if prob.shape[1:] != g.shape:
             prob = np.stack([cv2.resize(c, (w, h), interpolation=cv2.INTER_LINEAR) for c in prob])
+        return prob, s, s0, conf, sha
+
+    def segment(self, pre: Preprocessed, params: PipelineParams) -> Segmentation:
+        from ..segment import border_connected, estimate_levels
+
+        g = pre.gray_raw
+        prob, s, s0, conf, sha = self.predict(pre, params)
         cls = prob.argmax(0).astype(np.uint8)
 
         wall = prob[WALL] > params.learned_wall_thr if params.learned_wall_thr is not None else cls == WALL
@@ -117,6 +127,51 @@ class LearnedSegmenter:
             method=self.name,
             stairs=stairs,
             partitions=None,
+            doors=doors,
+        )
+
+
+class HybridSegmenter:
+    """Classical walls + the network's confident walls, and the network's doors (phase D of
+    docs/ML_IMPROVEMENT_PLAN.md). Walls the classical rules miss (hatched, coloured, odd conventions) come
+    from the network; its extra-room splits are avoided by only adding walls it is sure about. Outside is
+    decided geometrically from the closed wall outline, as for line drawings."""
+
+    name = "hybrid"
+
+    def __init__(self, device: str | None = None):
+        self.learned = LearnedSegmenter(device)
+
+    def segment(self, pre: Preprocessed, params: PipelineParams) -> Segmentation:
+        from ..segment import ClassicalSegmenter
+
+        c = ClassicalSegmenter().segment(pre, params)
+        prob, s, s0, conf, sha = self.learned.predict(pre, params)
+        cls = prob.argmax(0)
+        sure = prob[WALL] > params.hybrid_wall_conf
+        if params.learned_min_wall_frag_t2 > 0:
+            sure = drop_small_fragments(sure, params.learned_min_wall_frag_t2)
+        wall = c.wall | sure
+        doors = (cls == DOOR) & ~wall if params.learned_doors or params.hybrid_doors else None
+        lv = dict(c.levels)
+        lv.update(
+            {
+                "filled": False,  # outside = what the closed wall outline leaves connected to the border
+                "wall_mode": "hybrid",
+                "learned": {"weights_sha256_16": sha, "scale": round(s, 3), "confidence": round(conf, 4)},
+            }
+        )
+        stairs = c.stairs if c.stairs is not None else None
+        net_st = np.isin(cls, (STAIRS, ESCALATOR))
+        stairs = net_st if stairs is None else (stairs | net_st)
+        return Segmentation(
+            wall=wall,
+            floor=~wall,
+            background=np.zeros_like(wall),
+            levels=lv,
+            method=self.name,
+            stairs=stairs,
+            partitions=c.partitions,
             doors=doors,
         )
 

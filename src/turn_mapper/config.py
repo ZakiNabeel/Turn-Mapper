@@ -55,6 +55,8 @@ class PipelineParams:
     learned_wall_thr: float | None = None  # wall where p(wall) > thr (None: argmax)
     learned_min_wall_frag_t2: float = 0.0  # drop wall pieces smaller than this many (thickness^2)
     learned_doors: bool = False  # network door pixels become known openings in vectorize
+    hybrid_wall_conf: float = 0.75  # hybrid: add network walls only where p(wall) exceeds this
+    hybrid_doors: bool = True  # hybrid: use the network's doors
 
     def to_dict(self) -> dict:
         return asdict(self)

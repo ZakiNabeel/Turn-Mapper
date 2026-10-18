@@ -46,7 +46,7 @@ def inspect(plan: str) -> None:
     show_default=True,
     help="json = venue.json + images/; turnmap = zipped package",
 )
-@click.option("--segmenter", default="classical", show_default=True, help="classical | learned")
+@click.option("--segmenter", default="classical", show_default=True, help="classical | learned | hybrid")
 def run(plans, venue, out, floors, split, force, fmt, segmenter) -> None:
     """Run the pipeline and write <out>/venue.json (or .turnmap) + <out>/qa/index.html."""
     from .api import convert
