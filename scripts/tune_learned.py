@@ -56,15 +56,43 @@ def sh(cmd: list[str], env: dict | None = None) -> str:
     return r.stdout
 
 
+def run_test(py: str, out: Path, runs: list) -> dict:
+    """The 12-case synthetic test, once per (name, segmenter, params). The segmenter comes from the config:
+    before 2026-10-19 the pick always ran with "learned", so a hybrid pick was tested as learned v1."""
+    test = {}
+    for name, seg, params in runs:
+        d = out / f"synth_{name}"
+        env = {"TURN_PARAMS_JSON": json.dumps(params)} if params else {}
+        print("test:", name, seg, json.dumps(params), flush=True)
+        sh([py, "eval/evaluate_synthetic.py", "--segmenter", seg, "--out", str(d)], env=env)
+        test[name] = json.loads((d / "metrics.json").read_text())
+    return test
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--n", type=int, default=16)
     ap.add_argument("--out", default="runs/tune")
     ap.add_argument("--set", default="learned", choices=sorted(CONFIG_SETS))
+    ap.add_argument(
+        "--test-only",
+        default="",
+        help="comma-separated config names: skip the dev grid and run only the 12-case test for classical, "
+        "v1 and these (already picked on dev; the test is still run once per pick)",
+    )
     args = ap.parse_args()
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     py = sys.executable
+    if args.test_only:
+        allc = {n: (seg, params) for cs in CONFIG_SETS.values() for n, seg, params in cs}
+        picks = [n.strip() for n in args.test_only.split(",") if n.strip()]
+        runs = [("classical", "classical", {}), ("v1", "learned", {})]
+        runs += [(n, *allc[n]) for n in picks if n != "v1"]
+        test = run_test(py, out, runs)
+        (out / "tune_results.json").write_text(json.dumps({"dev": {}, "best": picks, "test": test}, indent=1))
+        print("DONE", flush=True)
+        return
     results = {}
     configs = CONFIG_SETS[args.set]
     runs = [("classical", "classical", {})] + configs
@@ -96,16 +124,15 @@ def main() -> None:
     best = max(learned, key=lambda n: (results[n]["dev_score"], -learned.index(n)))
     print("BEST (by the declared rule):", best, flush=True)
     # one test run on the 12 synthetic cases
-    test = {}
-    for name, seg, params in [
-        ("classical", "classical", {}),
-        ("v1", "learned", {}),
-        (best, "learned", results[best]["params"]),
-    ]:
-        d = out / f"synth_{name}"
-        env = {"TURN_PARAMS_JSON": json.dumps(params)} if params else {}
-        sh([py, "eval/evaluate_synthetic.py", "--segmenter", seg, "--out", str(d)], env=env)
-        test[name] = json.loads((d / "metrics.json").read_text())
+    test = run_test(
+        py,
+        out,
+        [
+            ("classical", "classical", {}),
+            ("v1", "learned", {}),
+            (best, results[best]["segmenter"], results[best]["params"]),
+        ],
+    )
     (out / "tune_results.json").write_text(json.dumps({"dev": results, "best": best, "test": test}, indent=1))
     print("DONE", flush=True)
 
