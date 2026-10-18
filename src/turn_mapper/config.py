@@ -48,6 +48,13 @@ class PipelineParams:
     door_link_max_m: float = 6.0
     # validate
     inside_tolerance_m: float = 0.05
+    # learned segmenter v2 (docs/ML_IMPROVEMENT_PLAN.md phase B). Defaults reproduce v1 (argmax, one scale).
+    learned_scales: tuple[float, ...] = (
+        1.0,
+    )  # multipliers of the wall-thickness scale; best = most confident
+    learned_wall_thr: float | None = None  # wall where p(wall) > thr (None: argmax)
+    learned_min_wall_frag_t2: float = 0.0  # drop wall pieces smaller than this many (thickness^2)
+    learned_doors: bool = False  # network door pixels become known openings in vectorize
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -89,7 +96,7 @@ def load_venue_config(path: str | Path, input_file: str | None = None) -> VenueC
                 options=dict(f.get("options") or {}),
             )
         )
-    params = PipelineParams(**(raw.get("params") or {}))
+    params = PipelineParams(**{**(raw.get("params") or {}), **env_param_overrides()})
     return VenueConfig(
         id=raw["venue"]["id"],
         name=raw["venue"]["name"],
@@ -106,4 +113,23 @@ def load_venue_config(path: str | Path, input_file: str | None = None) -> VenueC
 def single_image_config(image_path: str) -> VenueConfig:
     stem = Path(image_path).stem
     spec = FloorSpec(id="F1", building="B1", level=0, name=stem, source_file=image_path)
-    return VenueConfig(id=stem, name=stem, buildings=[{"id": "B1", "name": "Building"}], floors=[spec])
+    return VenueConfig(
+        id=stem,
+        name=stem,
+        buildings=[{"id": "B1", "name": "Building"}],
+        floors=[spec],
+        params=PipelineParams(**env_param_overrides()),
+    )
+
+
+def env_param_overrides() -> dict:
+    """``TURN_PARAMS_JSON='{"learned_doors": true}'`` overrides PipelineParams in every config (evaluation
+    scripts use it to test segmenter options without editing venue files). Lists become tuples."""
+    import json
+    import os
+
+    raw = os.environ.get("TURN_PARAMS_JSON")
+    if not raw:
+        return {}
+    d = json.loads(raw)
+    return {k: tuple(v) if isinstance(v, list) else v for k, v in d.items()}

@@ -205,6 +205,14 @@ def vectorize(
     walls_all, carved = carve_door_slabs(
         seg.wall, gray_raw, seg.levels, seg.background, t, gap_px, ignore=color_mask
     )
+    net_doors = np.zeros_like(seg.wall)
+    if seg.doors is not None and seg.doors.any():
+        # network doors: grow a little across the opening (not into walls) so each one meets the walls at both
+        # ends, then treat it like a carved slab: a known opening that splits spaces and becomes a door
+        k = max(3, int(round(t)) | 1)
+        grown = cv2.dilate(seg.doors.astype(np.uint8), np.ones((k, k), np.uint8)) > 0
+        net_doors = grown & ~walls_all & ~seg.background
+        carved = carved | net_doors
     n_slabs = int(cv2.connectedComponents(carved.astype(np.uint8))[0] - 1)
     if seg.partitions is not None and seg.partitions.any():
         # a thin line lying in a gap of a thick wall is a door leaf, not a partition
@@ -256,7 +264,10 @@ def vectorize(
         seg_line, long_, short = _blob_segment(ys + sl[0].start, xs + sl[1].start)
         if len(touched) < 2 and not (len(touched) == 1 and outside):
             continue
-        door_shaped = long_ >= max(2.0 * t, 6) and short <= 3.5 * t + 2 and long_ <= gap_px * 1.25
+        # a door the network predicted may be wider than gap closing allows (double doors, wide openings)
+        predicted = net_doors[sl][blob].mean() > 0.5
+        max_long = gap_px * (3.5 if predicted else 1.25)
+        door_shaped = long_ >= max(2.0 * t, 6) and short <= 3.5 * t + 2 and long_ <= max_long
         # openings where walls meet (e.g. a diagonal wall next to a door) produce triangular blobs;
         # accept them when they clearly join exactly two spaces and are not much bigger than a door
         junction_opening = len(touched) == 2 and long_ <= gap_px * 1.6 and area <= gap_px * gap_px * 0.5
