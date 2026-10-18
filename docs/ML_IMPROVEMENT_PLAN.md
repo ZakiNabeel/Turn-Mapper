@@ -36,3 +36,21 @@ The promotion rule stays: learned or hybrid becomes the default only if it is at
 ## Order
 
 Today: A + B + C (CPU, no GPU quota) and the E renderer fixes, then the S3a run on GPU in parallel. Next: D and F (F needs Zaki's annotations), then G.
+
+## How to make the A-block test set (Zaki, about 20–30 min per floor)
+
+1. `turn-mapper studio` → New project "FAST A test" → upload `fast_blocks.pdf` → add floors **A-GF, A-F1, A-F2,
+   A-F3** with the same ids as `configs/venues/fast_isb.yaml` (page 2 images 0 and 1, page 3 images 0 and 1).
+2. Run each floor with **classical**, then correct *everything* in the Map tab:
+   - every room has its true outline and label;
+   - every door is placed;
+   - the graph follows the corridors;
+   - voids are marked not walkable.
+
+   Save (the floor's status becomes *edited*).
+3. Do not run the learned or hybrid methods on these floors in Studio (test set, ADR-009).
+4. Then, once per method:
+   `python scripts/eval_real_block.py --studio studio_projects/fast-a-test --methods classical learned hybrid --out a_block.json`
+   It runs each method on the exact image Studio used and compares with your correction
+   (`eval/evaluate_real.py`: rooms, doors, places, routes, wall crossings). Keep the project in `studio_projects/`
+   (gitignored), never in git.
