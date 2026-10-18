@@ -74,7 +74,7 @@ recorded in `docs/RESULTS_*.md`; nothing here is a promise of a result.
 | 2.7 | **Any input -> editable CAD** | Studio exports the extracted plan as DXF (`floor_dxf`), edited in any CAD tool, re-loaded as a measured DXF | **done 10-17**; round trip exact on synthetic, C-F3, C-F4; lossy on C-F5 |
 | 2.6 | Photos of printed plans | perspective correction (4 clicks in Studio) | later |
 
-### W3 — Data and fine-tuning · **S2 run started 10-17 on Kaggle (`turn-segmenter-s2-finetune`, v1, GPU T4)**
+### W3 — Data and fine-tuning · **S2 done 10-17** (docs/RESULTS_ML_S2_2026-10-17.md): ResPlan test mIoU 0.43 → 0.78, CubiCasa 0.650 → 0.634; synthetic ≥ classical on 8/12 → classical stays default; S3 next
 
 **Datasets**
 
@@ -92,6 +92,7 @@ recorded in `docs/RESULTS_*.md`; nothing here is a promise of a result.
 | Stage | Init | Data | Settings | Expected cost |
 |---|---|---|---|---|
 | S1 | ImageNet | CubiCasa5K | done, 25 epochs | done |
+| S2 (done 10-17) | S1 | 17K ResPlan + 3K institutional + 1.5K CubiCasa | 20 epochs fp32, best epoch 16 | 10.7 h on T4 (the next runs use `--amp --max-minutes`) |
 | S2 | S1 | ResPlan renders (8 styles incl. thin-line, double-line, scanned) + synthetic institutional | crop 512, lr 2e-4, 20 epochs | ~4 h on one T4 |
 | S3 | S2 | FAST B/C corrected floors (target 20–40 floors × tiles) + 30% replay of S2 | lr 5e-5, 15 epochs, frozen encoder for 3 epochs | < 1 h |
 | Ablation | S2 | same as S3 | stronger encoder (e.g. EfficientNet-B4 U-Net) | ~2 h |

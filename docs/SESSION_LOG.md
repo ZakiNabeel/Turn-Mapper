@@ -17,6 +17,36 @@ Newest entry at the top. Every Claude Code session (and every human session that
 
 ---
 
+## 2026-10-17/18 — Zaki (+Claude) — S2 fine-tuning run and evaluation
+**Goal:** fine-tune the segmenter (S2) and decide whether it replaces classical.
+**Changed:**
+- docs/RESULTS_ML_S2_2026-10-17.md (new).
+- eval/evaluate_synthetic.py: routes tolerate destination nodes with no edges.
+- notebooks/eval_s2_kaggle.ipynb (new).
+- learned/train.py + cli: `--amp` and `--max-minutes`.
+- scripts/kaggle_finetune_s2.sh: AMP plus a 420-min training budget by default.
+- notebooks/finetune_s2_kaggle.ipynb: streams its log.
+- MASTER_PLAN.
+
+**Verified:**
+- Kaggle `turn-segmenter-s2-finetune` v1 (commit 70a0a7e) succeeded in 38,364 s. Best epoch 16, val mIoU 0.809.
+- Test mIoU, S1 → S2:
+  - ResPlan: 0.431 → 0.781.
+  - CubiCasa: 0.650 → 0.634.
+  - Institutional val (also used for model selection): 0.343 → 0.770.
+- Kaggle `turn-segmenter-s2-eval` v1 (CPU, 482 s), 12 synthetic cases, mean room/door recall and routes found:
+  - S2: 0.979 / 0.986 / 0.818, 0 wall crossings.
+  - S1: 0.833 / 0.819 / 0.667, 1.42 wall crossings.
+- S2 ≥ recorded classical on 8/12 cases.
+- Local tests: 91 passed. CPU smoke test of the time budget passed.
+
+**Not verified / unknown:** S2 on the FAST A block (no measured ground truth yet); AMP on GPU (implemented, only exercised on CPU).
+**Broken or risky:** the classical segmenter scores lower on Kaggle than locally with the same commit (likely OCR/Tesseract version), so pinning is needed. S2 adds extra rooms (precision 0.53–0.82) and still fails double-line.
+**Decisions:** classical stays the default (promotion rule not met). S2 weights stay on Kaggle (sha256 146f1fcc…2407) and are not in git.
+**Next step:** S3 with corrected FAST B/C floors from Studio; more double-line variety in `learned/styles.py`; pin OCR in evaluations.
+
+---
+
 ## 2026-10-17 — Zaki (+Claude) — OCR without Tesseract, editable CAD export, S2 launch prep
 **Goal:** rooms were "Unlabelled" on Zaki's Windows laptop; any input -> editable CAD; start S2 on Kaggle.
 **Changed:** src/turn_mapper/ocr.py (new: engine choice Tesseract -> RapidOCR -> none, Windows Tesseract paths, `OCR_UNAVAILABLE` warning), preprocess.py, pois.py (page-level boxes per room for RapidOCR; label regex on spaced text first), api.py, studio (OCR badge; `Export -> Editable CAD (DXF)` via `floor_dxf`), pyproject (`.[studio]` adds rapidocr + onnxruntime), scripts/kaggle_finetune_s2.sh (never start from the misaligned run-1 checkpoint), tests (ocr, CAD round trip).
