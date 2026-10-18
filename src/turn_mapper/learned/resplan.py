@@ -18,7 +18,7 @@ import cv2
 import numpy as np
 
 from .classes import BG, DOOR, IGNORE, OTHER, ROOM, STAIRS, WALKABLE, WALL
-from .styles import STYLES, Extras, render
+from .styles import STYLES, Extras, render, thicken_walls
 
 ROOM_KEYS = ("bedroom", "bathroom", "kitchen", "living", "storage")
 _ALLOWED = ("shapely.", "numpy", "networkx.")  # the Kaggle release adds a networkx graph
@@ -159,6 +159,8 @@ def prepare(
         for v in range(variants):
             style = str(rng.choice(styles))
             mask, ex, _ = rasterize(plan, float(rng.uniform(*m_per_px)), rng)
+            if style == "doubleline":
+                mask = thicken_walls(mask, rng)
             img = render(mask, ex, style, rng)
             if (
                 ignore_residual

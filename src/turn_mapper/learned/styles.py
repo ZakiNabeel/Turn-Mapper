@@ -120,10 +120,8 @@ def render(mask: np.ndarray, ex: Extras, style: str, rng: np.random.Generator) -
         _arcs(out, ex, (120, 120, 120))
         _text(out, ex, (40, 40, 40), rng, t * 3)
     elif style == "doubleline":
-        # line weight 1-2 px; the pair sits on the wall faces or up to 2 px outside them
-        d = int(rng.integers(0, 3))
-        fat = cv2.dilate(wall.astype(np.uint8), np.ones((2 * d + 1, 2 * d + 1), np.uint8)) > 0 if d else wall
-        out[_outline(fat, int(rng.choice([3, 3, 5])))] = dark
+        # 1-2 px lines on the wall faces (prepare() thickens the wall label first for wider pairs)
+        out[_outline(wall, int(rng.choice([3, 3, 5])))] = dark
         _stairs(out, mask, (140, 140, 140), rng)
         _furniture(out, ex, (180, 180, 180))
         _arcs(out, ex, (110, 110, 110))
@@ -162,6 +160,18 @@ def render(mask: np.ndarray, ex: Extras, style: str, rng: np.random.Generator) -
         _dimensions(out, mask, rng)
     else:
         raise ValueError(f"unknown style {style}")
+    return out
+
+
+def thicken_walls(mask: np.ndarray, rng: np.random.Generator, max_px: int = 3) -> np.ndarray:
+    """Grow walls by 0..max_px into room/walkable (never over doors, stairs or outside). Used before drawing
+    double-line plans so the two lines can sit far apart (common in architectural drawings), labels exact."""
+    d = int(rng.integers(0, max_px + 1))
+    if d == 0:
+        return mask
+    grown = cv2.dilate((mask == WALL).astype(np.uint8), np.ones((2 * d + 1, 2 * d + 1), np.uint8)) > 0
+    out = mask.copy()
+    out[grown & np.isin(mask, (ROOM, WALKABLE))] = WALL
     return out
 
 
@@ -216,4 +226,4 @@ def geometric_aug(
     return np.ascontiguousarray(img), np.ascontiguousarray(mask)
 
 
-__all__ = ["STYLES", "Extras", "render", "geometric_aug", "BG", "WALL"]
+__all__ = ["STYLES", "Extras", "render", "thicken_walls", "geometric_aug", "BG", "WALL"]

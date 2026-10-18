@@ -17,7 +17,7 @@ import cv2
 import numpy as np
 
 from .classes import BG, DOOR, LIFT, OTHER, ROOM, STAIRS, WALKABLE, WALL
-from .styles import STYLES, Extras, render
+from .styles import STYLES, Extras, render, thicken_walls
 
 LABELS = [
     "C-{n}",
@@ -232,6 +232,8 @@ def prepare(
     for i in range(n):
         mask, ex = generate(rng)
         style = str(rng.choice(styles))
+        if style == "doubleline":
+            mask = thicken_walls(mask, rng)
         img = render(mask, ex, style, rng)
         name = f"inst{i:05d}"
         cv2.imwrite(str(out / "images" / f"{name}.png"), cv2.cvtColor(img, cv2.COLOR_RGB2GRAY))

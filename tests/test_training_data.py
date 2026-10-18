@@ -87,3 +87,21 @@ def test_unsafe_pickle_is_refused(tmp_path):
 
 def test_polygon_helper_ignores_empty():
     assert rasterize({**_plan(), "stair": Polygon()}, 0.05, np.random.default_rng(0))[0].size
+
+
+def test_thicken_walls_grows_into_rooms_only():
+    from turn_mapper.learned.classes import DOOR
+    from turn_mapper.learned.styles import thicken_walls
+
+    m = np.full((40, 40), BG, np.uint8)
+    m[5:35, 5:35] = ROOM
+    m[19:21, 5:35] = WALL
+    m[19:21, 15:20] = DOOR
+    rng = np.random.default_rng(3)
+    out = thicken_walls(m, rng, max_px=3)
+    for _ in range(5):
+        out = thicken_walls(m, rng, max_px=3)
+        if (out == WALL).sum() > (m == WALL).sum():
+            break
+    assert (out == WALL).sum() > (m == WALL).sum()
+    assert (out[m == DOOR] == DOOR).all() and (out[m == BG] == BG).all()
