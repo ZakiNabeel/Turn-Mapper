@@ -136,6 +136,7 @@ def evaluate(plan, style, fd):
     # routes between destinations (POIs whose label is a true room with a door)
     G = nx.Graph()
     nodes = {n["id"]: np.array([n["x"], n["y"]]) / s for n in fd["graph"]["nodes"]}
+    G.add_nodes_from(nodes)  # isolated nodes (a POI with no edge) must count as "no route", not crash
     for e in fd["graph"]["edges"]:
         G.add_edge(e["from"], e["to"], w=float(np.linalg.norm(nodes[e["from"]] - nodes[e["to"]])))
     # destinations: the POI of the predicted room matched to each true room (independent of OCR labels)
@@ -144,7 +145,13 @@ def evaluate(plan, style, fd):
     cost = np.where(walk_t, 1.0, np.inf)
     found, ratios, pairs = 0, [], list(itertools.combinations(sorted(doors_t), 2))
     for a, b in pairs:
-        if a not in poi or b not in poi or not nx.has_path(G, poi[a], poi[b]):
+        if (
+            a not in poi
+            or b not in poi
+            or poi[a] not in G
+            or poi[b] not in G
+            or not nx.has_path(G, poi[a], poi[b])
+        ):
             continue
         found += 1
         path = nx.shortest_path(G, poi[a], poi[b], weight="w")
