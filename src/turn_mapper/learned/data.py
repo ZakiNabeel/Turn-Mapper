@@ -126,7 +126,9 @@ class MaskDataset:
             )
             mask = cv2.resize(mask, (img.shape[1], img.shape[0]), interpolation=cv2.INTER_NEAREST)
         if rng.random() < self.restyle_p:
-            img = restyle(np.where(mask == IGNORE, BG, mask).astype(np.uint8), rng)
+            img = restyle(
+                np.where(mask == IGNORE, WALKABLE, mask).astype(np.uint8), rng
+            )  # ignored = inside, unknown use
         c = self.crop
         ph, pw = max(0, c - img.shape[0]), max(0, c - img.shape[1])
         if ph or pw:

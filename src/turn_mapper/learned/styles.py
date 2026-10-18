@@ -120,7 +120,10 @@ def render(mask: np.ndarray, ex: Extras, style: str, rng: np.random.Generator) -
         _arcs(out, ex, (120, 120, 120))
         _text(out, ex, (40, 40, 40), rng, t * 3)
     elif style == "doubleline":
-        out[_outline(wall, int(rng.choice([3, 3, 5])))] = dark
+        # line weight 1-2 px; the pair sits on the wall faces or up to 2 px outside them
+        d = int(rng.integers(0, 3))
+        fat = cv2.dilate(wall.astype(np.uint8), np.ones((2 * d + 1, 2 * d + 1), np.uint8)) > 0 if d else wall
+        out[_outline(fat, int(rng.choice([3, 3, 5])))] = dark
         _stairs(out, mask, (140, 140, 140), rng)
         _furniture(out, ex, (180, 180, 180))
         _arcs(out, ex, (110, 110, 110))

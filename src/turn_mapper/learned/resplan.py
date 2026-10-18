@@ -17,7 +17,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from .classes import BG, DOOR, OTHER, ROOM, STAIRS, WALKABLE, WALL
+from .classes import BG, DOOR, IGNORE, OTHER, ROOM, STAIRS, WALKABLE, WALL
 from .styles import STYLES, Extras, render
 
 ROOM_KEYS = ("bedroom", "bathroom", "kitchen", "living", "storage")
@@ -131,6 +131,7 @@ def prepare(
     m_per_px: tuple[float, float] = (0.02, 0.045),
     styles: tuple[str, ...] = STYLES,
     seed: int = 0,
+    ignore_residual: bool = False,
 ) -> dict:
     """Write ``images/``, ``masks/``, ``{train,val,test}.txt``.
 
@@ -159,6 +160,10 @@ def prepare(
             style = str(rng.choice(styles))
             mask, ex, _ = rasterize(plan, float(rng.uniform(*m_per_px)), rng)
             img = render(mask, ex, style, rng)
+            if (
+                ignore_residual
+            ):  # ResPlan "inner minus named rooms" is not reliably circulation: no loss there
+                mask = np.where(mask == WALKABLE, IGNORE, mask).astype(np.uint8)
             name = f"rp{pid}_{v}"
             cv2.imwrite(str(out / "images" / f"{name}.png"), cv2.cvtColor(img, cv2.COLOR_RGB2GRAY))
             cv2.imwrite(str(out / "masks" / f"{name}.png"), mask)
@@ -174,6 +179,7 @@ def prepare(
         "splits": {k: len(v) for k, v in lists.items()},
         "styles": counts,
         "m_per_px": list(m_per_px),
+        "ignore_residual": ignore_residual,
     }
     (out / "dataset.json").write_text(json.dumps(info, indent=1))
     return info

@@ -140,11 +140,15 @@ def ml_bootstrap(plans, venue, floors, out) -> None:
 @click.option("--limit", type=int, default=None, help="only the first N plans")
 @click.option("--variants", default=1, show_default=True, help="drawings per plan (random style/resolution)")
 @click.option("--seed", default=0, show_default=True)
-def ml_prepare_resplan(pkl, out, split_json, limit, variants, seed) -> None:
+@click.option(
+    "--ignore-residual", is_flag=True, help="no loss on ResPlan's leftover circulation (weak label)"
+)
+def ml_prepare_resplan(pkl, out, split_json, limit, variants, seed, ignore_residual) -> None:
     """Render ResPlan vector plans (CC BY 4.0) in 8 drawing styles with exact masks."""
     from .learned.resplan import prepare
 
-    click.echo(json.dumps(prepare(pkl, out, split_json, limit, variants, seed=seed), indent=1))
+    info = prepare(pkl, out, split_json, limit, variants, seed=seed, ignore_residual=ignore_residual)
+    click.echo(json.dumps(info, indent=1))
 
 
 @ml.command("make-institutional")
