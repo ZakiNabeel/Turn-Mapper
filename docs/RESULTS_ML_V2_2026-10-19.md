@@ -69,6 +69,23 @@ Learned pick (doors+scales), run once, notebook `notebookf6cd6bb856`. Cells: roo
 
 The hybrid notebook's test column was identical to v1 in every cell. Cause: `scripts/tune_learned.py` always ran the pick with `--segmenter learned`, so the test ran "learned with `hybrid_wall_conf=0.6`", which is v1. Fixed (the pick's own segmenter is now used, and `--test-only` reruns only the test). The hybrid0.6 test had therefore never actually been run. It is queued in `notebooks/test_picks_kaggle.ipynb` together with doors+scales, rerun in the same environment for a side-by-side comparison; it is deterministic and not a new tuning step. Results go here when it finishes.
 
+## S3a retraining (phase E), interim
+
+The run is `turn-segmenter-s3a-finetune` (Kaggle GPU T4), `scripts/kaggle_finetune_s3a.sh`, initialised from S2 with lr 1e-4 and AMP. ResPlan was prepared with `--ignore-residual`, the institutional floors with seed 1, and double-line walls were thickened.
+
+- Training: 12 epochs (26,904 iterations) finished at 23:02 UTC. The best val mIoU was 0.9345 at epoch 9.
+- Checkpoint: `turn_seg_s3a.pt`, sha256 `d7db04ad…afd23b`. It stays on Kaggle and is not in git.
+
+S2 and S3a were evaluated on the same splits in the same run. These ResPlan numbers are not comparable to the 0.781 in the S2 report: residual walkable is now ignored, and walkable shows as "—".
+
+| test set | S2 mIoU | **S3a mIoU** | wall S2 → S3a | door S2 → S3a | stairs S2 → S3a | lift S2 → S3a |
+|---|---|---|---|---|---|---|
+| ResPlan test (1,632) | 0.892 | **0.899** | 0.976 → 0.979 | 0.892 → 0.904 | 0.860 → 0.870 | — |
+| Institutional test (400, seed 1, held-out split) | 0.768 | **0.804** | 0.958 → 0.966 | 0.824 → 0.832 | 0.840 → 0.862 | 0.171 → 0.171 |
+| CubiCasa5K test | *running* | 0.647 | | | | |
+
+The pipeline test on the 12 synthetic cases is still to run. Note that it uses the learned v1 settings, so the pick (doors+scales) with S3a will need a later dev-tuning run.
+
 ## Next
 
 1. Hybrid0.6 test (above).
