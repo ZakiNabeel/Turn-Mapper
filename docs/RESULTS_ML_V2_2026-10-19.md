@@ -135,8 +135,46 @@ Same run, `evaluate_synthetic.py --segmenter learned` with S3a. Cells: rooms R/P
 - S3a v1 qualifies on 6/12 against the recorded classical, against 8/12 for S2 v1. On the other 10 cases S3a's room precision is equal to or better than S2's.
 - The fair comparison is S3a with the tuned settings (network doors plus scale search, which should break the loop). That dev-tuning and test run with S3a weights is queued. **Until it is done, S2 stays the learned weights.**
 
+### S3a with tuned settings (dev tuning + 12-case test)
+
+Notebook `notebook77566ec8c1` (`notebooks/tune_s3a_kaggle.ipynb`, commit `4c06d05`, CPU, 6,007 s). It used the same 16 dev floors, the same configs and the same declared rule as the S2 run, with only the weights changed.
+
+| config | S2 dev score | **S3a dev score** | S3a rooms R / P | S3a doors R / P | routes | wall x |
+|---|---|---|---|---|---|---|
+| v1 | 0.809 | 0.815 | 0.767 / 0.644 | 0.740 / 0.937 | 1.0 | 0.062 |
+| doors | 0.895 | 0.891 | 0.930 / 0.659 | 0.931 / 0.936 | 1.0 | 0 |
+| **doors+scales** (pick) | **0.911** | 0.901 | 0.937 / 0.703 | 0.940 / 0.923 | 1.0 | 0 |
+| doors+frag | 0.900 | 0.894 | 0.930 / 0.664 | 0.926 / 0.952 | 1.0 | 0 |
+| doors+thr0.35 | 0.881 | 0.884 | 0.927 / 0.658 | 0.931 / 0.902 | 1.0 | 0 |
+| doors+scales+thr0.35+frag | 0.896 | 0.892 | 0.929 / 0.703 | 0.938 / 0.907 | 0.996 | 0.062 |
+
+12-case test, doors+scales (cells: rooms R/P, doors R/P, routes, wall crossings):
+
+| case | S2 doors+scales | **S3a doors+scales** |
+|---|---|---|
+| basic greyfill | 1/1, 1/1, 1.0, 0 | 1/1, 1/1, 1.0, 0 |
+| basic blackwalls | 1/1, 1/1, 1.0, 0 | 1/1, 1/1, 1.0, 0 |
+| basic thinlines | 1/1, 1/1, 1.0, 0 | 1/1, 1/1, **0.667**, 0 |
+| basic doubleline | 0.857/0.5, 0.833/0.714, 0.0, 0 | 0.857/0.5, 0.833/0.5, 0.0, 0 |
+| basic colored | 1/1, 1/1, 1.0, 0 | 1/1, 1/1, 1.0, 0 |
+| basic scanned | 1/1, 1/1, 1.0, 0 | 1/1, 1/1, 1.0, 0 |
+| lshape greyfill | 1/0.9, 1/1, 1.0, 0 | 1/0.9, 1/1, 1.0, 0 |
+| lshape blackwalls | 1/0.9, 1/1, 1.0, 0 | 1/0.9, 1/1, 1.0, 0 |
+| lshape thinlines | 1/0.818, 1/1, 1.0, 0 | 1/1, 1/1, **0.75**, 0 |
+| lshape doubleline | 0.889/0.533, 1/0.667, 0.0, 0 | 0.889/0.533, 1/0.667, 0.0, 0 |
+| lshape colored | 1/0.9, 1/1, 1.0, 0 | 1/0.9, 1/0.889, 1.0, 0 |
+| lshape scanned | 1/0.75, 1/1, 1.0, 0 | 1/1, 1/1, 1.0, 0 |
+
+Reading:
+
+- **Scale search fixes most of the thin-line collapse.** With S3a, the thin-line cases go from 0 doors and 7–16 wall crossings (v1 settings) to every room and door found with 0 crossings. Routes are still short: 0.667 and 0.75.
+- **S3a with tuned settings qualifies on 8/12** against the recorded classical. It fails both double-line cases and both thin-line cases (routes). S2 doors+scales qualifies on 10/12.
+- Dev score: 0.901 (S3a) vs 0.911 (S2). Room precision is lower with S3a (0.703 vs 0.750), and door precision is higher (0.923 vs 0.916).
+- **Decision: S3a does not replace S2.** It is below S2 on both pre-declared criteria (dev score and test count). S2 stays the learned weights, with doors+scales as the learned settings.
+- The higher pixel IoU of S3a (ResPlan, CubiCasa, institutional) did not carry over into the pipeline. The thicker double-line walls and ignored residual circulation did not fix double-line routes, which are still 0 on both test cases for every model and setting. That failure is therefore in the pipeline's handling of double-line drawings (gap closing, outside detection), not in pixel accuracy. Phase A images of those two cases are the next step.
+
 ## Next
 
-1. S3a dev tuning + test with doors+scales (`notebooks/tune_s3a_kaggle.ipynb`).
+1. Done: S3a tuned and tested; S3a not adopted (above).
 2. Double-line routes are 0 on both test cases for every learned config, although dev double-line routes are 1.0. The test's double-line style (1 px lines, gap = wall + 4 px) differs from training and dev. S3a (training with wider double-line variety) is the fix being tried. Phase A images of these two cases are the next diagnosis.
 3. A-block annotation (phase F), then the full promotion decision.
