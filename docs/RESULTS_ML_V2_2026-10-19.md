@@ -65,11 +65,34 @@ Learned pick (doors+scales), run once, notebook `notebookf6cd6bb856`. Cells: roo
 - Against the Kaggle-run classical, it qualifies on 12/12 (not used, weaker baseline).
 - **The synthetic half of the rule is met for the first time. The A-block half is still open** (it needs Zaki's annotations, phase F), so classical stays the default for now.
 
-### Hybrid test: invalid run, rerun queued
+### Hybrid pick: 12-case test
 
-The hybrid notebook's test column was identical to v1 in every cell. Cause: `scripts/tune_learned.py` always ran the pick with `--segmenter learned`, so the test ran "learned with `hybrid_wall_conf=0.6`", which is v1. Fixed (the pick's own segmenter is now used, and `--test-only` reruns only the test). The hybrid0.6 test had therefore never actually been run. It is queued in `notebooks/test_picks_kaggle.ipynb` together with doors+scales, rerun in the same environment for a side-by-side comparison; it is deterministic and not a new tuning step. Results go here when it finishes.
+The first hybrid notebook's test column was identical to v1 in every cell. Cause: `scripts/tune_learned.py` always ran the pick with `--segmenter learned`, so it actually tested "learned with `hybrid_wall_conf=0.6`", which is v1. This is fixed: the pick's own segmenter is now used, and `--test-only` reruns only the test.
 
-## S3a retraining (phase E), interim
+Rerun in notebook `notebookf97605f49a` (`notebooks/test_picks_kaggle.ipynb`, commit `61ea072`, CPU, 728 s). It is deterministic: the classical, v1 and doors+scales columns came out identical to the first run, cell for cell.
+
+| case | classical (recorded, local) | doors+scales | **hybrid0.6** |
+|---|---|---|---|
+| basic greyfill | 1/1, 1/1, 1.0, 0 | 1/1, 1/1, 1.0, 0 | 1/1, 1/1, 1.0, 0 |
+| basic blackwalls | 1/1, 1/1, 1.0, 0 | 1/1, 1/1, 1.0, 0 | 1/1, 1/1, 1.0, 0 |
+| basic thinlines | 1/1, 1/1, 1.0, 0 | 1/1, 1/1, 1.0, 0 | 1/1, 1/1, 1.0, 0 |
+| basic doubleline | 1/1, 1/1, 1.0, 0 | 0.857/0.5, 0.833/0.714, 0.0, 0 | 0.571/0.286, 0.667/0.333, **0.0**, 0 |
+| basic colored | 1/1, 1/1, 1.0, 0 | 1/1, 1/1, 1.0, 0 | 1/1, 1/1, 1.0, 0 |
+| basic scanned | 1/1, 1/0.86, 1.0, 0 | 1/1, 1/1, 1.0, 0 | 1/1, 1/0.6, 1.0, **1** |
+| lshape greyfill | 1/1, 1/1, 1.0, 0 | 1/0.9, 1/1, 1.0, 0 | 1/1, 1/1, 1.0, 0 |
+| lshape blackwalls | 1/1, 1/1, 1.0, 0 | 1/0.9, 1/1, 1.0, 0 | 1/1, 1/1, 1.0, 0 |
+| lshape thinlines | 1/1, 1/1, 1.0, 0 | 1/0.818, 1/1, 1.0, 0 | 1/1, 1/1, 1.0, **1** |
+| lshape doubleline | 1/1, 1/1, 1.0, 0 | 0.889/0.533, 1/0.667, 0.0, 0 | 0.667/0.316, 0.5/0.308, **0.0**, 0 |
+| lshape colored | 1/1, 1/1, 1.0, 0 | 1/0.9, 1/1, 1.0, 0 | 1/1, 1/1, 1.0, 0 |
+| lshape scanned | 1/1, 1/1, 1.0, 0 | 1/0.75, 1/1, 1.0, 0 | 1/1, 1/0.889, 1.0, 0 |
+
+- **Hybrid0.6 qualifies on 8/12** against the recorded classical. It fails:
+  - both double-line cases: on double-line it inherits classical's walls, which are wrong there;
+  - basic scanned and lshape thinlines: 1 wall crossing each.
+- Where it passes, its room precision is perfect (1.0 on all 8 of those cases), which no other method reaches.
+- **Doors+scales stays the best learned option at 10/12.** Neither method meets the full rule yet (A block open).
+
+## S3a retraining (phase E)
 
 The run is `turn-segmenter-s3a-finetune` (Kaggle GPU T4), `scripts/kaggle_finetune_s3a.sh`, initialised from S2 with lr 1e-4 and AMP. ResPlan was prepared with `--ignore-residual`, the institutional floors with seed 1, and double-line walls were thickened.
 
@@ -81,13 +104,39 @@ S2 and S3a were evaluated on the same splits in the same run. These ResPlan numb
 | test set | S2 mIoU | **S3a mIoU** | wall S2 → S3a | door S2 → S3a | stairs S2 → S3a | lift S2 → S3a |
 |---|---|---|---|---|---|---|
 | ResPlan test (1,632) | 0.892 | **0.899** | 0.976 → 0.979 | 0.892 → 0.904 | 0.860 → 0.870 | — |
-| Institutional test (400, seed 1, held-out split) | 0.768 | **0.804** | 0.958 → 0.966 | 0.824 → 0.832 | 0.840 → 0.862 | 0.171 → 0.171 |
-| CubiCasa5K test | *running* | 0.647 | | | | |
+| Institutional val (400, seed 1) ‡ | 0.768 | **0.804** | 0.958 → 0.966 | 0.824 → 0.832 | 0.840 → 0.862 | 0.171 → 0.171 |
+| CubiCasa5K test | 0.634 | **0.647** | 0.731 → 0.740 | 0.616 → 0.618 | — | — |
 
-The pipeline test on the 12 synthetic cases is still to run. Note that it uses the learned v1 settings, so the pick (doors+scales) with S3a will need a later dev-tuning run.
+‡ The script fell back to the val split (`eval_s3a_inst_val.json`). S3a also used that split to pick its best epoch, so its institutional number is not clean. S2 never saw seed-1 floors, so its number there is clean. ResPlan and CubiCasa are clean test splits.
+
+All three pixel benchmarks go up a little, CubiCasa included (0.634 → 0.647).
+
+### S3a in the pipeline: 12-case test, learned v1 settings (no network doors, one scale)
+
+Same run, `evaluate_synthetic.py --segmenter learned` with S3a. Cells: rooms R/P, doors R/P, routes found, wall crossings, scale error.
+
+| case | S2 v1 (from the S2 report) | **S3a v1** |
+|---|---|---|
+| basic greyfill | 1/1, 1/1, 1.0, 0 | 1/1, 1/1, 1.0, 0, −2.2% |
+| basic blackwalls | 1/1, 1/1, 1.0, 0 | 1/1, 1/1, 1.0, 0, −2.2% |
+| basic thinlines | 1/0.58, 1/1, 1.0, 0 | **0.143/0.333, 0/0, 0.0, 16**, +181% |
+| basic doubleline | 0.86/0.75, 0.83/0.50, 0.4, 0 | 0.857/0.75, 0.833/0.5, 0.4, 0, +7.1% |
+| basic colored | 1/1, 1/1, 1.0, 0 | 1/1, 1/1, 1.0, 0, −2.2% |
+| basic scanned | 1/1, 1/1, 0.67, 0 | 1/0.875, 1/0.75, 0.667, 0, −6.3% |
+| lshape greyfill | 1/0.82, 1/0.89, 1.0, 0 | 1/0.9, 1/1, 1.0, 0, −2.2% |
+| lshape blackwalls | 1/0.64, 1/0.89, 1.0, 0 | 1/0.9, 1/1, 1.0, 0, −2.2% |
+| lshape thinlines | 1/0.64, 1/1, 1.0, 0 | **0.111/0.143, 0/0, 0.0, 7**, +125% |
+| lshape doubleline | 0.89/0.53, 1/0.67, 0.0, 0 | 0.889/0.533, 1/0.667, 0.0, 0, +7.1% |
+| lshape colored | 1/0.82, 1/0.89, 1.0, 0 | 1/0.9, 1/1, 1.0, 0, −2.2% |
+| lshape scanned | 1/0.82, 1/0.89, 0.75, 0 | 1/0.818, 1/0.889, 0.75, 0, −6.3% |
+
+- **S3a regresses on thin lines in the pipeline** even though its pixel scores went up. Both thin-line cases collapse: 0 doors, 7–16 wall crossings, and the scale estimate is off by +125% to +181%.
+- This looks like a scale feedback loop. With no scale given, the scale comes from the door-width prior. When the network misses the thin-line doors at the input size chosen from the classical wall thickness, the scale goes wrong and everything downstream fails.
+- S3a v1 qualifies on 6/12 against the recorded classical, against 8/12 for S2 v1. On the other 10 cases S3a's room precision is equal to or better than S2's.
+- The fair comparison is S3a with the tuned settings (network doors plus scale search, which should break the loop). That dev-tuning and test run with S3a weights is queued. **Until it is done, S2 stays the learned weights.**
 
 ## Next
 
-1. Hybrid0.6 test (above).
+1. S3a dev tuning + test with doors+scales (`notebooks/tune_s3a_kaggle.ipynb`).
 2. Double-line routes are 0 on both test cases for every learned config, although dev double-line routes are 1.0. The test's double-line style (1 px lines, gap = wall + 4 px) differs from training and dev. S3a (training with wider double-line variety) is the fix being tried. Phase A images of these two cases are the next diagnosis.
 3. A-block annotation (phase F), then the full promotion decision.
