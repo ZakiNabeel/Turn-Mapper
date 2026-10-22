@@ -104,7 +104,7 @@ S2 and S3a were evaluated on the same splits in the same run. These ResPlan numb
 | test set | S2 mIoU | **S3a mIoU** | wall S2 → S3a | door S2 → S3a | stairs S2 → S3a | lift S2 → S3a |
 |---|---|---|---|---|---|---|
 | ResPlan test (1,632) | 0.892 | **0.899** | 0.976 → 0.979 | 0.892 → 0.904 | 0.860 → 0.870 | — |
-| Institutional val (400, seed 1) ‡ | 0.768 | **0.804** | 0.958 → 0.966 | 0.824 → 0.832 | 0.840 → 0.862 | 0.171 → 0.171 |
+| Institutional val (300, seed 1) ‡ | 0.768 | **0.804** | 0.958 → 0.966 | 0.824 → 0.832 | 0.840 → 0.862 | 0.171 → 0.171 |
 | CubiCasa5K test | 0.634 | **0.647** | 0.731 → 0.740 | 0.616 → 0.618 | — | — |
 
 ‡ The script fell back to the val split (`eval_s3a_inst_val.json`). S3a also used that split to pick its best epoch, so its institutional number is not clean. S2 never saw seed-1 floors, so its number there is clean. ResPlan and CubiCasa are clean test splits.
