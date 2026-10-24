@@ -39,6 +39,7 @@ class PipelineParams:
     partition_min_len_frac: float = 0.035  # of the image's short side (min 25 px)
     # scale
     door_width_prior_m: float = 0.9
+    door_width_calibrated: bool = False  # door_width_prior_m was calibrated on measured floors of this venue
     # graph
     hole_fill_m2: float = 2.0
     spur_prune_m: float = 1.5
@@ -92,7 +93,9 @@ def load_venue_config(path: str | Path, input_file: str | None = None) -> VenueC
                 source_file=f.get("file", src_file),
                 page=f.get("page"),
                 image_index=f.get("image_index"),
-                scale_evidence=list(scale_ev.get(f["id"], []) or []),
+                # per-floor evidence first, then evidence for the whole building (e.g. its typical room size)
+                scale_evidence=list(scale_ev.get(f["id"], []) or [])
+                + list(scale_ev.get(f["building"], []) or []),
                 crop=tuple(f["crop"]) if f.get("crop") else None,
                 scale_like=f.get("scale_like"),
                 options=dict(f.get("options") or {}),

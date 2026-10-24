@@ -33,4 +33,20 @@ floors:
   - { id: C-F3, building: C, level: 3,  page: 7, image_index: 2 }
   - { id: C-F4, building: C, level: 4,  page: 8, image_index: 0 }
   - { id: C-F5, building: C, level: 5,  page: 8, image_index: 1, scale_like: C-F3 }  # re-exported JPEG
-scale_evidence: {}                   # filled from samples/README.md after on-site measurement
+# Site measurements (team, 2026-10-23/24, tape, feet; inside dimensions). Keys are floor ids or building ids
+# (building entries apply to every floor of that building). Notes from the measurement sheet:
+#   typical room: A 30 x 20 ft, B 30 x 24 ft, C 30 x 25 ft (D 30 x 25-26 ft: no D block in this PDF)
+#   B227-A: 19.7 + 16.08 ft by 19.7 + 5.41 ft = 35.78 x 25.11 ft (sheet note: "almost 34 by 24")
+#   A block 2nd-floor corridor: 90 x 12 ft
+# A is the held-out test building (ADR-009): its measurements are site input, not tuning; nothing is
+# adjusted by looking at A results.
+scale_evidence:
+  A:
+    - {method: typical_room, size_ft: [30, 20]}
+  B:
+    - {method: typical_room, size_ft: [30, 24]}
+    - {method: room_size, label: B-227A, size_ft: [35.78, 25.11], check_only: true}
+  C:
+    - {method: typical_room, size_ft: [30, 25]}
+  A-F2:
+    - {method: corridor_width, width_ft: 12, length_ft: 90, check_only: true}

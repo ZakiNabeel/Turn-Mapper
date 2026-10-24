@@ -275,7 +275,9 @@
                 "cad_units",
                 "scale_bar",
                 "door_width_prior",
-                "footprint_transfer"
+                "footprint_transfer",
+                "measured_room_size",
+                "door_width_calibrated"
               ]
             },
             "scale_evidence": {

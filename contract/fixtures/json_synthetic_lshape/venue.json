@@ -1,10 +1,10 @@
 {
- "schema_version": "0.1.1",
+ "schema_version": "0.1.2",
  "generator": {
   "name": "turn-mapper",
   "version": "0.3.0",
-  "git_commit": "7f6e5a1",
-  "run_id": "2026-10-12T11-21-46Z_lshape",
+  "git_commit": "ab3a5d1",
+  "run_id": "2026-10-24T05-43-21Z_lshape",
   "model": {
    "name": "classical",
    "checksum": null

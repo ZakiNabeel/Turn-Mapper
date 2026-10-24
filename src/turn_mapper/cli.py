@@ -81,6 +81,32 @@ def run(plans, venue, out, floors, split, force, fmt, segmenter) -> None:
     sys.exit(0 if res.all_passed else 1)
 
 
+@main.command("export-positioning")
+@click.argument("venue_json", type=click.Path(exists=True))
+@click.option("--out", "out_dir", required=True, help="output folder")
+@click.option("--floors", default=None, help="comma-separated floor ids (default: all)")
+@click.option("--keep-unreachable", is_flag=True, help="also export destinations cut off from the anchors")
+def export_positioning(venue_json: str, out_dir: str, floors: str | None, keep_unreachable: bool) -> None:
+    """Export venue.json for the live-positioning app: venue.package.json (load with
+    `npm run venue:load -- venue.package.json`) and one TURN Floor GeoJSON per floor."""
+    from .positioning_export import export
+
+    r = export(
+        venue_json,
+        out_dir,
+        floors=floors.split(",") if floors else None,
+        reachable_only=not keep_unreachable,
+    )
+    for b, rep in r.items():
+        click.echo(f"[{b}] connectors={rep['connectors']} anchors={rep['anchors']}")
+        for fid, f in rep["floors"].items():
+            click.echo(
+                f"  {fid}: rooms={f['rooms']} doors={f['doors']} nodes={f['nodes']} "
+                f"destinations={f['pois_exported']}/{f['pois']} scale={f['scale_source']}"
+            )
+    click.echo(f"wrote {out_dir}/<building>/venue.package.json (+ .turn-floor.geojson per floor)")
+
+
 @main.command()
 @click.argument("package", type=click.Path(exists=True))
 def validate(package: str) -> None:

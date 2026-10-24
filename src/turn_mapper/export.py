@@ -15,7 +15,7 @@ from . import __version__
 from .ingest import sha256_file
 from .ir import FloorResult
 
-SCHEMA_VERSION = "0.1.1"
+SCHEMA_VERSION = "0.1.2"
 
 
 def _r(v: float) -> float:
