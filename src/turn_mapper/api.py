@@ -65,6 +65,18 @@ def footprint_px(seg) -> tuple[float, float]:
     return (float(xs.max() - xs.min()), float(ys.max() - ys.min())) if len(xs) else (0.0, 0.0)
 
 
+def public_meta(meta: dict) -> dict:
+    """Source metadata fit for the package: bulky in-memory items (text layer, door list) become counts."""
+    out = {
+        k: v for k, v in meta.items() if k not in ("text_boxes", "known_doors") and not isinstance(v, bytes)
+    }
+    if "text_boxes" in meta:
+        out["text_layer_words"] = len(meta["text_boxes"])
+    if "known_doors" in meta:
+        out["known_doors"] = len(meta["known_doors"])
+    return out
+
+
 def process_floor(
     spec: FloorSpec,
     cfg: VenueConfig,
@@ -82,6 +94,12 @@ def process_floor(
     t: dict[str, float] = {}
     t0 = time.perf_counter()
     img = load_floor(spec)
+    if img.source_meta.get("adapter") == "pdf_vector":
+        # CAD sheets: doors are known from the drawing, so corridor-shape rules are reliable there
+        if p.outdoor_apron_gaps == 0:
+            p = replace(p, outdoor_apron_gaps=p.vector_outdoor_apron_gaps)
+        if p.corridor_elongation == 0:
+            p = replace(p, corridor_elongation=p.vector_corridor_elongation)
     cad_s = img.source_meta.get("cad_m_per_px")
     if cad_s and not any(e.get("method") == "cad_units" for e in spec.scale_evidence):
         cad_ev = {"method": "cad_units", "m_per_px": cad_s, "units": img.source_meta.get("units")}
@@ -93,6 +111,16 @@ def process_floor(
     t["preprocess"] = time.perf_counter() - t0
     t0 = time.perf_counter()
     seg = seg_override if seg_override is not None else SEGMENTERS[method].segment(pre, p)
+    known = img.source_meta.get("known_doors")
+    if known and p.use_known_doors:
+        # door swings read from a vector PDF: known openings, merged with any the segmenter predicted
+        kd = np.zeros(seg.wall.shape, np.uint8)
+        for a, b in known:
+            cv2.line(kd, tuple(int(round(v)) for v in a), tuple(int(round(v)) for v in b), 1, 3)
+        seg.doors = (kd > 0) | (seg.doors if seg.doors is not None else False)
+        lens = [float(np.hypot(b[0] - a[0], b[1] - a[1])) for a, b in known]
+        seg.levels["known_door_px"] = float(np.median(lens))
+        seg.levels["known_doors"] = known
     t["segment"] = time.perf_counter() - t0
     t0 = time.perf_counter()
     pt_ev = point_evidence(spec.scale_evidence)
@@ -120,7 +148,10 @@ def process_floor(
     t["vectorize"] = time.perf_counter() - t0
     t0 = time.perf_counter()
     patterns = [cfg.label_patterns[spec.building]] if spec.building in cfg.label_patterns else []
-    label_rooms(geom, pre.gray_raw, p, patterns, pre.text)  # before scale: room-size evidence names rooms
+    from_pdf_text = img.source_meta.get("text_boxes") is not None
+    label_rooms(
+        geom, pre.gray_raw, p, patterns, pre.text, page_level=True if from_pdf_text else None
+    )  # before scale: room-size evidence names rooms
     t["ocr_labels"] = time.perf_counter() - t0
     room_fit, room_records, room_issues = (
         room_evidence_scale(geom, room_ev, [d.width_px for d in geom.doors]) if room_ev else (None, [], [])
@@ -333,7 +364,7 @@ def convert(
                     "level": spec.level,
                     "name": spec.name,
                     "path": f"floors/{spec.id}/floor.json",
-                    "source": fr.image.source_meta,
+                    "source": public_meta(fr.image.source_meta),
                     "validation_passed": passed,
                 }
             )

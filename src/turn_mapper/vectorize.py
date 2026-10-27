@@ -7,9 +7,12 @@ added are door openings, which re-connect the spaces they touch.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
+
 import cv2
 import numpy as np
 from scipy import ndimage
+from shapely.affinity import translate
 from shapely.geometry import LineString, MultiPolygon, Point, Polygon
 from shapely.ops import unary_union
 from skimage.morphology import skeletonize
@@ -191,6 +194,9 @@ def vectorize(
     if m_per_px:
         gap_px = int(round(params.door_max_width_m / m_per_px))
         gap_src = "scale"
+    elif seg.levels.get("known_door_px"):
+        # door swings read from the drawing give the door width directly
+        gap_px, gap_src = int(round(1.3 * seg.levels["known_door_px"])), "known_doors"
     else:
         door_w, n_door_meas = estimate_door_width_px(seg.wall, t)
         filled = seg.levels.get("filled", True)
@@ -232,7 +238,17 @@ def vectorize(
         from .segment import border_connected
 
         seg.background = border_connected(~wall_c)
-    if params.sheet_frame_outside:
+    if params.outdoor_apron_gaps > 0:
+        # CAD sheets: the outdoors (open to the page edge or closed in by the sheet border) is not walkable,
+        # except a strip along the building (entrances, covered walkways, open-air corridors), as indoor-map
+        # tools route over the whole level and treat only the far outdoors and the sheet margin as void
+        outdoor = border_connected_free = seg.background | _border_free(wall_c)
+        fo, frame = sheet_frame_outside(wall_c, border_connected_free, t, return_frame=True)
+        outdoor = outdoor | fo
+        building = wall_c & ~frame
+        dist = cv2.distanceTransform((~building).astype(np.uint8), cv2.DIST_L2, 3)
+        seg.background = outdoor & (dist > params.outdoor_apron_gaps * gap_px) & ~wall_c
+    elif params.sheet_frame_outside:
         # entrances are sealed with twice the door gap so the outdoors cannot flow into the corridors
         sealed = close_wall_gaps(wall_c, 2 * gap_px, t)
         seg.background = seg.background | (sheet_frame_outside(sealed, seg.background, t) & ~wall_c)
@@ -253,7 +269,7 @@ def vectorize(
     keep_set = set(keep)
     region_of = {i: f"s{i}" for i in keep}
     doors: list[Door] = []
-    door_masks: dict[str, np.ndarray] = {}
+    door_masks: dict[str, tuple[tuple[slice, slice], np.ndarray]] = {}  # door id -> (box, blob in box)
     kernel = np.ones((3, 3), np.uint8)
     for d in range(1, dn):
         x, y, w, h, area = dstats[d]
@@ -287,9 +303,47 @@ def vectorize(
                 width_px=long_,
             )
         )
-        full = np.zeros_like(added)
-        full[sl] = blob
-        door_masks[did] = full
+        door_masks[did] = (sl, blob)
+
+    # door swings read from the drawing: each joins the two spaces on either side of its closed position,
+    # whether or not gap closing produced an opening there (Esri-style openings)
+    for a, b in seg.levels.get("known_doors", []):
+        a, b = np.asarray(a, float), np.asarray(b, float)
+        v = b - a
+        length = float(np.hypot(*v))
+        if length < 2:
+            continue
+        nrm = np.array([-v[1], v[0]]) / length
+        mid = (a + b) / 2
+        sides = []
+        for sgn in (1, -1):
+            lbl = 0
+            for f in (0.3, 0.6, 1.0):
+                x, y = (mid + sgn * f * length * nrm).round().astype(int)
+                if 0 <= y < lab.shape[0] and 0 <= x < lab.shape[1] and lab[y, x] in keep_set:
+                    lbl = int(lab[y, x])
+                    break
+            sides.append(lbl)
+        if 0 in sides or sides[0] == sides[1]:
+            continue
+        pair = tuple(sorted(region_of[i] for i in sides))
+        near_existing = any(
+            set(d.regions) == set(pair) and d.center.distance(Point(*mid)) < length for d in doors
+        )
+        if near_existing:
+            continue
+        did = f"d{len(doors) + 1}"
+        line = LineString([tuple(a), tuple(b)])
+        doors.append(Door(id=did, segment=line, center=line.centroid, regions=pair, width_px=length))
+        # the opening itself becomes walkable (thick enough to bridge the wall)
+        pad = int(max(3, 2 * t)) + 2
+        x0, y0 = int(max(min(a[0], b[0]) - pad, 0)), int(max(min(a[1], b[1]) - pad, 0))
+        x1, y1 = int(min(max(a[0], b[0]) + pad, lab.shape[1])), int(min(max(a[1], b[1]) + pad, lab.shape[0]))
+        box = np.zeros((y1 - y0, x1 - x0), np.uint8)
+        p0 = (int(round(a[0])) - x0, int(round(a[1])) - y0)
+        p1 = (int(round(b[0])) - x0, int(round(b[1])) - y0)
+        cv2.line(box, p0, p1, 1, int(max(3, 2 * t)))
+        door_masks[did] = ((slice(y0, y1), slice(x0, x1)), box > 0)
 
     # classify spaces
     door_count = {rid: 0 for rid in region_of.values()}
@@ -300,31 +354,74 @@ def vectorize(
             neighbours[rid] |= set(dr.regions) - {rid}
     areas = {f"s{i}": float(stats[i, cv2.CC_STAT_AREA]) for i in keep}
     largest = max(areas, key=areas.get) if areas else None
-    # circulation = the largest space, plus many-door spaces reachable from it through doors
+    seed = largest
+    if params.circulation_seed == "doors" and areas:
+        # the corridor is the space most rooms open onto; the largest space can be a title block, a legend or
+        # the outdoors on a CAD sheet
+        best = max(areas, key=lambda r: (len(neighbours[r]), areas[r]))
+        if len(neighbours[best]) >= params.circulation_min_doors:
+            seed = best
+    # circulation = the seed space, plus many-door spaces reachable from it through doors
     # (a cluster of cubicles behind a closed office is not a corridor)
-    circ_set = {largest} if largest else set()
+    circ_set = {seed} if seed else set()
+    ids = {rid: i for i, rid in region_of.items()}
+
+    def elongation(rid: str) -> float:
+        i = ids[rid]
+        x, y, bw, bh = (int(v) for v in stats[i, :4])
+        crop = (lab[y : y + bh, x : x + bw] == i).astype(np.uint8)
+        cs, _ = cv2.findContours(
+            cv2.copyMakeBorder(crop, 1, 1, 1, 1, cv2.BORDER_CONSTANT, 0),
+            cv2.RETR_EXTERNAL,
+            cv2.CHAIN_APPROX_SIMPLE,
+        )
+        perim = sum(cv2.arcLength(c, True) for c in cs)
+        # a strip of length L and width W has perimeter^2 / (4 area) ~ L / W; a square room gives 4
+        return perim * perim / (4 * areas[rid])
+
+    use_shape = params.corridor_elongation > 0
+    if use_shape and areas:
+        # every long, narrow space that several other spaces open onto is circulation too (a corridor split
+        # by fire doors, or corridors not joined to the seed through a detected door)
+        for rid in ids:
+            if (
+                len(neighbours[rid]) >= params.circulation_min_doors
+                and elongation(rid) >= params.corridor_elongation
+            ):
+                circ_set.add(rid)
     changed = True
     while changed:
         changed = False
         for dr in doors:
             if circ_set & set(dr.regions):
                 for rid in dr.regions:
+                    if rid in circ_set:
+                        continue
                     # a corridor leads to several *different* spaces; 3 openings into one hall = still a room
-                    if rid not in circ_set and len(neighbours[rid]) >= params.circulation_min_doors:
+                    many = len(neighbours[rid]) >= params.circulation_min_doors
+                    # a narrow passage between two circulation spaces (corridor stretch between fire doors)
+                    link = (
+                        use_shape
+                        and len(neighbours[rid] & circ_set) >= 2
+                        and elongation(rid) >= params.corridor_elongation
+                    )
+                    if many or link:
                         circ_set.add(rid)
                         changed = True
     regions: list[Region] = []
-    masks: dict[str, np.ndarray] = {}
+    masks = RegionMasks(lab)
     for i in keep:
         rid = f"s{i}"
-        mask = lab == i
-        polys = mask_to_polygons(mask, simplify_px=1.0)
+        x, y, bw, bh = (int(v) for v in stats[i, :4])
+        x0, y0 = max(x - 1, 0), max(y - 1, 0)
+        crop = lab[y0 : y + bh + 1, x0 : x + bw + 1] == i  # polygons from the region's box, not the page
+        polys = mask_to_polygons(crop, simplify_px=1.0)
         if not polys:
             continue
-        poly = max(polys, key=lambda p: p.area)
+        poly = translate(max(polys, key=lambda p: p.area), x0, y0)
         kind = "circulation" if rid in circ_set else "room"
         regions.append(Region(id=rid, polygon=poly, area_px=areas[rid], kind=kind))
-        masks[rid] = mask
+        masks.add(rid, i)
 
     circ_ids = {r.id for r in regions if r.kind == "circulation"}
     walk = np.zeros_like(free)
@@ -332,7 +429,21 @@ def vectorize(
         walk |= masks[rid]
     for dr in doors:
         if circ_ids & set(dr.regions):
-            walk |= door_masks[dr.id]
+            sl_d, blob_d = door_masks[dr.id]
+            walk[sl_d] |= blob_d
+    if params.bridge_circulation and len(circ_ids) > 1:
+        # gap closing can cut a corridor where it narrows; a closed-off strip between two circulation
+        # spaces is part of the corridor, door-shaped or not
+        circ_idx = {int(r[1:]) for r in circ_ids}
+        for d in range(1, dn):
+            x, y, w, h, area = dstats[d]
+            if area < 3:
+                continue
+            sl = (slice(max(y - 2, 0), y + h + 2), slice(max(x - 2, 0), x + w + 2))
+            blob = dlab[sl] == d
+            ring = cv2.dilate(blob.astype(np.uint8), kernel, iterations=2) > 0
+            if len(set(np.unique(lab[sl][ring]).tolist()) & circ_idx) >= 2:
+                walk[sl] |= blob
     walk = cv2.morphologyEx(walk.astype(np.uint8), cv2.MORPH_CLOSE, kernel) > 0
     wpolys = mask_to_polygons(walk, simplify_px=0.75)
     walkable = unary_union(wpolys) if wpolys else MultiPolygon()
@@ -377,7 +488,36 @@ def wall_segments_from_mask(wall: np.ndarray, thickness: float) -> list:
     return segs
 
 
-def sheet_frame_outside(wall: np.ndarray, background: np.ndarray, t: float) -> np.ndarray:
+class RegionMasks(Mapping):
+    """Region id -> boolean mask, computed on demand from the label image (one full-page mask per region
+    would need gigabytes on large CAD sheets with hundreds of spaces)."""
+
+    def __init__(self, lab: np.ndarray):
+        self.lab = lab
+        self.idx: dict[str, int] = {}
+
+    def add(self, rid: str, i: int) -> None:
+        self.idx[rid] = i
+
+    def __getitem__(self, rid: str) -> np.ndarray:
+        return self.lab == self.idx[rid]
+
+    def __iter__(self):
+        return iter(self.idx)
+
+    def __len__(self) -> int:
+        return len(self.idx)
+
+
+def _border_free(wall: np.ndarray) -> np.ndarray:
+    from .segment import border_connected
+
+    return border_connected(~wall)
+
+
+def sheet_frame_outside(
+    wall: np.ndarray, background: np.ndarray, t: float, return_frame: bool = False
+) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
     """Outdoor space enclosed by a drawing-sheet border (CAD exports draw a frame round the page).
 
     Without this the outdoors inside the frame is one huge closed space and becomes the "corridor". A frame
@@ -388,6 +528,7 @@ def sheet_frame_outside(wall: np.ndarray, background: np.ndarray, t: float) -> n
     many separate rooms, none of which runs round half the perimeter."""
     h, w = wall.shape
     out = np.zeros_like(wall)
+    frames = np.zeros_like(wall)
     n, lab, st, _ = cv2.connectedComponentsWithStats(wall.astype(np.uint8), connectivity=8)
     free = ~wall & ~background
     band = max(3, int(round(2 * t)) + 2)
@@ -399,6 +540,7 @@ def sheet_frame_outside(wall: np.ndarray, background: np.ndarray, t: float) -> n
         edges = [comp[:band].any(0), comp[-band:].any(0), comp[:, :band].any(1), comp[:, -band:].any(1)]
         if sum(e.mean() >= 0.9 for e in edges) < 3:
             continue
+        frames |= lab == i
         inner = np.zeros_like(wall)
         y0, y1, x0, x1 = y + band, y + bh - band, x + band, x + bw - band
         if y1 - y0 < 3 * band or x1 - x0 < 3 * band:
@@ -419,4 +561,4 @@ def sheet_frame_outside(wall: np.ndarray, background: np.ndarray, t: float) -> n
         area = int((flab == best).sum())
         if perim and hits[best] >= 0.5 * perim and area >= 0.25 * (y1 - y0) * (x1 - x0):
             out |= flab == best
-    return out
+    return (out, frames) if return_frame else out

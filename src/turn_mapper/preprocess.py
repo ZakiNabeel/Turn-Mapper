@@ -46,8 +46,13 @@ def erase_text(gray: np.ndarray, boxes: list[TextBox], min_conf: float) -> np.nd
 
 def preprocess(img: FloorImage, params: PipelineParams) -> Preprocessed:
     gray = cv2.cvtColor(img.rgb, cv2.COLOR_RGB2GRAY)
-    boxes = run_ocr(gray, params)
-    clean = erase_text(gray, boxes, params.ocr_min_conf)
+    if img.source_meta.get("text_boxes") is not None:
+        # vector PDF: the text layer is exact and the text was never drawn, so no OCR and nothing to erase
+        boxes = list(img.source_meta["text_boxes"])
+        clean = gray
+    else:
+        boxes = run_ocr(gray, params)
+        clean = erase_text(gray, boxes, params.ocr_min_conf)
     sat = cv2.cvtColor(img.rgb, cv2.COLOR_RGB2HSV)[:, :, 1] > 80
     color = cv2.dilate(sat.astype(np.uint8), np.ones((5, 5), np.uint8)) > 0 if sat.any() else None
     return Preprocessed(gray=clean, gray_raw=gray, text=boxes, color_mask=color)

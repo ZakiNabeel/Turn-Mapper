@@ -327,7 +327,10 @@ class ImageAdapter:
         return FloorImage(spec=spec, rgb=rgb, source_meta=meta)
 
 
+from .vector_pdf import PdfVectorAdapter  # noqa: E402  (needs the adapters above for crop/hash helpers)
+
 ADAPTERS: list[Adapter] = [
+    PdfVectorAdapter(),
     PdfEmbeddedImageAdapter(),
     PdfRasterPageAdapter(),
     ImageAdapter(),

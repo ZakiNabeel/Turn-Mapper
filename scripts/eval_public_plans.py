@@ -33,7 +33,7 @@ GENERIC_LABEL = r"\b(?:[A-Z]{1,3}[-.]?)?\d{2,4}(?:\.\d)?[A-Z]?\b"
 MAX_SIDE_PX = 5000
 
 
-def venue_yaml(path: Path, out: Path) -> Path:
+def venue_yaml(path: Path, out: Path, vector: bool = True) -> Path:
     floor = {"id": "F1", "building": "B1", "level": 0, "file": str(path.resolve())}
     if path.suffix.lower() == ".pdf":
         import pymupdf
@@ -41,6 +41,8 @@ def venue_yaml(path: Path, out: Path) -> Path:
         r = pymupdf.open(str(path))[0].rect
         floor["page"] = 1
         floor["options"] = {"dpi": int(min(300, MAX_SIDE_PX * 72 / max(r.width, r.height)))}
+        if not vector:
+            floor["options"]["vector_clean"] = False
     cfg = {
         "venue": {"id": path.stem, "name": path.stem},
         "label_patterns": {"B1": GENERIC_LABEL},
@@ -104,6 +106,9 @@ def main() -> None:
     ap.add_argument("--out", default="runs/public_eval")
     ap.add_argument("--segmenter", default="classical")
     ap.add_argument("--only", default="")
+    ap.add_argument(
+        "--no-vector", action="store_true", help="render PDFs as pictures (the pre-2026-10-28 input path)"
+    )
     a = ap.parse_args()
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
@@ -124,7 +129,7 @@ def main() -> None:
         }
         t0 = time.perf_counter()
         try:
-            y = venue_yaml(src, out / pid)
+            y = venue_yaml(src, out / pid, vector=not a.no_vector)
             res = convert(
                 [str(src)], venue_config=str(y), out_dir=str(out / pid), method=a.segmenter, force=True
             )

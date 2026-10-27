@@ -259,7 +259,9 @@ class Studio:
         cv2.imwrite(str(fd / "base.png"), cv2.cvtColor(np.ascontiguousarray(rgb), cv2.COLOR_RGB2BGR))
         for stale in ("erase.png", "masks.png"):
             (fd / stale).unlink(missing_ok=True)
-        rec["source_meta"] = {k2: v for k2, v in img.source_meta.items() if not isinstance(v, bytes)}
+        from ..api import public_meta
+
+        rec["source_meta"] = public_meta(img.source_meta)
         rec["size"] = [int(rgb.shape[1]), int(rgb.shape[0])]
         rec["status"] = "new"
         # the old scale points were in the old pixels

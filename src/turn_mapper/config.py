@@ -55,7 +55,14 @@ class PipelineParams:
     )  # multipliers of the wall-thickness scale; best = most confident
     learned_wall_thr: float | None = None  # wall where p(wall) > thr (None: argmax)
     learned_min_wall_frag_t2: float = 0.0  # drop wall pieces smaller than this many (thickness^2)
+    use_known_doors: bool = True  # door swings read from vector PDFs become known openings
+    corridor_elongation: float = 0.0  # >0: door-rich spaces with perimeter^2/(4 area) >= this are corridors
+    bridge_circulation: bool = True  # join circulation spaces cut apart by gap closing
+    circulation_seed: str = "doors"  # "doors": space with most door neighbours; "largest": largest space
     sheet_frame_outside: bool = True  # outdoors inside a drawing-sheet frame is not a corridor
+    vector_corridor_elongation: float = 4.0  # used for CAD (vector PDF) sheets, where doors are known
+    vector_outdoor_apron_gaps: float = 0.0  # the strip used for CAD (vector PDF) sheets
+    outdoor_apron_gaps: float = 0.0  # >0: outdoors walkable only within this many door gaps of the building
     learned_doors: bool = False  # network door pixels become known openings in vectorize
     hybrid_wall_conf: float = 0.75  # hybrid: add network walls only where p(wall) exceeds this
     hybrid_doors: bool = True  # hybrid: use the network's doors

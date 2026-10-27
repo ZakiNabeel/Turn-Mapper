@@ -84,6 +84,7 @@ def label_rooms(
     params: PipelineParams,
     patterns: list[str],
     text: list[TextBox] | None = None,
+    page_level: bool | None = None,
 ) -> None:
     """Room label (code such as B-215A) and name (the rest, e.g. "Maker Lab") from the text drawn in it.
 
@@ -92,7 +93,8 @@ def label_rooms(
     from .ocr import engine_name
 
     regs = [re.compile(p.strip("^$")) for p in (patterns or [DEFAULT_LABEL_PATTERN])]
-    page_level = engine_name() == "rapidocr" and text is not None
+    if page_level is None:
+        page_level = engine_name() == "rapidocr" and text is not None
     for r in geom.regions:
         if r.kind == "circulation":
             continue
