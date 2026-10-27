@@ -102,7 +102,7 @@ The two DfE GA plans have fewer than 10 printed room numbers, so they are graded
 
 # Round 3 (same day): next steps 3 and 4 done
 
-**Code:** commit `8aaa108` (fills) and the commit after it. Same 28 plans, same generic config, same scorer.
+**Code:** commits `16e50c8` (fills) and `8aaa108` (flattened arcs, Studio, drafts). Same 28 plans, same generic config, same scorer.
 **Rules were built on the dev plans only** (Bangor Brigantia for the fire doors, Cal Poly for the margin). The
 held-out plans were run once, after the change was frozen. Note that the held-out plans were already seen once
 in round 2, so they are "seen-once" rather than pristine.
