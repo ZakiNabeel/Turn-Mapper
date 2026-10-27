@@ -56,6 +56,15 @@ CubiCasa → TURN mapping must be written as a table in code (`turn_mapper/data/
 - Quality: each plan annotated by one person, reviewed by another. Spot-check agreement on 5 plans (mean IoU between annotators) and report it.
 - Time each annotation — the manual-effort numbers are useful for the effort study.
 
+### Correcting a draft (fastest route to ground truth)
+
+`python scripts/make_annotation_drafts.py PLANS_DIR SOURCES_TSV --studio studio_projects --set heldout` makes one
+Studio project per plan (`annotate-<id>`) with the automatic map already run; for the FAST A block use
+`--files fast_blocks.pdf:<page>,...`. The annotator fixes walls/doors (dashed doors first), corridors (walkable /
+not walkable) and room names in the Map tab and saves; the saved `floor.json` is the reference. Record who
+corrected it and the minutes taken. The drafts and plans are local (gitignored); only the scores are reported.
+Corrected drafts are scored against the pipeline, never fed back into tuning for the same plans (ADR-009).
+
 ## 6. Splits
 
 - Split **by building**, never by tile or by floor of the same building (floors of one building leak style).

@@ -164,6 +164,69 @@ def merge_arcs(arcs: list[tuple[int, dict]]) -> list[tuple[int, dict]]:
     return out
 
 
+def polyline_arcs(strokes: list[dict]) -> list[tuple[int, dict]]:
+    """Arcs exported as chains of short straight segments (some CAD/PDF writers flatten curves).
+    Returns arc records like parse_page's, with the chain's stroke ids as members."""
+    out: list[tuple[int, dict]] = []
+    chain: list[int] = []
+
+    def fit(ids: list[int]) -> None:
+        if len(ids) < 5:
+            return
+        pts = np.vstack([strokes[ids[0]]["pts"][:1]] + [strokes[k]["pts"][1:] for k in ids])
+        circ = _circle(pts[0], pts[len(pts) // 2], pts[-1])
+        if circ is None:
+            return
+        centre, r = circ
+        d = np.linalg.norm(pts - centre, axis=1)
+        seg = np.linalg.norm(np.diff(pts, axis=0), axis=1)
+        if r <= 0 or np.abs(d - r).max() > 0.05 * r or seg.max() > 0.35 * r:
+            return
+        ang = np.unwrap(np.arctan2(pts[:, 1] - centre[1], pts[:, 0] - centre[0]))
+        rec = dict(
+            pts=pts,
+            style=strokes[ids[0]]["style"],
+            kind="c",
+            p0=pts[0].copy(),
+            p3=pts[-1].copy(),
+            centre=centre,
+            r=r,
+            sweep=abs(math.degrees(ang[-1] - ang[0])),
+            members=list(ids),
+        )
+        out.append((ids[0], rec))
+
+    def flush():
+        if len(chain) >= 5:
+            # a leaf or a wall drawn in the same path continues the chain; arc pieces are all about equally
+            # long, so split where the length jumps
+            lens = np.array([np.linalg.norm(strokes[k]["pts"][1] - strokes[k]["pts"][0]) for k in chain])
+            med = float(np.median(lens))
+            run: list[int] = []
+            for k, ln in zip(chain, lens, strict=True):
+                if med > 0 and 0.2 * med <= ln <= 2 * med:
+                    run.append(k)
+                else:
+                    fit(run)
+                    run = []
+            fit(run)
+        chain.clear()
+
+    for i, s in enumerate(strokes):
+        if s["kind"] == "l":
+            if chain:
+                prev = strokes[chain[-1]]
+                if prev["style"] == s["style"] and np.allclose(prev["pts"][1], s["pts"][0], atol=0.05):
+                    chain.append(i)
+                    continue
+                flush()
+            chain.append(i)
+        else:
+            flush()
+    flush()
+    return out
+
+
 def find_doors(prim: dict) -> tuple[list[tuple[np.ndarray, np.ndarray]], set[int]]:
     """Door swings: a 60-100 degree arc plus a straight leaf from the arc centre to one arc end.
     Returns the closed-door segments (hinge, far end) and the ids of the strokes to leave out."""
@@ -181,6 +244,7 @@ def find_doors(prim: dict) -> tuple[list[tuple[np.ndarray, np.ndarray]], set[int
                 else:
                     cands.append((i, np.array([(q[1] + q[2]) / 2, (q[3] + q[0]) / 2])))
     arcs = merge_arcs([(i, s) for i, s in enumerate(prim["strokes"]) if s["kind"] == "c" and "r" in s])
+    arcs += polyline_arcs(prim["strokes"])
     radii = [s["r"] for _, s in arcs if 60 <= s["sweep"] <= 100]
     if not radii:
         return [], set()

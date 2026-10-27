@@ -123,7 +123,8 @@ def floor_to_dict(fr: FloorResult) -> dict:
                 "a": _pt(d.segment.coords[0], s),
                 "b": _pt(d.segment.coords[-1], s),
                 "room_id": door_room[d.id],
-                "provenance": {"source": "auto", "confidence": 0.7},
+                # a swing drawn in the CAD file is near-certain; a wall gap may be a missing wall
+                "provenance": {"source": "auto", "confidence": 0.95 if d.source == "drawing" else 0.7},
             }
             for d in g.doors
         ],

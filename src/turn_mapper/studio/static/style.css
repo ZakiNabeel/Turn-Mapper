@@ -106,7 +106,8 @@ dialog h3 { text-transform: none; font-size: 15px; color: var(--ink); letter-spa
 #ov .room.manual, #ov .room.corrected { stroke: var(--accent); }
 #ov .roomlbl { fill: #6b5413; font-weight: 600; paint-order: stroke; stroke: #fff; stroke-width: 3px; pointer-events: none; }
 #ov .wall { stroke: #6d4aff; vector-effect: non-scaling-stroke; stroke-width: 2; opacity: .7; }
-#ov .door { stroke: var(--ok); vector-effect: non-scaling-stroke; stroke-width: 4; stroke-linecap: round; }
+#ov .door { stroke: var(--ok); vector-effect: non-scaling-stroke; stroke-width: 4; stroke-linecap: round; stroke-dasharray: 6 4; }
+#ov .door.drawn { stroke-dasharray: none; } /* solid: swing read from the drawing; dashed: wall gap, check it */
 #ov .edge { stroke: #e0312b; vector-effect: non-scaling-stroke; stroke-width: 2.2; }
 #ov .edge.hit { stroke: transparent; stroke-width: 12; }
 #ov .node { fill: #e0312b; stroke: #fff; vector-effect: non-scaling-stroke; stroke-width: 1.5; }

@@ -62,6 +62,11 @@ class PipelineParams:
     sheet_frame_outside: bool = True  # outdoors inside a drawing-sheet frame is not a corridor
     vector_corridor_elongation: float = 4.0  # used for CAD (vector PDF) sheets, where doors are known
     vector_outdoor_apron_gaps: float = 0.0  # the strip used for CAD (vector PDF) sheets
+    frame_footprint_gaps: float = 0.0  # >0: inside a sheet frame, space outside the building outline is void
+    # outline = walls closed over gaps up to this many door widths; off for CAD sheets (Cal Poly-style
+    # open-air walkways are real routes; cutting them disconnected rooms, RESULTS_PUBLIC_PLANS_2026-10-28)
+    vector_frame_footprint_gaps: float = 0.0
+    frame_apron_gaps: float = 2.0  # ...except a strip this many door widths wide along the outer walls
     outdoor_apron_gaps: float = 0.0  # >0: outdoors walkable only within this many door gaps of the building
     learned_doors: bool = False  # network door pixels become known openings in vectorize
     hybrid_wall_conf: float = 0.75  # hybrid: add network walls only where p(wall) exceeds this

@@ -47,7 +47,10 @@ one is active; **Labels: OFF** means neither is available and rooms will be "Unl
    - `S` select / drag nodes · `N` add node (chains from the selected node) · `E` add edge · `D` add door
      (two clicks; a door node is added and linked to the nearest node) · `P` add place on a node ·
      `V` draw an area that is **not walkable** (void, shaft) · `W` add walkable area · `Del` delete · `Ctrl+Z` undo;
-   - select a room to set its label, name and category, make it non-walkable, or create a place for it.
+   - select a room to set its label, name and category, make it non-walkable, or create a place for it;
+   - doors: a **solid** line is a door swing read from a CAD PDF (confidence 0.95); a **dashed** line is a gap
+     in the walls the pipeline took for a door (confidence 0.7) — check those first, they can be a missing wall.
+     The door inspector says which it is.
 5. **Scale** tab: click two points with a known real distance (tape-measured on site), type metres; add more
    pairs as checks (residuals shown) → *Apply scale*. All geometry is rescaled; your edits are kept.
 6. **Check** tab: errors (block export) and warnings; click one to jump to it. Below them, **Floor links**: with two or

@@ -251,6 +251,22 @@ def vectorize(
         # entrances are sealed with twice the door gap so the outdoors cannot flow into the corridors
         sealed = close_wall_gaps(wall_c, 2 * gap_px, t)
         seg.background = seg.background | (sheet_frame_outside(sealed, seg.background, t) & ~wall_c)
+        frame = (
+            sheet_frame_outside(wall_c, seg.background, t, return_frame=True)[1]
+            if params.frame_footprint_gaps > 0
+            else None
+        )
+        if frame is not None and frame.any():
+            # buildings with wide openings (open-air walkways, courtyards) leak the framed outdoors into the
+            # corridors; the outdoors is what lies outside the building outline (walls closed over wide gaps)
+            # a strip along the outer walls stays: rooms on open-air walkways have their doors there
+            building = wall_c & ~frame
+            dist = cv2.distanceTransform((~building).astype(np.uint8), cv2.DIST_L2, 3)
+            seg.background = seg.background | (
+                frame_outdoors(building, params.frame_footprint_gaps * gap_px)
+                & (dist > params.frame_apron_gaps * gap_px)
+                & ~wall_c
+            )
 
     free = ~wall_c & ~seg.background
     n, lab, stats, _ = cv2.connectedComponentsWithStats(free.astype(np.uint8), connectivity=4)
@@ -333,7 +349,9 @@ def vectorize(
             continue
         did = f"d{len(doors) + 1}"
         line = LineString([tuple(a), tuple(b)])
-        doors.append(Door(id=did, segment=line, center=line.centroid, regions=pair, width_px=length))
+        doors.append(
+            Door(id=did, segment=line, center=line.centroid, regions=pair, width_px=length, source="drawing")
+        )
         # the opening itself becomes walkable (thick enough to bridge the wall)
         pad = int(max(3, 2 * t)) + 2
         x0, y0 = int(max(min(a[0], b[0]) - pad, 0)), int(max(min(a[1], b[1]) - pad, 0))
@@ -512,6 +530,17 @@ def _border_free(wall: np.ndarray) -> np.ndarray:
     from .segment import border_connected
 
     return border_connected(~wall)
+
+
+def frame_outdoors(building: np.ndarray, radius: float) -> np.ndarray:
+    """Pixels outside the building outline: the walls closed (dilate then erode, by distance) over gaps up
+    to 2 x radius, holes filled; whatever stays connected to the image border is outdoors."""
+    from .segment import border_connected
+
+    r = max(float(radius), 1.0)
+    grown = cv2.distanceTransform((~building).astype(np.uint8), cv2.DIST_L2, 5) <= r
+    closed = cv2.distanceTransform(grown.astype(np.uint8), cv2.DIST_L2, 5) > r
+    return border_connected(~closed)
 
 
 def sheet_frame_outside(

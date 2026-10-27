@@ -90,6 +90,7 @@ class Door:
     center: Point
     regions: tuple[str, ...]  # region ids it connects
     width_px: float
+    source: str = "gap"  # "gap": opening found by wall-gap closing; "drawing": door swing read from a CAD PDF
 
 
 @dataclass

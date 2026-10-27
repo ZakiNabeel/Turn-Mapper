@@ -100,6 +100,8 @@ def process_floor(
             p = replace(p, outdoor_apron_gaps=p.vector_outdoor_apron_gaps)
         if p.corridor_elongation == 0:
             p = replace(p, corridor_elongation=p.vector_corridor_elongation)
+        if p.frame_footprint_gaps == 0:
+            p = replace(p, frame_footprint_gaps=p.vector_frame_footprint_gaps)
     cad_s = img.source_meta.get("cad_m_per_px")
     if cad_s and not any(e.get("method") == "cad_units" for e in spec.scale_evidence):
         cad_ev = {"method": "cad_units", "m_per_px": cad_s, "units": img.source_meta.get("units")}

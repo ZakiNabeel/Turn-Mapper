@@ -13,6 +13,9 @@ const S = {
 };
 
 // ---------------------------------------------------------------- helpers
+// doors read from a CAD door swing are exported with confidence 0.95; wall-gap doors with 0.7
+const isDrawnDoor = (d) => !!(d.provenance && d.provenance.source === "auto" && (d.provenance.confidence || 0) >= 0.9);
+
 async function api(path, opt = {}) {
   const init = { method: opt.method || "GET", headers: {} };
   if (opt.json !== undefined) { init.body = JSON.stringify(opt.json); init.headers["Content-Type"] = "application/json"; }
@@ -351,7 +354,9 @@ function renderProps() {
       <label class="fld">Type <select data-f="type">${["corridor", "door", "stairs", "lift", "escalator"].map((c) => `<option ${x.type === c ? "selected" : ""}>${c}</option>`).join("")}</select></label>
       <label class="chk"><input type="checkbox" data-f="accessible" ${x.accessible ? "checked" : ""}> step-free (accessible)</label>`;
   } else if (k === "door") {
-    html += `<p class="note">width ${dist(x.a, x.b).toFixed(2)} m · room ${esc(x.room_id || "–")}</p>`;
+    const how = x.provenance && x.provenance.source !== "auto" ? "added by hand"
+      : isDrawnDoor(x) ? "door swing read from the drawing" : "gap in the walls (check it is a real door)";
+    html += `<p class="note">width ${dist(x.a, x.b).toFixed(2)} m · room ${esc(x.room_id || "–")} · ${how}</p>`;
   }
   box.innerHTML = html;
   for (const inp of $$("[data-f]", box)) {
@@ -397,7 +402,7 @@ function render() {
       t.textContent = r.label || r.name || "";
     }
     if (L.walls) for (const w of fd.walls) el("line", { x1: toPx(w.a[0]), y1: toPx(w.a[1]), x2: toPx(w.b[0]), y2: toPx(w.b[1]), class: "wall" }, svg);
-    if (L.doors) for (const d of fd.doors) el("line", { x1: toPx(d.a[0]), y1: toPx(d.a[1]), x2: toPx(d.b[0]), y2: toPx(d.b[1]), class: "door" + (isSel("door", d.id) ? " sel" : ""), "data-kind": "door", "data-id": d.id }, svg);
+    if (L.doors) for (const d of fd.doors) el("line", { x1: toPx(d.a[0]), y1: toPx(d.a[1]), x2: toPx(d.b[0]), y2: toPx(d.b[1]), class: "door" + (isDrawnDoor(d) ? " drawn" : "") + (isSel("door", d.id) ? " sel" : ""), "data-kind": "door", "data-id": d.id }, svg);
     const nodes = Object.fromEntries(fd.graph.nodes.map((n) => [n.id, n]));
     if (L.graph) {
       for (const e of fd.graph.edges) {

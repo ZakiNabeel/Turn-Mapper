@@ -102,3 +102,23 @@ def test_pipeline_on_cad_sheet(tmp_path):
     assert {"101", "102", "103"} <= {r["label"] for r in fd["rooms"]}  # read from the text layer, no OCR
     reachable = {p["label"] for p in fd["pois"]} & {"101", "102", "103"}
     assert len(reachable) >= 2  # rooms linked to the corridor through their doors
+
+
+def test_flattened_arc_door_is_found(tmp_path):
+    """Some CAD exports write the swing as a chain of short straight segments; it is still a door."""
+    doc = pymupdf.open()
+    page = doc.new_page(width=200, height=200)
+    hinge = np.array([100.0, 100.0])
+    sh = page.new_shape()
+    sh.draw_line(pymupdf.Point(*hinge), pymupdf.Point(100, 90))  # leaf to the open position
+    pts = [hinge + 10 * np.array([math.sin(a), -math.cos(a)]) for a in np.linspace(0, math.pi / 2, 13)]
+    for p, q in zip(pts[:-1], pts[1:], strict=True):
+        sh.draw_line(pymupdf.Point(*p), pymupdf.Point(*q))
+    sh.draw_line(pymupdf.Point(110, 100), pymupdf.Point(140, 100))  # wall the closed door meets
+    sh.finish(color=(0, 0, 0), width=0.3)
+    sh.commit()
+    doors, drop = find_doors(parse_page(page))
+    assert len(doors) == 1
+    a, b = doors[0]
+    assert np.allclose(a, hinge, atol=0.5) and np.allclose(b, [110, 100], atol=0.5)
+    assert len(drop) >= 13  # the leaf and every arc segment are left out of the wall drawing
