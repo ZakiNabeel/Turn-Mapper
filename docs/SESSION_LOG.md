@@ -165,3 +165,11 @@ correct 8–10 B/C floors in Studio and export training annotations (S3); try St
 **Verified:** nothing run yet; docs only.
 **Not verified / unknown:** whether the FAST A/B/C PDF is vector or raster; app coordinate frame; how the app stores walkable/graph/POIs.
 **Next step:** Prompt 1 (inspect FAST PDF) in TURN-Mapper; Prompt A1 (app audit) in TURN-Field-Test.
+
+## 2026-10-27 — real plans from 21 other institutions
+
+- New: `scripts/eval_public_plans.py` (one generic config, CAD-aware PDF input, label recall vs PDF text layer); `docs/RESULTS_PUBLIC_PLANS_2026-10-27.md`.
+- Result (classical as released, 24 plans): 20/24 structurally valid, visual grade A 0 / B 4 / C 20; 0 wall crossings; median 75 s/plan. Main causes: sheet border/title block (7), colour wayfinding maps (8), door swings/street fill (3), scan (1), campus map (1).
+- New rule `sheet_frame_outside` (vectorize.py, default on): outdoors inside a drawing-sheet border is background. Synthetic, style stress (11/12), FAST 14/14 counts and scales unchanged; 109 tests pass. Grade B 4 → 5 (Cal Poly Engineering); 5 held-out plans unchanged (no frames).
+- Learned S3a on CPU: 148 s on the smallest plan, 159 graph pieces; the 24-plan learned run needs Kaggle GPU.
+- Next: annotate 10 public plans + A block; learned/hybrid on GPU; door-swing and legend/title-block rules; Studio crop/page picker; FloorPlanCAD fine-tune.

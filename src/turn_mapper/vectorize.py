@@ -232,6 +232,10 @@ def vectorize(
         from .segment import border_connected
 
         seg.background = border_connected(~wall_c)
+    if params.sheet_frame_outside:
+        # entrances are sealed with twice the door gap so the outdoors cannot flow into the corridors
+        sealed = close_wall_gaps(wall_c, 2 * gap_px, t)
+        seg.background = seg.background | (sheet_frame_outside(sealed, seg.background, t) & ~wall_c)
 
     free = ~wall_c & ~seg.background
     n, lab, stats, _ = cv2.connectedComponentsWithStats(free.astype(np.uint8), connectivity=4)
@@ -371,3 +375,48 @@ def wall_segments_from_mask(wall: np.ndarray, thickness: float) -> list:
             if Point(a).distance(Point(b)) >= max(thickness, 2):
                 segs.append((tuple(a), tuple(b), thickness))
     return segs
+
+
+def sheet_frame_outside(wall: np.ndarray, background: np.ndarray, t: float) -> np.ndarray:
+    """Outdoor space enclosed by a drawing-sheet border (CAD exports draw a frame round the page).
+
+    Without this the outdoors inside the frame is one huge closed space and becomes the "corridor". A frame
+    is a wall component whose bounding box spans most of the image and that runs along at least three of
+    its own bounding-box edges. The outdoors is then the free space that hugs the inside of the frame: one
+    component touching at least half of the frame's inner perimeter and covering at least a quarter of the
+    framed area. A building drawn up to the image edge does not qualify: the spaces along its outer wall are
+    many separate rooms, none of which runs round half the perimeter."""
+    h, w = wall.shape
+    out = np.zeros_like(wall)
+    n, lab, st, _ = cv2.connectedComponentsWithStats(wall.astype(np.uint8), connectivity=8)
+    free = ~wall & ~background
+    band = max(3, int(round(2 * t)) + 2)
+    for i in range(1, n):
+        x, y, bw, bh, _ = st[i]
+        if bw < 0.6 * w or bh < 0.6 * h:
+            continue
+        comp = lab[y : y + bh, x : x + bw] == i
+        edges = [comp[:band].any(0), comp[-band:].any(0), comp[:, :band].any(1), comp[:, -band:].any(1)]
+        if sum(e.mean() >= 0.9 for e in edges) < 3:
+            continue
+        inner = np.zeros_like(wall)
+        y0, y1, x0, x1 = y + band, y + bh - band, x + band, x + bw - band
+        if y1 - y0 < 3 * band or x1 - x0 < 3 * band:
+            continue
+        ring = np.zeros_like(wall)
+        ring[y0 : y0 + band, x0:x1] = True
+        ring[y1 - band : y1, x0:x1] = True
+        ring[y0:y1, x0 : x0 + band] = True
+        ring[y0:y1, x1 - band : x1] = True
+        inner[y0:y1, x0:x1] = True
+        fn_, flab = cv2.connectedComponents((free & inner).astype(np.uint8), connectivity=4)
+        if fn_ <= 1:
+            continue
+        hits = np.bincount(flab[ring & free], minlength=fn_)
+        hits[0] = 0
+        best = int(hits.argmax())
+        perim = int((ring & free).sum())
+        area = int((flab == best).sum())
+        if perim and hits[best] >= 0.5 * perim and area >= 0.25 * (y1 - y0) * (x1 - x0):
+            out |= flab == best
+    return out
