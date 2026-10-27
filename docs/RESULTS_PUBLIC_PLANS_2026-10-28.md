@@ -97,3 +97,65 @@ The two DfE GA plans have fewer than 10 printed room numbers, so they are graded
 3. **Dark-fill threshold:** treat only near-black fills as walls. Then re-check the wayfinding maps.
 4. **Corridor graph:** join corridor pieces across fire doors (Bangor: 19 pieces), and clip the sheet margin round the building.
 5. **Studio:** show the operator the known doors and corridor choice so one click fixes a wrong corridor.
+
+---
+
+# Round 3 (same day): next steps 3 and 4 done
+
+**Code:** commit `8aaa108` (fills) and the commit after it. Same 28 plans, same generic config, same scorer.
+**Rules were built on the dev plans only** (Bangor Brigantia for the fire doors, Cal Poly for the margin). The
+held-out plans were run once, after the change was frozen. Note that the held-out plans were already seen once
+in round 2, so they are "seen-once" rather than pristine.
+
+## What changed
+
+1. **Fills:** only near-black fills are walls (luminance < 0.2, was < 0.45). Grey and colour room fills on
+   wayfinding maps are no longer drawn as solid wall.
+2. **Fire doors / flattened arcs:** some CAD writers export a door swing as a chain of 10-20 short straight
+   segments instead of a curve. These chains are now recognised as arcs (`polyline_arcs`: equal-length
+   segments that fit a circle within 5% of its radius). On Bangor Brigantia this finds 102 swings instead of 63,
+   including every fire door across the corridor, so the corridor is no longer cut into pieces.
+3. **Sheet margin (tried, off):** a building outline inside the sheet frame (walls closed over gaps up to 4 door
+   widths) with a 2-door-width strip kept along the walls. On Cal Poly Engineering it removed the margin but also
+   the open-air walkways that its rooms open onto, so reachable fell 0.407 → 0.186; on Cal Poly Business 0.25 →
+   0.05. Left in the code as `frame_footprint_gaps`, default off. Cal Poly's walkways are real routes; the margin
+   is a cosmetic fault, not a routing one.
+4. **Studio:** doors read from a door swing are drawn solid and exported with confidence 0.95; doors that are
+   only a gap in the walls are dashed (confidence 0.7), so the operator checks those first. No contract change.
+5. **Annotation drafts:** `scripts/make_annotation_drafts.py` creates one Studio project per plan with the
+   automatic map already run, for the team to correct into ground truth (`docs/DATA_AND_ANNOTATION.md`).
+
+## Printed-room-number score (round 2 → round 3)
+
+| set | plan | separated | reachable | named |
+|---|---|---|---|---|
+| dev | Bangor Brigantia 1 | 0.707 → 0.663 | 0.174 → **0.326** | 0.174 → **0.315** |
+| dev | Tufts Tisch | 0.000 → **0.463** | 0 → 0 | 0 → 0 |
+| dev | other 9 | unchanged | unchanged | unchanged |
+| **dev mean (11)** | | 0.421 → **0.459** | 0.082 → **0.096** | 0.080 → **0.093** |
+| held out | Warwick L02 | 0.304 → **0.582** | 0.076 → **0.342** | 0.063 → **0.291** |
+| held out | Conwy school | 0.076 → **0.367** | 0.013 → 0.025 | 0 → 0.025 |
+| held out | Bern ExWi | 0.044 → 0.067 | 0 → 0 | 0 → 0 |
+| held out | AA, UW, Truman | unchanged | unchanged | unchanged |
+| **held-out mean (6)** | | 0.150 → **0.248** | 0.015 → **0.061** | 0.011 → **0.053** |
+
+From the released pipeline (round 1) to now: dev reachable 0.029 → 0.096, held-out reachable 0.004 → 0.061.
+
+## Visual grades (same rubric)
+
+| set | round 2: A / B / C | round 3: A / B / C | changed |
+|---|---|---|---|
+| dev (19) | 0 / 6 / 13 | 0 / **8** / 11 | Bangor Brigantia C → B (one connected corridor ring); Reading C → B (open library floor now routed) |
+| held out (9) | 0 / 3 / 6 | 0 / 3 / 6 | Warwick stays B but its routes now follow the corridors instead of spreading through the offices |
+| all 28 | 0 / 9 / 19 | 0 / **11** / 17 | |
+
+## Regression checks
+
+FAST 14 floors: identical counts and scales. Synthetic evaluation: identical (timings only). Style stress
+11/12. pytest 112 passed (1 new test for flattened arcs).
+
+## Known costs
+
+- Bern ExWi now takes 26 min (was 9): 352 graph pieces, and the bridging step routes each one over the whole
+  page. A per-pair window or caching unroutable pieces would fix this.
+- No plan reaches grade A yet.
