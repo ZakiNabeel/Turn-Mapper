@@ -239,15 +239,14 @@ def vectorize(
 
         seg.background = border_connected(~wall_c)
     if params.outdoor_apron_gaps > 0:
-        # CAD sheets: the outdoors (open to the page edge or closed in by the sheet border) is not walkable,
-        # except a strip along the building (entrances, covered walkways, open-air corridors), as indoor-map
-        # tools route over the whole level and treat only the far outdoors and the sheet margin as void
-        outdoor = border_connected_free = seg.background | _border_free(wall_c)
-        fo, frame = sheet_frame_outside(wall_c, border_connected_free, t, return_frame=True)
-        outdoor = outdoor | fo
+        # CAD sheets closed in by a drawing border: the outdoors inside the border is not walkable, except a
+        # strip along the building (entrances, covered walkways, open-air corridors). Outdoors open to the
+        # page edge stays void as before.
+        border_free = seg.background | _border_free(wall_c)
+        fo, frame = sheet_frame_outside(wall_c, border_free, t, return_frame=True)
         building = wall_c & ~frame
         dist = cv2.distanceTransform((~building).astype(np.uint8), cv2.DIST_L2, 3)
-        seg.background = outdoor & (dist > params.outdoor_apron_gaps * gap_px) & ~wall_c
+        seg.background = border_free | (fo & (dist > params.outdoor_apron_gaps * gap_px) & ~wall_c)
     elif params.sheet_frame_outside:
         # entrances are sealed with twice the door gap so the outdoors cannot flow into the corridors
         sealed = close_wall_gaps(wall_c, 2 * gap_px, t)

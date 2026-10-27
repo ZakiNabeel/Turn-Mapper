@@ -173,3 +173,10 @@ correct 8–10 B/C floors in Studio and export training annotations (S3); try St
 - New rule `sheet_frame_outside` (vectorize.py, default on): outdoors inside a drawing-sheet border is background. Synthetic, style stress (11/12), FAST 14/14 counts and scales unchanged; 109 tests pass. Grade B 4 → 5 (Cal Poly Engineering); 5 held-out plans unchanged (no frames).
 - Learned S3a on CPU: 148 s on the smallest plan, 159 graph pieces; the 24-plan learned run needs Kaggle GPU.
 - Next: annotate 10 public plans + A block; learned/hybrid on GPU; door-swing and legend/title-block rules; Studio crop/page picker; FloorPlanCAD fine-tune.
+
+## 2026-10-28 — vector-PDF input and door-based corridors (real plans, round 2)
+
+- Diagnosis: routes only on the outdoors (circulation = largest space), door swings sealing gaps, hatching shattering rooms, OCR used despite a PDF text layer. Industry comparison and plan: `docs/PLAN_REAL_PLANS_2026-10-28.md`.
+- New: `vector_pdf.py` (PdfVectorAdapter), text-layer labels, known doors, circulation seed by doors, corridor-shape and link rules (vector sheets only), lazy region masks; `scripts/score_textlayer.py`.
+- Results `docs/RESULTS_PUBLIC_PLANS_2026-10-28.md`: dev reachable 0.029 → 0.082, separated 0.214 → 0.421; held-out (9 plans) reachable 0.004 → 0.015; visual B 4 → 9 of 28, A 0. FAST/synthetic/style unchanged; 111 tests.
+- Known fault: mid-grey fills of wayfinding maps drawn as wall (threshold 0.45). Next: annotation, FloorPlanCAD vector-entity classifier, fill threshold, fire-door corridor joining.

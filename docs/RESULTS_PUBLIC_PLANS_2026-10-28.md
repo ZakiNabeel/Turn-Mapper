@@ -1,0 +1,99 @@
+# Real plans, round 2: vector-PDF input and door-based corridors (2026-10-28)
+
+**Plan, diagnosis and industry comparison:** `docs/PLAN_REAL_PLANS_2026-10-28.md`.
+**Previous round:** `docs/RESULTS_PUBLIC_PLANS_2026-10-27.md`.
+
+## Setup
+
+**Code:** this commit, classical segmenter, one generic config for every plan (as in round 1).
+
+**Plans:**
+- **Development, 19 plans / 16 institutions:** batch 1. The rules were built while looking at these.
+- **Held out, 9 plans / 8 institutions.** Not looked at until the rules were frozen.
+  - Batch 2: AA, Michigan, Bern, UW, Warwick.
+  - Batch 3, downloaded 2026-10-27 evening: UK Department for Education primary and secondary GA plans, Conwy County Borough Council school, Truman State.
+  - A Southwest Minnesota State file arrived truncated and could not be used.
+- **In total:** 28 plans from 24 institutions.
+
+**Before vs after:**
+- **Before:** the pipeline as released (v0.3.x). Page rendered as a picture, circulation = largest space, no frame rule.
+- **After:** vector-PDF adapter plus the new corridor rules.
+- Run with `scripts/eval_public_plans.py` (`--no-vector` and `TURN_PARAMS_JSON` reproduce "before").
+
+**Regression checks (all unchanged after the change):**
+
+| check | result |
+|---|---|
+| FAST, all 14 floors | identical counts and scales |
+| Synthetic evaluation | identical table |
+| Style stress | 11/12 |
+| pytest | 111 passed (2 new tests) |
+
+## Objective score: printed room numbers (`scripts/score_textlayer.py`)
+
+Plans whose PDF text layer holds at least 10 room numbers are scored.
+
+- **separated:** the number lies in its own room space.
+- **reachable:** that room is a destination on the main route graph.
+- **named:** the destination carries that number.
+
+Title-block numbers also count, so the scores are lower bounds.
+
+| set | plan | numbers | separated | reachable | named |
+|---|---|---|---|---|---|
+| dev | Bangor Brigantia 1 | 92 | 0.457 → 0.707 | 0.283 → **0.174** | 0.011 → 0.174 |
+| dev | Bangor Main Arts 1 | 113 | 0.106 → 0.496 | 0.000 → 0.071 | 0.000 → 0.071 |
+| dev | Cal Poly Business 1 | 40 | 0.450 → 0.300 | 0.000 → 0.250 | 0.000 → 0.225 |
+| dev | Cal Poly Engineering 1 | 59 | 0.644 → 0.508 | 0.034 → **0.407** | 0.034 → 0.407 |
+| dev | Cronulla HS | 11 | 0.636 → 0.909 | 0 → 0 | 0 → 0 |
+| dev | Minnesota State Armstrong 1 | 124 | 0.000 → 0.532 | 0 → 0 | 0 → 0 |
+| dev | Minnesota State Library 2 | 14 | 0.000 → 0.143 | 0 → 0 | 0 → 0 |
+| dev | Reading library 1 | 10 | 0.000 → 1.000 | 0 → 0 | 0 → 0 |
+| dev | Simmons | 25 | 0.000 → 0.040 | 0 → 0 | 0 → 0 |
+| dev | Tufts Tisch | 54 | 0.056 → 0.000 | 0 → 0 | 0 → 0 |
+| dev | Wesleyan (scan) | 30 | 0 → 0 | 0 → 0 | 0 → 0 |
+| **dev mean (11)** | | | **0.214 → 0.421** | **0.029 → 0.082** | **0.004 → 0.080** |
+| held out | AA | 22 | 0.273 → 0.182 | 0 → 0 | 0 → 0 |
+| held out | Bern ExWi | 45 | 0.022 → 0.044 | 0.022 → 0.000 | 0 → 0 |
+| held out | UW 840 | 11 | 0.273 → 0.273 | 0 → 0 | 0 → 0 |
+| held out | Warwick L02 | 79 | 0.671 → 0.304 | 0.000 → 0.076 | 0.000 → 0.063 |
+| held out | Conwy school | 79 | 0.000 → 0.076 | 0.000 → 0.013 | 0 → 0 |
+| held out | Truman Baldwin | 52 | 0.019 → 0.019 | 0 → 0 | 0 → 0 |
+| **held-out mean (6)** | | | 0.210 → 0.150 | **0.004 → 0.015** | 0.000 → 0.011 |
+
+The two DfE GA plans have fewer than 10 printed room numbers, so they are graded visually only.
+
+## Visual grade (rubric unchanged from round 1)
+
+- **A:** usable after light review.
+- **B:** routes run on the real corridors inside the building, but destinations are missing or wrong.
+- **C:** not usable.
+
+| set | before: A / B / C | after: A / B / C | changed grades |
+|---|---|---|---|
+| dev (19) | 0 / 3 / 16 | 0 / **6** / 13 | Bangor Main Arts, Cal Poly Engineering and Minnesota State Library move C → B |
+| held out (9) | 0 / 1 / 8 | 0 / **3** / 6 | Michigan Fine Arts and Warwick move C → B; Bern stays B |
+| all 28 | 0 / 4 / 24 | 0 / **9** / 19 | |
+
+**Notes on individual plans:**
+- **Cal Poly Engineering** (the plan in the user's screenshot). Routes now run through the interior corridor network and reach 41% of the printed room numbers (was 3%).
+  - Cal Poly's corridors are partly open-air walkways, so routes also run outside the building.
+  - The sheet margin is still walkable on this plan. An outdoor strip limited to the building edge was tried (`vector_outdoor_apron_gaps`), but it lowered Cal Poly Business, so it is off.
+- **Bangor Brigantia:** rooms are better separated (0.46 → 0.71), but fewer are reachable (0.28 → 0.17). The corridor graph is split into 19 pieces where fire doors cut the corridor.
+
+## What this shows
+
+1. **Diagnosis confirmed.** On CAD sheets drawn like Cal Poly's and Bangor's (lines, door swings with gaps, text in the PDF), reading the drawing's own vectors and text more than doubles room separation and makes destinations reachable. Labels are now exact where they are found (named = reachable).
+2. **Small held-out gain.** It does not yet generalise.
+   - Held-out plans use other conventions: furniture drawn on the same layer as walls (Warwick, Bern), coloured room fills, plans with no door swings (AA), and GA sheets with solid-filled existing buildings (DfE).
+   - Reachable rose only from 0.4% to 1.5%. Visual B grades rose from 1 to 3 of 9.
+3. **A new fault on colour wayfinding maps (Reading, Michigan State, Tufts, Simmons, Cronulla).** Mid-grey room fills are now drawn as solid wall, because the dark-fill threshold is luminance < 0.45. A stricter threshold (near-black only) is the obvious next fix, but it was not applied after the held-out run.
+4. **No plan reaches grade A.** Industry tools (Pointr reports 90% detection on 19 plans) get there with models trained on thousands of digitised buildings and a human QA step. Rules alone are not enough for "any institution".
+
+## Next steps
+
+1. **Annotate** the 9 held-out plans and the FAST A block (rooms, doors, corridors) for a real scored benchmark.
+2. **Learn which vector entities are walls, doors and furniture.** FloorPlanCAD labels exactly these CAD primitives (about 15,000 drawings). This replaces stroke-style heuristics.
+3. **Dark-fill threshold:** treat only near-black fills as walls. Then re-check the wayfinding maps.
+4. **Corridor graph:** join corridor pieces across fire doors (Bangor: 19 pieces), and clip the sheet margin round the building.
+5. **Studio:** show the operator the known doors and corridor choice so one click fixes a wrong corridor.
