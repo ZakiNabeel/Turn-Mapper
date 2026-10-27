@@ -1,0 +1,29 @@
+id	set	page	institution	kind	floor	url
+calpoly_013	dev	1	Cal Poly San Luis Obispo	university	Engineering bldg 13	https://afd.calpoly.edu/facilities/campus-maps/building-floor-plans/docs/Building%20013-0_Engineering.pdf
+calpoly_003	dev	1	Cal Poly San Luis Obispo	university	Business bldg 3	https://afd.calpoly.edu/facilities/campus-maps/building-floor-plans/docs/Building%20003-0_Business.pdf
+mnsu_ah1	dev	1	Minnesota State Univ. Mankato	university	Armstrong Hall 1st	https://mankato.mnsu.edu/globalassets/maps/university/buildings/2021/ah_01_firstfloor_2021.pdf
+mnsu_ml2	dev	1	Minnesota State Univ. Mankato	university	Memorial Library 2nd	https://mankato.mnsu.edu/globalassets/maps/university/buildings/2021/ml_02_secondfloor_2021.pdf
+reading_1	dev	1	University of Reading	university	Library 1st	https://www.reading.ac.uk/library/-/media/project/functions/library/documents/maps-and-floor-plans/1st-floor-plan.pdf
+bangor_ma0	dev	1	Bangor University	university	Main Arts ground	https://www.bangor.ac.uk/sites/default/files/2023-09/MainArts-GroundFloor.pdf
+bangor_br1	dev	1	Bangor University	university	Brigantia 1st	https://www.bangor.ac.uk/sites/default/files/2023-09/R147001-First.pdf
+appstate_1	dev	1	Appalachian State University	university	Belk Library 1st	https://library.appstate.edu/wp-content/uploads/2026/04/floorplans-1st.png
+lonestar_1	dev	1	Lone Star College	college	University Center L1	https://www.lonestar.edu/departments/universitycenter/UC_Floor_Plan_Level1.png
+simmons_all	dev	1	Simmons University	university	Main College Bldg	https://www.simmons.edu/sites/default/files/2021-07/Room-Number-Floorplans-FY22.pdf
+aa_all	heldout	3	Architectural Association School	college	Bedford Sq	https://www.aaschool.ac.uk/assets/240911_aa_plans_2024-25_digital-2.pdf
+wesleyan_b2	dev	1	Wesleyan University	university	Bennet Hall 2nd	https://www.wesleyan.edu/reslife/housing/residence/floor_plans/bennet%202nd%20floor.pdf
+tufts_tisch	dev	1	Tufts University	university	Tisch Library	https://tischlibrary.tufts.edu/sites/default/files/2026-08/Tisch%20library%20webmap%200826.pdf
+surrey_1	dev	1	University of Surrey	university	Library L1	https://my.surrey.ac.uk/sites/default/files/styles/960x540/public/2026-10/floor-plan-1.png?h=c53b8a41&itok=wgnCCnXP
+msu_1	dev	1	Michigan State University	university	Main Library 1st	https://img.lib.msu.edu/structure/1Main.pdf
+ucba_m1	dev	1	UC Blue Ash College	college	Muntz Hall 1st	https://www.ucblueash.edu/content/ucblueash/resources/getting-around/floor-plans/muntz/_jcr_content/main/image_1220952219.img.jpeg/1754938241000/muntz-1-2025.jpeg
+mst_1	dev	1	Missouri S&T	university	Library 1st	https://d2jv02qf7xgjwx.cloudfront.net/accounts/368882/images/1st_Floor.jpg
+evelina_lg	dev	1	Evelina London (Guy's & St Thomas' NHS)	hospital	Southwark Wing LG	https://www.evelinalondon.nhs.uk/resources/maps/southwark-wing-lower-ground-floor.pdf
+wheaton_hs	dev	1	Wheaton High School (MCPS)	school	school map	https://prod.montgomeryschoolsmd.org/siteassets/schools/high-schools/r-w/wheatonhs/school-map-for-printing.pdf
+cronulla_hs	dev	1	Cronulla High School (NSW)	school	school map	https://assets.schools.nsw.gov.au/content/dam/doe/sws/schools/c/cronulla-h/School%20map/CHS%20Map.pdf
+unibe_exwi	heldout	3	University of Bern	university	ExWi building	https://www.unibe.ch/unibe/portal/content/e809/e946/e947/e133258/e478925/e478929/02_Exwi_ger.pdf
+umich_fa1	heldout	1	University of Michigan	university	Fine Arts Library 1	https://www.lib.umich.edu/cms-files/1f1bf8fb04fb791dc15d369e73ba3abc/FineArts_Floor1_0.pdf
+warwick_l2	heldout	1	University of Warwick	university	Physics STEM L02 GA plan	https://warwick.ac.uk/fac/sci/physics/news/stemgc/phase1/19104-bdp-01x459-l02-dr-a-200001_p10_-_proposed_ga_plan_-_level_02_-_tile_01.pdf
+uw_840	heldout	1	University of Washington (pressbooks)	university	840 Level 2	https://uw.pressbooks.pub/app/uploads/sites/943/2025/04/840-Floor-Plans-Level-2-.pdf
+truman_baldwin	heldout	1	Truman State University	university	Baldwin Hall	https://c3c5e312.delivery.rocketcdn.me/wp-content/uploads/2020/04/Baldwin-Hall-Floor-Plans2.pdf
+dfe_sec00	heldout	1	UK Department for Education	school	Secondary school GA Level 00	https://assets.publishing.service.gov.uk/media/6968f9ec5fd54abe6531a7fc/SEC-DFE-XX-00-D-X-0201-Secondary_School_GA_Plan_Level_00-A-C01.pdf
+dfe_pri00	heldout	1	UK Department for Education	school	Primary school GA Level 00	https://assets.publishing.service.gov.uk/media/6968f61650a5ef67d031a7f3/PRI-DFE-XX-00-D-X-0201-Primary_School_GA_Plan_Level_00-A-C01.pdf
+conwy_school	heldout	1	Conwy County Borough Council	school	Proposed floor plans	https://www.conwy.gov.uk/en/Resident/Education-and-Families/Education-Consultations/documents/Proposed-Floor-Plans.pdf
