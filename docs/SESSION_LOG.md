@@ -180,3 +180,12 @@ correct 8–10 B/C floors in Studio and export training annotations (S3); try St
 - New: `vector_pdf.py` (PdfVectorAdapter), text-layer labels, known doors, circulation seed by doors, corridor-shape and link rules (vector sheets only), lazy region masks; `scripts/score_textlayer.py`.
 - Results `docs/RESULTS_PUBLIC_PLANS_2026-10-28.md`: dev reachable 0.029 → 0.082, separated 0.214 → 0.421; held-out (9 plans) reachable 0.004 → 0.015; visual B 4 → 9 of 28, A 0. FAST/synthetic/style unchanged; 111 tests.
 - Known fault: mid-grey fills of wayfinding maps drawn as wall (threshold 0.45). Next: annotation, FloorPlanCAD vector-entity classifier, fill threshold, fire-door corridor joining.
+
+## 2026-10-28 (night) — round 3 fixes; learned vs classical on real plans
+
+- Fixes: near-black fills only (0.2); flattened polyline arcs read as door swings (Bangor 63 → 102 doors, corridor ring connected); sheet-margin outline rule tried and kept off (cut Cal Poly's open-air walkways); Studio draws wall-gap doors dashed (confidence 0.7) vs drawn swings solid (0.95), no contract change; `scripts/make_annotation_drafts.py`.
+- Classical round 3: dev reachable 0.082 → 0.096, held-out 0.015 → 0.061 (Warwick 0.08 → 0.34); visual B 9 → 11 of 28, A 0. FAST/synthetic/style unchanged; 112 tests.
+- Kaggle T4, 28 plans, same code (16e50c8): reachable dev classical 0.082 / learned 0.163 / hybrid 0.138; held-out 0.015 / 0.055 / 0.011. Learned best on real plans; not promoted until the A block is annotated (rule in ML_IMPROVEMENT_PLAN).
+- Kaggle version 2 (learned on 87941eb, with the arc fix) was still running at the time of writing.
+- Not done: FloorPlanCAD classifier (HF copy is raster only; SVG release is a Google Drive download, CC BY-NC — needs the team's OK). Bern ExWi slow (26 min) in graph bridging.
+- Deck updated: Round 3 slide, learning verdict, conclusions, next steps.
