@@ -445,6 +445,7 @@ def _bridge_components(nodes, edges, add_node, add_edge, rprep, wall_hard, max_d
     """Join small graph components to the largest: first with the shortest valid straight edge, else with
     a routed path through the valid area (repairs breaks at narrow passages, e.g. beside a stairwell).
     Components that can't be joined are reported."""
+    unroutable: set[frozenset] = set()  # pieces whose routed fallback already failed: do not route them again
     for _ in range(20):
         g = nx.Graph([(e.a, e.b) for e in edges])
         g.add_nodes_from(nodes)
@@ -473,6 +474,9 @@ def _bridge_components(nodes, edges, add_node, add_edge, rprep, wall_hard, max_d
                 joined = True
                 break
             # routed fallback: nearest node pair (by distance), path through the valid raster
+            key = frozenset(comp)
+            if key in unroutable:
+                continue
             pairs = []
             hub = np.array([nodes[m].kind in ("corridor", "junction") for m in main_ids])
             for n in comp:
@@ -496,6 +500,7 @@ def _bridge_components(nodes, edges, add_node, add_edge, rprep, wall_hard, max_d
                 break
             if joined:
                 break
+            unroutable.add(key)
         if not joined:
             for comp in comps[1:]:
                 issues.append(
