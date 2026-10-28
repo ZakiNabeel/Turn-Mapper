@@ -5,7 +5,7 @@ corrected floor.json is then the reference for scoring (docs/DATA_AND_ANNOTATION
 Plans stay where they are on disk and in the Studio folder (both gitignored); nothing is committed.
 
     python scripts/make_annotation_drafts.py PLANS_DIR SOURCES_TSV --studio studio_projects --set heldout
-    python scripts/make_annotation_drafts.py samples/private --files fast_blocks.pdf:3 --studio studio_projects
+    python scripts/make_annotation_drafts.py samples/private --files fast_blocks.pdf:3
 """
 
 from __future__ import annotations
@@ -44,7 +44,8 @@ def main() -> None:
     if a.files:
         for item in a.files.split(","):
             fname, _, page = item.partition(":")
-            todo.append((Path(fname).stem + (f"_p{page}" if page else ""), plans / fname, int(page or 0) or None))
+            name = Path(fname).stem + (f"_p{page}" if page else "")
+            todo.append((name, plans / fname, int(page or 0) or None))
     else:
         rows = csv.DictReader(open(a.sources, encoding="utf-8"), delimiter="\t")
         seen = set()

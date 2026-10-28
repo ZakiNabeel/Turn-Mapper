@@ -17,6 +17,7 @@ What remains is rendered as clean black strokes for the usual raster stages.
 from __future__ import annotations
 
 import math
+import os
 from pathlib import Path
 
 import cv2
@@ -317,10 +318,19 @@ def find_hatching(prim: dict, skip: set[int]) -> set[int]:
     return out
 
 
-def render(page, px_per_pt: float, min_line_px: int = 2) -> tuple[np.ndarray, dict]:
+def render(
+    page, px_per_pt: float, min_line_px: int = 2, line_model: str | None = None
+) -> tuple[np.ndarray, dict]:
     prim = parse_page(page)
     doors, drop = find_doors(prim)
     hatch = find_hatching(prim, drop)
+    furniture: set[int] = set()
+    if line_model:
+        # learned line classes (FloorPlanCAD): furniture and fixtures drawn on the wall layer are left out
+        from .primitives import load_classifier, stroke_groups
+
+        groups = stroke_groups(prim["strokes"], load_classifier(line_model))
+        furniture = {k for k, g in groups.items() if g == "furniture" and k not in drop}
     w, h = int(round(page.rect.width * px_per_pt)), int(round(page.rect.height * px_per_pt))
     img = np.full((h, w), 255, np.uint8)
     for subs in prim["fills"]:
@@ -339,7 +349,7 @@ def render(page, px_per_pt: float, min_line_px: int = 2) -> tuple[np.ndarray, di
             layer ^= one
         img[y0:y1, x0:x1][layer > 0] = 0
     for i, s in enumerate(prim["strokes"]):
-        if i in drop or i in hatch:
+        if i in drop or i in hatch or i in furniture:
             continue
         lw = max(min_line_px, int(round(s["style"][0] * px_per_pt)))
         pts = np.round(s["pts"] * px_per_pt).astype(np.int32)
@@ -350,6 +360,7 @@ def render(page, px_per_pt: float, min_line_px: int = 2) -> tuple[np.ndarray, di
         "door_swings": len(doors),
         "hatch_segments": len(hatch),
         "dark_fills": len(prim["fills"]),
+        "furniture_strokes": len(furniture),
     }
     return np.dstack([img] * 3), {"known_doors": known, "vector_stats": stats}
 
@@ -404,7 +415,9 @@ class PdfVectorAdapter:
             spec.options.get("dpi") or min(300.0, float(spec.options.get("max_side_px", 5000)) * 72 / long_pt)
         )
         s = dpi / 72
-        rgb, meta = render(page, s)
+        # optional learned line classifier: option ``line_model`` or env TURN_LINE_MODEL (a joblib path)
+        line_model = spec.options.get("line_model") or os.environ.get("TURN_LINE_MODEL") or None
+        rgb, meta = render(page, s, line_model=line_model)
         tb = text_boxes(page, s)
         if spec.crop:
             x0, y0 = spec.crop[0], spec.crop[1]

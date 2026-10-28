@@ -122,3 +122,26 @@ def test_flattened_arc_door_is_found(tmp_path):
     a, b = doors[0]
     assert np.allclose(a, hinge, atol=0.5) and np.allclose(b, [110, 100], atol=0.5)
     assert len(drop) >= 13  # the leaf and every arc segment are left out of the wall drawing
+
+
+def test_line_classifier_hook_drops_furniture():
+    """A line model's 'furniture' strokes are left out of the wall drawing; others stay."""
+    from turn_mapper import primitives
+
+    class Fake:  # long segments are walls, short ones furniture
+        classes_ = np.array([primitives.GROUPS.index("wall"), primitives.GROUPS.index("furniture")])
+
+        def predict_proba(self, x):
+            wall = (x[:, primitives.FEATURES.index("len_u")] > 2).astype(float)
+            return np.column_stack([wall, 1 - wall])
+
+    strokes = [
+        {"kind": "l", "pts": np.array([[0.0, 0.0], [100.0, 0.0]]), "style": (1.0, (0, 0, 0))},
+        {"kind": "l", "pts": np.array([[0.0, 10.0], [100.0, 10.0]]), "style": (1.0, (0, 0, 0))},
+        {"kind": "l", "pts": np.array([[50.0, 50.0], [55.0, 50.0]]), "style": (1.0, (0, 0, 0))},
+        {"kind": "l", "pts": np.array([[60.0, 50.0], [65.0, 50.0]]), "style": (1.0, (0, 0, 0))},
+        {"kind": "l", "pts": np.array([[70.0, 50.0], [75.0, 50.0]]), "style": (1.0, (0, 0, 0))},
+    ]
+    groups = primitives.stroke_groups(strokes, Fake())
+    assert groups[0] == groups[1] == "wall"
+    assert groups[2] == groups[3] == groups[4] == "furniture"
