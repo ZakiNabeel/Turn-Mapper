@@ -261,7 +261,7 @@ function renderPanels() {
     ["Run time", S.rec.stats && S.rec.stats.seconds ? S.rec.stats.seconds + " s" : "–"],
   ]);
   $("#scaleNow").innerHTML = s ? kv([["Current", `${(s.scale_m_per_px * 100).toFixed(3)} cm/px`], ["Source", s.scale_source]]) : "Run the floor first.";
-  renderPairs(); renderChecks(); renderProps(); renderLinks();
+  renderPairs(); renderChecks(); renderProps(); renderLinks(); renderRoutePanel(); renderRouteSteps();
 }
 function renderPairs() {
   const ul = $("#pairList"); ul.innerHTML = "";
@@ -320,10 +320,48 @@ async function renderLinks() {
     }
     ul.appendChild(li);
   });
+  Object.entries(L.quality || {}).sort().forEach(([fid, q]) => {
+    const cls = q.grade === "ready" ? "ok" : q.grade === "needs work" ? "err" : "edit";
+    ul.appendChild(h("li", {}, `<span class="badge ${cls}">${esc(q.grade)}</span> ${esc(fid)}` +
+      (q.reasons.length ? `<br><small>${esc(q.reasons.join("; "))}</small>` : "")));
+  });
   L.warnings.forEach((w) => ul.appendChild(h("li", { className: "issue" }, `<code>${esc(w.code)}</code><br>${esc(w.message)}`)));
   const opts = Object.entries(L.nodes).flatMap(([f, ns]) => ns.map((n) => `<option value="${esc(f)}:${esc(n.id)}:${esc(n.type)}">${esc(f)} · ${esc(n.id)} (${esc(n.type)})</option>`)).join("");
   $("#linkA").innerHTML = opts; $("#linkB").innerHTML = opts;
 }
+// ---------------------------------------------------------------- route across floors
+async function renderRoutePanel() {
+  if (!S.pid || !$("#routeFrom")) return;
+  let places; try { places = await api(`${P()}/places`); } catch (_) { return; }
+  const keep = [$("#routeFrom").value, $("#routeTo").value];
+  const opts = places.map((p) => `<option value="${esc(p.floor_id)}:${esc(p.node_id)}">${esc(p.floor_id)} · ${esc(p.label || p.name)}</option>`).join("");
+  $("#routeFrom").innerHTML = opts; $("#routeTo").innerHTML = opts;
+  if (keep[0]) $("#routeFrom").value = keep[0];
+  if (keep[1]) $("#routeTo").value = keep[1];
+}
+function renderRouteSteps() {
+  const ol = $("#routeSteps"); ol.innerHTML = ""; const r = S.route;
+  if (!r) { $("#routeSummary").innerHTML = ""; return; }
+  if (!r.found) { $("#routeSummary").innerHTML = `<span class="badge err">no route${r.step_free ? " without stairs" : ""}</span>`; return; }
+  const est = r.changes.some((c) => c.length_estimated) ? " · stair/lift lengths estimated" : "";
+  $("#routeSummary").innerHTML = kv([["Length", `${r.length_m} m`], ["Time", `about ${(r.time_s / 60).toFixed(1)} min`],
+    ["Floors", [...new Set(r.floors)].join(" › ") + est]]);
+  r.instructions.forEach((t) => ol.appendChild(h("li", {}, esc(t))));
+  [...new Set(r.floors)].forEach((fid) => {
+    const b = h("button", { className: "act" + (fid === S.fid ? " on" : "") }, `Show ${esc(fid)}`);
+    b.onclick = () => openFloor(fid);
+    ol.appendChild(h("li", { className: "empty" })).appendChild(b);
+  });
+}
+document.addEventListener("DOMContentLoaded", () => {
+  const b = $("#routeBtn"); if (!b) return;
+  b.addEventListener("click", () => task("Routing…", async () => {
+    S.route = await api(`${P()}/route`, { method: "POST", json: { from: $("#routeFrom").value, to: $("#routeTo").value, step_free: $("#routeStepFree").checked } });
+    renderRouteSteps(); render();
+    status(S.route.found ? `Route: ${S.route.length_m} m over ${new Set(S.route.floors).size} floor(s).` : "No route found.");
+  }));
+});
+
 function selected() {
   if (!S.sel || !S.fd) return null;
   const pool = { node: S.fd.graph.nodes, edge: S.fd.graph.edges, door: S.fd.doors, room: S.fd.rooms, poi: S.fd.pois }[S.sel.kind];
@@ -419,6 +457,17 @@ function render() {
       const t = el("text", { x: toPx(n.x) + 7 / k, y: toPx(n.y) - 7 / k, class: "poilbl", "font-size": 12 / k, "data-kind": "poi", "data-id": p.id }, svg);
       t.textContent = (isSel("poi", p.id) ? "▶ " : "") + (p.label || p.name || p.id);
       t.style.pointerEvents = "auto";
+    }
+  }
+  // the route's leg(s) on this floor (node ids of the stored floor)
+  if (fd && S.route && S.route.found) {
+    const byId = Object.fromEntries(fd.graph.nodes.map((n) => [n.id, n]));
+    for (const leg of S.route.legs) {
+      if (leg.floor_id !== S.fid) continue;
+      const pts = leg.nodes.map((id) => byId[id]).filter(Boolean).map((n) => `${toPx(n.x)},${toPx(n.y)}`);
+      if (pts.length > 1) el("polyline", { points: pts.join(" "), class: "routeleg" }, svg);
+      const ends = [leg.nodes[0], leg.nodes[leg.nodes.length - 1]].map((id) => byId[id]).filter(Boolean);
+      for (const n of ends) el("circle", { cx: toPx(n.x), cy: toPx(n.y), r: 8 / k, class: "routeend" }, svg);
     }
   }
   // drafts (polygons, door, crop, measurements)

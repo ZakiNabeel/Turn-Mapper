@@ -40,7 +40,11 @@ The FAST packages contain private plan geometry. `venue:load` keeps them in the 
 - **Doors:** the centre of the opening, with its width.
 - **Walls:** wall centre lines.
 - **Edges:** our edge length, never shorter than the straight line (the app's schema rejects that). `stepFree` is false only where the map says not accessible.
-- **Connectors:** stairs/lift links from multi-floor linking (`venue.transitions`) become `connectors` plus a cross-floor edge.
+- **Connectors:** stairs/lift/escalator links from multi-floor linking (`venue.transitions`) become `connectors` plus a cross-floor edge. A `walkway` (contract 0.1.3) becomes a plain edge with no connector; `stepFree` follows the link's `accessible`. Per-building packages leave out walkways to other buildings.
+
+### Note for the Android team (contract 0.1.3, 2026-11-10)
+
+`venue.transitions` is now typed (MAP_PACKAGE_SCHEMA.md §3.2) and `floor.building_frame` is written. Nothing changes for single-floor import. To route across floors in the app: build one graph over `(floor_id, node_id)` from every floor's edges plus every transition (`length_m`); for a step-free route keep only transitions with `accessible: true`. The reference implementation is `turn_mapper.route.VenueGraph` (`turn-mapper route venue.json --from … --to … [--step-free] [--json]` prints the expected answer for any pair, useful as a test oracle). Fixture: `contract/fixtures/json_synthetic_multifloor/`.
   - The length is an estimate (6 m for stairs, 4 m for a lift).
   - Stairs are not step-free.
 - **Anchors:** a `manual` start anchor at every stairs/lift node in the main graph. With none, one goes at the busiest corridor junction. QR anchors are for the team to place on site.

@@ -87,6 +87,18 @@ class VenueConfig:
     source_sha256: str | None = None
     path: str | None = None
     splits: dict = field(default_factory=dict)  # {'dev': [building ids], 'test': [...]}  (ADR-009)
+    # multi-floor: {max_link_dist_m, lengths: {stairs, lift, escalator}, correct_scales, connections: [...],
+    # costs: {walk_mps, stairs_s_per_level, lift_wait_s, ...}} (docs/PLAN_MULTIFLOOR_2026-11-10.md)
+    multifloor: dict = field(default_factory=dict)
+
+
+def _resolve_file(name: str, config_path: Path) -> str:
+    """A relative per-floor ``file:`` is taken as given if it exists, else next to the YAML."""
+    p = Path(name)
+    if p.is_absolute() or p.exists():
+        return name
+    near = config_path.parent / p
+    return str(near) if near.exists() else name
 
 
 def load_venue_config(path: str | Path, input_file: str | None = None) -> VenueConfig:
@@ -103,7 +115,7 @@ def load_venue_config(path: str | Path, input_file: str | None = None) -> VenueC
                 building=f["building"],
                 level=int(f["level"]),
                 name=f.get("name") or f"{f['building']} Block – level {f['level']}",
-                source_file=f.get("file", src_file),
+                source_file=_resolve_file(f["file"], path) if f.get("file") else src_file,
                 page=f.get("page"),
                 image_index=f.get("image_index"),
                 # per-floor evidence first, then evidence for the whole building (e.g. its typical room size)
@@ -125,6 +137,7 @@ def load_venue_config(path: str | Path, input_file: str | None = None) -> VenueC
         source_sha256=src.get("sha256"),
         path=str(path),
         splits=raw.get("splits", {}) or {},
+        multifloor=raw.get("multifloor", {}) or {},
     )
 
 

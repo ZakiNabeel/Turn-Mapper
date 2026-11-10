@@ -1,0 +1,7376 @@
+{
+ "schema_version": "0.1.3",
+ "generator": {
+  "name": "turn-mapper",
+  "version": "0.3.0",
+  "git_commit": "abcc809",
+  "run_id": "2026-11-10T17-57-13Z_synth-campus",
+  "model": {
+   "name": "classical",
+   "checksum": null
+  }
+ },
+ "venue": {
+  "id": "synth-campus",
+  "name": "Synthetic campus"
+ },
+ "buildings": [
+  {
+   "id": "T",
+   "name": "Tower"
+  },
+  {
+   "id": "W",
+   "name": "Annex"
+  }
+ ],
+ "floors": [
+  {
+   "id": "T0",
+   "building_id": "T",
+   "level": 0,
+   "name": "T Block \u2013 level 0",
+   "source": {
+    "adapter": "image",
+    "file": "tower.png",
+    "sha256": "b02ec4e17b9078ba95278450755bf0bea2396d2ebb06dcc96a59b75030c53434"
+   },
+   "validation_passed": true,
+   "floor": {
+    "floor_id": "T0",
+    "image": {
+     "file": "images/T0.png",
+     "width_px": 800,
+     "height_px": 600
+    },
+    "transform": {
+     "px_to_m": [
+      [
+       0.04,
+       0.0,
+       0.0
+      ],
+      [
+       0.0,
+       0.04,
+       0.0
+      ]
+     ],
+     "scale_m_per_px": 0.04,
+     "scale_source": "operator_two_point",
+     "scale_evidence": [
+      {
+       "p1_px": [
+        25,
+        25
+       ],
+       "p2_px": [
+        775,
+        25
+       ],
+       "distance_m": 30.0,
+       "used_for_fit": true
+      }
+     ]
+    },
+    "bounds_m": {
+     "min_x": 0.0,
+     "min_y": 0.0,
+     "max_x": 32.0,
+     "max_y": 24.0
+    },
+    "walkable": {
+     "type": "MultiPolygon",
+     "coordinates": [
+      [
+       [
+        [
+         4.0,
+         5.92
+        ],
+        [
+         4.0,
+         6.08
+        ],
+        [
+         3.96,
+         6.12
+        ],
+        [
+         1.12,
+         6.12
+        ],
+        [
+         1.12,
+         8.88
+        ],
+        [
+         1.96,
+         8.88
+        ],
+        [
+         2.0,
+         8.92
+        ],
+        [
+         2.0,
+         9.08
+        ],
+        [
+         2.88,
+         9.08
+        ],
+        [
+         2.88,
+         8.92
+        ],
+        [
+         2.92,
+         8.88
+        ],
+        [
+         6.96,
+         8.88
+        ],
+        [
+         7.0,
+         8.92
+        ],
+        [
+         7.0,
+         9.08
+        ],
+        [
+         7.92,
+         9.08
+        ],
+        [
+         7.92,
+         8.92
+        ],
+        [
+         7.96,
+         8.88
+        ],
+        [
+         16.96,
+         8.88
+        ],
+        [
+         17.0,
+         8.92
+        ],
+        [
+         17.0,
+         9.08
+        ],
+        [
+         17.88,
+         9.08
+        ],
+        [
+         17.88,
+         8.92
+        ],
+        [
+         17.92,
+         8.88
+        ],
+        [
+         30.88,
+         8.88
+        ],
+        [
+         30.88,
+         6.12
+        ],
+        [
+         25.96,
+         6.12
+        ],
+        [
+         25.92,
+         6.08
+        ],
+        [
+         25.92,
+         5.92
+        ],
+        [
+         25.0,
+         5.92
+        ],
+        [
+         25.0,
+         6.08
+        ],
+        [
+         24.96,
+         6.12
+        ],
+        [
+         19.92,
+         6.12
+        ],
+        [
+         19.88,
+         6.08
+        ],
+        [
+         19.88,
+         5.92
+        ],
+        [
+         19.0,
+         5.92
+        ],
+        [
+         19.0,
+         6.08
+        ],
+        [
+         18.96,
+         6.12
+        ],
+        [
+         10.92,
+         6.12
+        ],
+        [
+         10.88,
+         6.08
+        ],
+        [
+         10.88,
+         5.92
+        ],
+        [
+         10.0,
+         5.92
+        ],
+        [
+         10.0,
+         6.08
+        ],
+        [
+         9.96,
+         6.12
+        ],
+        [
+         4.96,
+         6.12
+        ],
+        [
+         4.92,
+         6.08
+        ],
+        [
+         4.92,
+         5.92
+        ],
+        [
+         4.0,
+         5.92
+        ]
+       ]
+      ]
+     ],
+     "provenance": {
+      "source": "auto",
+      "confidence": 0.7
+     }
+    },
+    "walls": [
+     {
+      "id": "w1",
+      "a": [
+       8.0,
+       1.01
+      ],
+      "b": [
+       1.04,
+       1.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w2",
+      "a": [
+       1.04,
+       1.0
+      ],
+      "b": [
+       1.01,
+       6.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w3",
+      "a": [
+       8.0,
+       1.01
+      ],
+      "b": [
+       15.0,
+       1.01
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w4",
+      "a": [
+       15.0,
+       1.01
+      ],
+      "b": [
+       23.0,
+       1.01
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w5",
+      "a": [
+       23.0,
+       1.01
+      ],
+      "b": [
+       30.96,
+       1.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w6",
+      "a": [
+       30.96,
+       1.0
+      ],
+      "b": [
+       30.99,
+       6.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w7",
+      "a": [
+       8.0,
+       1.01
+      ],
+      "b": [
+       8.0,
+       5.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w8",
+      "a": [
+       15.0,
+       1.01
+      ],
+      "b": [
+       15.0,
+       5.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w9",
+      "a": [
+       23.0,
+       1.01
+      ],
+      "b": [
+       23.0,
+       5.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w10",
+      "a": [
+       3.92,
+       5.96
+      ],
+      "b": [
+       1.01,
+       6.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w11",
+      "a": [
+       9.92,
+       5.96
+      ],
+      "b": [
+       8.0,
+       5.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w12",
+      "a": [
+       18.92,
+       5.96
+      ],
+      "b": [
+       15.0,
+       5.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w13",
+      "a": [
+       24.92,
+       5.96
+      ],
+      "b": [
+       23.0,
+       5.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w14",
+      "a": [
+       5.04,
+       6.0
+      ],
+      "b": [
+       8.0,
+       5.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w15",
+      "a": [
+       11.0,
+       6.0
+      ],
+      "b": [
+       15.0,
+       5.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w16",
+      "a": [
+       20.0,
+       6.0
+      ],
+      "b": [
+       23.0,
+       5.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w17",
+      "a": [
+       26.04,
+       6.0
+      ],
+      "b": [
+       30.99,
+       6.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w18",
+      "a": [
+       1.01,
+       6.0
+      ],
+      "b": [
+       1.01,
+       9.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w19",
+      "a": [
+       30.99,
+       6.0
+      ],
+      "b": [
+       30.99,
+       9.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w20",
+      "a": [
+       1.92,
+       8.96
+      ],
+      "b": [
+       1.01,
+       9.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w21",
+      "a": [
+       6.92,
+       8.96
+      ],
+      "b": [
+       5.0,
+       9.01
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w22",
+      "a": [
+       16.92,
+       8.96
+      ],
+      "b": [
+       11.0,
+       9.01
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w23",
+      "a": [
+       3.0,
+       9.0
+      ],
+      "b": [
+       5.0,
+       9.01
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w24",
+      "a": [
+       8.04,
+       9.0
+      ],
+      "b": [
+       11.0,
+       9.01
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w25",
+      "a": [
+       18.0,
+       9.0
+      ],
+      "b": [
+       21.0,
+       9.01
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w26",
+      "a": [
+       21.0,
+       9.01
+      ],
+      "b": [
+       30.99,
+       9.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w27",
+      "a": [
+       1.01,
+       9.0
+      ],
+      "b": [
+       1.0,
+       12.96
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w28",
+      "a": [
+       1.0,
+       12.96
+      ],
+      "b": [
+       5.0,
+       12.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w29",
+      "a": [
+       5.0,
+       9.01
+      ],
+      "b": [
+       5.0,
+       12.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w30",
+      "a": [
+       11.0,
+       9.01
+      ],
+      "b": [
+       11.0,
+       12.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w31",
+      "a": [
+       21.0,
+       9.01
+      ],
+      "b": [
+       21.0,
+       12.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w32",
+      "a": [
+       30.99,
+       9.0
+      ],
+      "b": [
+       30.96,
+       13.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w33",
+      "a": [
+       30.96,
+       13.0
+      ],
+      "b": [
+       21.0,
+       12.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w34",
+      "a": [
+       24.85,
+       11.08
+      ],
+      "b": [
+       24.92,
+       10.8
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w35",
+      "a": [
+       24.92,
+       10.8
+      ],
+      "b": [
+       25.16,
+       10.88
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w36",
+      "a": [
+       24.85,
+       11.08
+      ],
+      "b": [
+       25.11,
+       11.08
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w37",
+      "a": [
+       5.0,
+       12.99
+      ],
+      "b": [
+       11.0,
+       12.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w38",
+      "a": [
+       11.0,
+       12.99
+      ],
+      "b": [
+       21.0,
+       12.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     }
+    ],
+    "doors": [
+     {
+      "id": "d1",
+      "a": [
+       4.0,
+       6.0
+      ],
+      "b": [
+       4.92,
+       6.0
+      ],
+      "room_id": "s1",
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.7
+      }
+     },
+     {
+      "id": "d2",
+      "a": [
+       10.0,
+       6.0
+      ],
+      "b": [
+       10.88,
+       6.0
+      ],
+      "room_id": "s2",
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.7
+      }
+     },
+     {
+      "id": "d3",
+      "a": [
+       19.0,
+       6.0
+      ],
+      "b": [
+       19.88,
+       6.0
+      ],
+      "room_id": "s3",
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.7
+      }
+     },
+     {
+      "id": "d4",
+      "a": [
+       25.0,
+       6.0
+      ],
+      "b": [
+       25.92,
+       6.0
+      ],
+      "room_id": "s4",
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.7
+      }
+     },
+     {
+      "id": "d5",
+      "a": [
+       2.0,
+       9.0
+      ],
+      "b": [
+       2.88,
+       9.0
+      ],
+      "room_id": "s6",
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.7
+      }
+     },
+     {
+      "id": "d6",
+      "a": [
+       7.0,
+       9.0
+      ],
+      "b": [
+       7.92,
+       9.0
+      ],
+      "room_id": "s7",
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.7
+      }
+     },
+     {
+      "id": "d7",
+      "a": [
+       17.0,
+       9.0
+      ],
+      "b": [
+       17.88,
+       9.0
+      ],
+      "room_id": "s8",
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.7
+      }
+     }
+    ],
+    "rooms": [
+     {
+      "id": "s1",
+      "polygon": [
+       [
+        1.12,
+        1.12
+       ],
+       [
+        1.12,
+        5.88
+       ],
+       [
+        7.88,
+        5.88
+       ],
+       [
+        7.88,
+        1.12
+       ],
+       [
+        1.12,
+        1.12
+       ]
+      ],
+      "label": "R-101",
+      "name": "R-101",
+      "category": null,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.6,
+       "ocr_confidence": 0.91
+      }
+     },
+     {
+      "id": "s2",
+      "polygon": [
+       [
+        8.12,
+        1.12
+       ],
+       [
+        8.12,
+        5.88
+       ],
+       [
+        14.88,
+        5.88
+       ],
+       [
+        14.88,
+        1.12
+       ],
+       [
+        8.12,
+        1.12
+       ]
+      ],
+      "label": "R-102",
+      "name": "R-102",
+      "category": null,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.6,
+       "ocr_confidence": 0.91
+      }
+     },
+     {
+      "id": "s3",
+      "polygon": [
+       [
+        15.12,
+        1.12
+       ],
+       [
+        15.12,
+        5.88
+       ],
+       [
+        22.88,
+        5.88
+       ],
+       [
+        22.88,
+        1.12
+       ],
+       [
+        15.12,
+        1.12
+       ]
+      ],
+      "label": "R-103",
+      "name": "R-103",
+      "category": null,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.6,
+       "ocr_confidence": 0.91
+      }
+     },
+     {
+      "id": "s4",
+      "polygon": [
+       [
+        23.12,
+        1.12
+       ],
+       [
+        23.12,
+        5.88
+       ],
+       [
+        30.88,
+        5.88
+       ],
+       [
+        30.88,
+        1.12
+       ],
+       [
+        23.12,
+        1.12
+       ]
+      ],
+      "label": null,
+      "name": "STAIRS",
+      "category": "stairs_or_lift",
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.6,
+       "ocr_confidence": 0.95
+      }
+     },
+     {
+      "id": "s6",
+      "polygon": [
+       [
+        1.12,
+        9.12
+       ],
+       [
+        1.12,
+        12.88
+       ],
+       [
+        4.88,
+        12.88
+       ],
+       [
+        4.88,
+        9.12
+       ],
+       [
+        1.12,
+        9.12
+       ]
+      ],
+      "label": null,
+      "name": "LIFT",
+      "category": "stairs_or_lift",
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.6,
+       "ocr_confidence": 0.96
+      }
+     },
+     {
+      "id": "s7",
+      "polygon": [
+       [
+        5.12,
+        9.12
+       ],
+       [
+        5.12,
+        12.88
+       ],
+       [
+        10.88,
+        12.88
+       ],
+       [
+        10.88,
+        9.12
+       ],
+       [
+        5.12,
+        9.12
+       ]
+      ],
+      "label": "R-105",
+      "name": "R-105",
+      "category": null,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.6,
+       "ocr_confidence": 0.91
+      }
+     },
+     {
+      "id": "s8",
+      "polygon": [
+       [
+        11.12,
+        9.12
+       ],
+       [
+        11.12,
+        12.88
+       ],
+       [
+        20.88,
+        12.88
+       ],
+       [
+        20.88,
+        9.12
+       ],
+       [
+        11.12,
+        9.12
+       ]
+      ],
+      "label": "R-106",
+      "name": "R-106",
+      "category": null,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.6,
+       "ocr_confidence": 0.91
+      }
+     },
+     {
+      "id": "s9",
+      "polygon": [
+       [
+        21.12,
+        9.12
+       ],
+       [
+        21.12,
+        12.88
+       ],
+       [
+        30.88,
+        12.88
+       ],
+       [
+        30.88,
+        9.12
+       ],
+       [
+        21.12,
+        9.12
+       ]
+      ],
+      "label": null,
+      "name": "-107",
+      "category": null,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.6,
+       "ocr_confidence": 0.91
+      }
+     }
+    ],
+    "graph": {
+     "nodes": [
+      {
+       "id": "n1",
+       "x": 29.52,
+       "y": 7.48,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n2",
+       "x": 22.77,
+       "y": 7.48,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n3",
+       "x": 16.02,
+       "y": 7.48,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n4",
+       "x": 9.27,
+       "y": 7.48,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n5",
+       "x": 2.52,
+       "y": 7.48,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n6",
+       "x": 2.4,
+       "y": 8.64,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n7",
+       "x": 4.46,
+       "y": 6.0,
+       "kind": "door",
+       "door_id": "d1",
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n8",
+       "x": 4.46,
+       "y": 7.48,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n9",
+       "x": 10.44,
+       "y": 6.0,
+       "kind": "door",
+       "door_id": "d2",
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n10",
+       "x": 10.44,
+       "y": 7.48,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n11",
+       "x": 19.44,
+       "y": 6.0,
+       "kind": "door",
+       "door_id": "d3",
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n12",
+       "x": 19.44,
+       "y": 7.48,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n13",
+       "x": 25.46,
+       "y": 6.0,
+       "kind": "door",
+       "door_id": "d4",
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n14",
+       "x": 25.46,
+       "y": 7.48,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n15",
+       "x": 2.44,
+       "y": 9.0,
+       "kind": "door",
+       "door_id": "d5",
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n16",
+       "x": 7.46,
+       "y": 9.0,
+       "kind": "door",
+       "door_id": "d6",
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n17",
+       "x": 7.46,
+       "y": 7.48,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n18",
+       "x": 17.44,
+       "y": 9.0,
+       "kind": "door",
+       "door_id": "d7",
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n19",
+       "x": 17.44,
+       "y": 7.48,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n20",
+       "x": 27.0,
+       "y": 6.12,
+       "kind": "transition",
+       "door_id": null,
+       "transition": "stairs",
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n21",
+       "x": 27.0,
+       "y": 7.48,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n22",
+       "x": 2.88,
+       "y": 9.08,
+       "kind": "transition",
+       "door_id": null,
+       "transition": "lift",
+       "provenance": {
+        "source": "auto"
+       }
+      }
+     ],
+     "edges": [
+      {
+       "id": "e1",
+       "from": "n1",
+       "to": "n21",
+       "length_m": 2.52,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e2",
+       "from": "n2",
+       "to": "n12",
+       "length_m": 3.33,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e3",
+       "from": "n3",
+       "to": "n10",
+       "length_m": 5.58,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e4",
+       "from": "n4",
+       "to": "n17",
+       "length_m": 1.81,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e5",
+       "from": "n5",
+       "to": "n6",
+       "length_m": 1.166,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e6",
+       "from": "n8",
+       "to": "n5",
+       "length_m": 1.94,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e7",
+       "from": "n7",
+       "to": "n8",
+       "length_m": 1.48,
+       "type": "door",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e8",
+       "from": "n10",
+       "to": "n4",
+       "length_m": 1.17,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e9",
+       "from": "n9",
+       "to": "n10",
+       "length_m": 1.48,
+       "type": "door",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e10",
+       "from": "n12",
+       "to": "n19",
+       "length_m": 2.0,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e11",
+       "from": "n11",
+       "to": "n12",
+       "length_m": 1.48,
+       "type": "door",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e12",
+       "from": "n14",
+       "to": "n2",
+       "length_m": 2.69,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e13",
+       "from": "n13",
+       "to": "n14",
+       "length_m": 1.48,
+       "type": "door",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e14",
+       "from": "n15",
+       "to": "n6",
+       "length_m": 0.362,
+       "type": "door",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e15",
+       "from": "n17",
+       "to": "n8",
+       "length_m": 3.0,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e16",
+       "from": "n16",
+       "to": "n17",
+       "length_m": 1.52,
+       "type": "door",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e17",
+       "from": "n19",
+       "to": "n3",
+       "length_m": 1.42,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e18",
+       "from": "n18",
+       "to": "n19",
+       "length_m": 1.52,
+       "type": "door",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e19",
+       "from": "n21",
+       "to": "n14",
+       "length_m": 1.54,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e20",
+       "from": "n20",
+       "to": "n21",
+       "length_m": 1.36,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e21",
+       "from": "n22",
+       "to": "n6",
+       "length_m": 0.651,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      }
+     ]
+    },
+    "pois": [
+     {
+      "id": "p1",
+      "name": "R-101",
+      "label": "R-101",
+      "node_id": "n7",
+      "room_id": "s1",
+      "category": null,
+      "needs_review": false,
+      "provenance": {
+       "source": "auto"
+      }
+     },
+     {
+      "id": "p2",
+      "name": "R-102",
+      "label": "R-102",
+      "node_id": "n9",
+      "room_id": "s2",
+      "category": null,
+      "needs_review": false,
+      "provenance": {
+       "source": "auto"
+      }
+     },
+     {
+      "id": "p3",
+      "name": "R-103",
+      "label": "R-103",
+      "node_id": "n11",
+      "room_id": "s3",
+      "category": null,
+      "needs_review": false,
+      "provenance": {
+       "source": "auto"
+      }
+     },
+     {
+      "id": "p4",
+      "name": "R-105",
+      "label": "R-105",
+      "node_id": "n16",
+      "room_id": "s7",
+      "category": null,
+      "needs_review": false,
+      "provenance": {
+       "source": "auto"
+      }
+     },
+     {
+      "id": "p5",
+      "name": "R-106",
+      "label": "R-106",
+      "node_id": "n18",
+      "room_id": "s8",
+      "category": null,
+      "needs_review": false,
+      "provenance": {
+       "source": "auto"
+      }
+     },
+     {
+      "id": "p6",
+      "name": "Stairs 1",
+      "label": null,
+      "node_id": "n20",
+      "room_id": "s4",
+      "category": "stairs",
+      "needs_review": false,
+      "provenance": {
+       "source": "auto"
+      }
+     },
+     {
+      "id": "p7",
+      "name": "Lift 1",
+      "label": null,
+      "node_id": "n22",
+      "room_id": "s6",
+      "category": "lift",
+      "needs_review": false,
+      "provenance": {
+       "source": "auto"
+      }
+     }
+    ],
+    "validation": {
+     "passed": true,
+     "forced": false,
+     "errors": [],
+     "warnings": [
+      {
+       "code": "ROOM_NOT_REACHABLE",
+       "ref": "s9",
+       "message": "room has no door linked to the corridor graph"
+      },
+      {
+       "code": "ROOM_NO_DOOR",
+       "ref": "s9",
+       "message": "no door detected for this room"
+      }
+     ]
+    },
+    "building_frame": {
+     "matrix": [
+      [
+       1.0,
+       0.0,
+       0.0
+      ],
+      [
+       0.0,
+       1.0,
+       0.0
+      ]
+     ],
+     "reference_floor_id": "T0",
+     "method": "reference",
+     "confidence": 1.0,
+     "registered_scale": 1.0
+    }
+   }
+  },
+  {
+   "id": "T1",
+   "building_id": "T",
+   "level": 1,
+   "name": "T Block \u2013 level 1",
+   "source": {
+    "adapter": "image",
+    "file": "tower.png",
+    "sha256": "b02ec4e17b9078ba95278450755bf0bea2396d2ebb06dcc96a59b75030c53434"
+   },
+   "validation_passed": true,
+   "floor": {
+    "floor_id": "T1",
+    "image": {
+     "file": "images/T1.png",
+     "width_px": 800,
+     "height_px": 600
+    },
+    "transform": {
+     "px_to_m": [
+      [
+       0.04,
+       0.0,
+       0.0
+      ],
+      [
+       0.0,
+       0.04,
+       0.0
+      ]
+     ],
+     "scale_m_per_px": 0.04,
+     "scale_source": "operator_two_point",
+     "scale_evidence": [
+      {
+       "p1_px": [
+        25,
+        25
+       ],
+       "p2_px": [
+        775,
+        25
+       ],
+       "distance_m": 30.0,
+       "used_for_fit": true
+      }
+     ]
+    },
+    "bounds_m": {
+     "min_x": 0.0,
+     "min_y": 0.0,
+     "max_x": 32.0,
+     "max_y": 24.0
+    },
+    "walkable": {
+     "type": "MultiPolygon",
+     "coordinates": [
+      [
+       [
+        [
+         4.0,
+         5.92
+        ],
+        [
+         4.0,
+         6.08
+        ],
+        [
+         3.96,
+         6.12
+        ],
+        [
+         1.12,
+         6.12
+        ],
+        [
+         1.12,
+         8.88
+        ],
+        [
+         1.96,
+         8.88
+        ],
+        [
+         2.0,
+         8.92
+        ],
+        [
+         2.0,
+         9.08
+        ],
+        [
+         2.88,
+         9.08
+        ],
+        [
+         2.88,
+         8.92
+        ],
+        [
+         2.92,
+         8.88
+        ],
+        [
+         6.96,
+         8.88
+        ],
+        [
+         7.0,
+         8.92
+        ],
+        [
+         7.0,
+         9.08
+        ],
+        [
+         7.92,
+         9.08
+        ],
+        [
+         7.92,
+         8.92
+        ],
+        [
+         7.96,
+         8.88
+        ],
+        [
+         16.96,
+         8.88
+        ],
+        [
+         17.0,
+         8.92
+        ],
+        [
+         17.0,
+         9.08
+        ],
+        [
+         17.88,
+         9.08
+        ],
+        [
+         17.88,
+         8.92
+        ],
+        [
+         17.92,
+         8.88
+        ],
+        [
+         30.88,
+         8.88
+        ],
+        [
+         30.88,
+         6.12
+        ],
+        [
+         25.96,
+         6.12
+        ],
+        [
+         25.92,
+         6.08
+        ],
+        [
+         25.92,
+         5.92
+        ],
+        [
+         25.0,
+         5.92
+        ],
+        [
+         25.0,
+         6.08
+        ],
+        [
+         24.96,
+         6.12
+        ],
+        [
+         19.92,
+         6.12
+        ],
+        [
+         19.88,
+         6.08
+        ],
+        [
+         19.88,
+         5.92
+        ],
+        [
+         19.0,
+         5.92
+        ],
+        [
+         19.0,
+         6.08
+        ],
+        [
+         18.96,
+         6.12
+        ],
+        [
+         10.92,
+         6.12
+        ],
+        [
+         10.88,
+         6.08
+        ],
+        [
+         10.88,
+         5.92
+        ],
+        [
+         10.0,
+         5.92
+        ],
+        [
+         10.0,
+         6.08
+        ],
+        [
+         9.96,
+         6.12
+        ],
+        [
+         4.96,
+         6.12
+        ],
+        [
+         4.92,
+         6.08
+        ],
+        [
+         4.92,
+         5.92
+        ],
+        [
+         4.0,
+         5.92
+        ]
+       ]
+      ]
+     ],
+     "provenance": {
+      "source": "auto",
+      "confidence": 0.7
+     }
+    },
+    "walls": [
+     {
+      "id": "w1",
+      "a": [
+       8.0,
+       1.01
+      ],
+      "b": [
+       1.04,
+       1.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w2",
+      "a": [
+       1.04,
+       1.0
+      ],
+      "b": [
+       1.01,
+       6.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w3",
+      "a": [
+       8.0,
+       1.01
+      ],
+      "b": [
+       15.0,
+       1.01
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w4",
+      "a": [
+       15.0,
+       1.01
+      ],
+      "b": [
+       23.0,
+       1.01
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w5",
+      "a": [
+       23.0,
+       1.01
+      ],
+      "b": [
+       30.96,
+       1.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w6",
+      "a": [
+       30.96,
+       1.0
+      ],
+      "b": [
+       30.99,
+       6.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w7",
+      "a": [
+       8.0,
+       1.01
+      ],
+      "b": [
+       8.0,
+       5.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w8",
+      "a": [
+       15.0,
+       1.01
+      ],
+      "b": [
+       15.0,
+       5.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w9",
+      "a": [
+       23.0,
+       1.01
+      ],
+      "b": [
+       23.0,
+       5.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w10",
+      "a": [
+       3.92,
+       5.96
+      ],
+      "b": [
+       1.01,
+       6.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w11",
+      "a": [
+       9.92,
+       5.96
+      ],
+      "b": [
+       8.0,
+       5.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w12",
+      "a": [
+       18.92,
+       5.96
+      ],
+      "b": [
+       15.0,
+       5.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w13",
+      "a": [
+       24.92,
+       5.96
+      ],
+      "b": [
+       23.0,
+       5.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w14",
+      "a": [
+       5.04,
+       6.0
+      ],
+      "b": [
+       8.0,
+       5.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w15",
+      "a": [
+       11.0,
+       6.0
+      ],
+      "b": [
+       15.0,
+       5.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w16",
+      "a": [
+       20.0,
+       6.0
+      ],
+      "b": [
+       23.0,
+       5.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w17",
+      "a": [
+       26.04,
+       6.0
+      ],
+      "b": [
+       30.99,
+       6.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w18",
+      "a": [
+       1.01,
+       6.0
+      ],
+      "b": [
+       1.01,
+       9.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w19",
+      "a": [
+       30.99,
+       6.0
+      ],
+      "b": [
+       30.99,
+       9.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w20",
+      "a": [
+       1.92,
+       8.96
+      ],
+      "b": [
+       1.01,
+       9.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w21",
+      "a": [
+       6.92,
+       8.96
+      ],
+      "b": [
+       5.0,
+       9.01
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w22",
+      "a": [
+       16.92,
+       8.96
+      ],
+      "b": [
+       11.0,
+       9.01
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w23",
+      "a": [
+       3.0,
+       9.0
+      ],
+      "b": [
+       5.0,
+       9.01
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w24",
+      "a": [
+       8.04,
+       9.0
+      ],
+      "b": [
+       11.0,
+       9.01
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w25",
+      "a": [
+       18.0,
+       9.0
+      ],
+      "b": [
+       21.0,
+       9.01
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w26",
+      "a": [
+       21.0,
+       9.01
+      ],
+      "b": [
+       30.99,
+       9.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w27",
+      "a": [
+       1.01,
+       9.0
+      ],
+      "b": [
+       1.0,
+       12.96
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w28",
+      "a": [
+       1.0,
+       12.96
+      ],
+      "b": [
+       5.0,
+       12.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w29",
+      "a": [
+       5.0,
+       9.01
+      ],
+      "b": [
+       5.0,
+       12.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w30",
+      "a": [
+       11.0,
+       9.01
+      ],
+      "b": [
+       11.0,
+       12.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w31",
+      "a": [
+       21.0,
+       9.01
+      ],
+      "b": [
+       21.0,
+       12.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w32",
+      "a": [
+       30.99,
+       9.0
+      ],
+      "b": [
+       30.96,
+       13.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w33",
+      "a": [
+       30.96,
+       13.0
+      ],
+      "b": [
+       21.0,
+       12.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w34",
+      "a": [
+       24.85,
+       11.08
+      ],
+      "b": [
+       24.92,
+       10.8
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w35",
+      "a": [
+       24.92,
+       10.8
+      ],
+      "b": [
+       25.16,
+       10.88
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w36",
+      "a": [
+       24.85,
+       11.08
+      ],
+      "b": [
+       25.11,
+       11.08
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w37",
+      "a": [
+       5.0,
+       12.99
+      ],
+      "b": [
+       11.0,
+       12.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w38",
+      "a": [
+       11.0,
+       12.99
+      ],
+      "b": [
+       21.0,
+       12.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     }
+    ],
+    "doors": [
+     {
+      "id": "d1",
+      "a": [
+       4.0,
+       6.0
+      ],
+      "b": [
+       4.92,
+       6.0
+      ],
+      "room_id": "s1",
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.7
+      }
+     },
+     {
+      "id": "d2",
+      "a": [
+       10.0,
+       6.0
+      ],
+      "b": [
+       10.88,
+       6.0
+      ],
+      "room_id": "s2",
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.7
+      }
+     },
+     {
+      "id": "d3",
+      "a": [
+       19.0,
+       6.0
+      ],
+      "b": [
+       19.88,
+       6.0
+      ],
+      "room_id": "s3",
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.7
+      }
+     },
+     {
+      "id": "d4",
+      "a": [
+       25.0,
+       6.0
+      ],
+      "b": [
+       25.92,
+       6.0
+      ],
+      "room_id": "s4",
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.7
+      }
+     },
+     {
+      "id": "d5",
+      "a": [
+       2.0,
+       9.0
+      ],
+      "b": [
+       2.88,
+       9.0
+      ],
+      "room_id": "s6",
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.7
+      }
+     },
+     {
+      "id": "d6",
+      "a": [
+       7.0,
+       9.0
+      ],
+      "b": [
+       7.92,
+       9.0
+      ],
+      "room_id": "s7",
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.7
+      }
+     },
+     {
+      "id": "d7",
+      "a": [
+       17.0,
+       9.0
+      ],
+      "b": [
+       17.88,
+       9.0
+      ],
+      "room_id": "s8",
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.7
+      }
+     }
+    ],
+    "rooms": [
+     {
+      "id": "s1",
+      "polygon": [
+       [
+        1.12,
+        1.12
+       ],
+       [
+        1.12,
+        5.88
+       ],
+       [
+        7.88,
+        5.88
+       ],
+       [
+        7.88,
+        1.12
+       ],
+       [
+        1.12,
+        1.12
+       ]
+      ],
+      "label": "R-101",
+      "name": "R-101",
+      "category": null,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.6,
+       "ocr_confidence": 0.91
+      }
+     },
+     {
+      "id": "s2",
+      "polygon": [
+       [
+        8.12,
+        1.12
+       ],
+       [
+        8.12,
+        5.88
+       ],
+       [
+        14.88,
+        5.88
+       ],
+       [
+        14.88,
+        1.12
+       ],
+       [
+        8.12,
+        1.12
+       ]
+      ],
+      "label": "R-102",
+      "name": "R-102",
+      "category": null,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.6,
+       "ocr_confidence": 0.91
+      }
+     },
+     {
+      "id": "s3",
+      "polygon": [
+       [
+        15.12,
+        1.12
+       ],
+       [
+        15.12,
+        5.88
+       ],
+       [
+        22.88,
+        5.88
+       ],
+       [
+        22.88,
+        1.12
+       ],
+       [
+        15.12,
+        1.12
+       ]
+      ],
+      "label": "R-103",
+      "name": "R-103",
+      "category": null,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.6,
+       "ocr_confidence": 0.91
+      }
+     },
+     {
+      "id": "s4",
+      "polygon": [
+       [
+        23.12,
+        1.12
+       ],
+       [
+        23.12,
+        5.88
+       ],
+       [
+        30.88,
+        5.88
+       ],
+       [
+        30.88,
+        1.12
+       ],
+       [
+        23.12,
+        1.12
+       ]
+      ],
+      "label": null,
+      "name": "STAIRS",
+      "category": "stairs_or_lift",
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.6,
+       "ocr_confidence": 0.95
+      }
+     },
+     {
+      "id": "s6",
+      "polygon": [
+       [
+        1.12,
+        9.12
+       ],
+       [
+        1.12,
+        12.88
+       ],
+       [
+        4.88,
+        12.88
+       ],
+       [
+        4.88,
+        9.12
+       ],
+       [
+        1.12,
+        9.12
+       ]
+      ],
+      "label": null,
+      "name": "LIFT",
+      "category": "stairs_or_lift",
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.6,
+       "ocr_confidence": 0.96
+      }
+     },
+     {
+      "id": "s7",
+      "polygon": [
+       [
+        5.12,
+        9.12
+       ],
+       [
+        5.12,
+        12.88
+       ],
+       [
+        10.88,
+        12.88
+       ],
+       [
+        10.88,
+        9.12
+       ],
+       [
+        5.12,
+        9.12
+       ]
+      ],
+      "label": "R-105",
+      "name": "R-105",
+      "category": null,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.6,
+       "ocr_confidence": 0.91
+      }
+     },
+     {
+      "id": "s8",
+      "polygon": [
+       [
+        11.12,
+        9.12
+       ],
+       [
+        11.12,
+        12.88
+       ],
+       [
+        20.88,
+        12.88
+       ],
+       [
+        20.88,
+        9.12
+       ],
+       [
+        11.12,
+        9.12
+       ]
+      ],
+      "label": "R-106",
+      "name": "R-106",
+      "category": null,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.6,
+       "ocr_confidence": 0.91
+      }
+     },
+     {
+      "id": "s9",
+      "polygon": [
+       [
+        21.12,
+        9.12
+       ],
+       [
+        21.12,
+        12.88
+       ],
+       [
+        30.88,
+        12.88
+       ],
+       [
+        30.88,
+        9.12
+       ],
+       [
+        21.12,
+        9.12
+       ]
+      ],
+      "label": null,
+      "name": "-107",
+      "category": null,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.6,
+       "ocr_confidence": 0.91
+      }
+     }
+    ],
+    "graph": {
+     "nodes": [
+      {
+       "id": "n1",
+       "x": 29.52,
+       "y": 7.48,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n2",
+       "x": 22.77,
+       "y": 7.48,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n3",
+       "x": 16.02,
+       "y": 7.48,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n4",
+       "x": 9.27,
+       "y": 7.48,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n5",
+       "x": 2.52,
+       "y": 7.48,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n6",
+       "x": 2.4,
+       "y": 8.64,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n7",
+       "x": 4.46,
+       "y": 6.0,
+       "kind": "door",
+       "door_id": "d1",
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n8",
+       "x": 4.46,
+       "y": 7.48,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n9",
+       "x": 10.44,
+       "y": 6.0,
+       "kind": "door",
+       "door_id": "d2",
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n10",
+       "x": 10.44,
+       "y": 7.48,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n11",
+       "x": 19.44,
+       "y": 6.0,
+       "kind": "door",
+       "door_id": "d3",
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n12",
+       "x": 19.44,
+       "y": 7.48,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n13",
+       "x": 25.46,
+       "y": 6.0,
+       "kind": "door",
+       "door_id": "d4",
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n14",
+       "x": 25.46,
+       "y": 7.48,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n15",
+       "x": 2.44,
+       "y": 9.0,
+       "kind": "door",
+       "door_id": "d5",
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n16",
+       "x": 7.46,
+       "y": 9.0,
+       "kind": "door",
+       "door_id": "d6",
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n17",
+       "x": 7.46,
+       "y": 7.48,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n18",
+       "x": 17.44,
+       "y": 9.0,
+       "kind": "door",
+       "door_id": "d7",
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n19",
+       "x": 17.44,
+       "y": 7.48,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n20",
+       "x": 27.0,
+       "y": 6.12,
+       "kind": "transition",
+       "door_id": null,
+       "transition": "stairs",
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n21",
+       "x": 27.0,
+       "y": 7.48,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n22",
+       "x": 2.88,
+       "y": 9.08,
+       "kind": "transition",
+       "door_id": null,
+       "transition": "lift",
+       "provenance": {
+        "source": "auto"
+       }
+      }
+     ],
+     "edges": [
+      {
+       "id": "e1",
+       "from": "n1",
+       "to": "n21",
+       "length_m": 2.52,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e2",
+       "from": "n2",
+       "to": "n12",
+       "length_m": 3.33,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e3",
+       "from": "n3",
+       "to": "n10",
+       "length_m": 5.58,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e4",
+       "from": "n4",
+       "to": "n17",
+       "length_m": 1.81,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e5",
+       "from": "n5",
+       "to": "n6",
+       "length_m": 1.166,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e6",
+       "from": "n8",
+       "to": "n5",
+       "length_m": 1.94,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e7",
+       "from": "n7",
+       "to": "n8",
+       "length_m": 1.48,
+       "type": "door",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e8",
+       "from": "n10",
+       "to": "n4",
+       "length_m": 1.17,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e9",
+       "from": "n9",
+       "to": "n10",
+       "length_m": 1.48,
+       "type": "door",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e10",
+       "from": "n12",
+       "to": "n19",
+       "length_m": 2.0,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e11",
+       "from": "n11",
+       "to": "n12",
+       "length_m": 1.48,
+       "type": "door",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e12",
+       "from": "n14",
+       "to": "n2",
+       "length_m": 2.69,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e13",
+       "from": "n13",
+       "to": "n14",
+       "length_m": 1.48,
+       "type": "door",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e14",
+       "from": "n15",
+       "to": "n6",
+       "length_m": 0.362,
+       "type": "door",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e15",
+       "from": "n17",
+       "to": "n8",
+       "length_m": 3.0,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e16",
+       "from": "n16",
+       "to": "n17",
+       "length_m": 1.52,
+       "type": "door",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e17",
+       "from": "n19",
+       "to": "n3",
+       "length_m": 1.42,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e18",
+       "from": "n18",
+       "to": "n19",
+       "length_m": 1.52,
+       "type": "door",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e19",
+       "from": "n21",
+       "to": "n14",
+       "length_m": 1.54,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e20",
+       "from": "n20",
+       "to": "n21",
+       "length_m": 1.36,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e21",
+       "from": "n22",
+       "to": "n6",
+       "length_m": 0.651,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      }
+     ]
+    },
+    "pois": [
+     {
+      "id": "p1",
+      "name": "R-101",
+      "label": "R-101",
+      "node_id": "n7",
+      "room_id": "s1",
+      "category": null,
+      "needs_review": false,
+      "provenance": {
+       "source": "auto"
+      }
+     },
+     {
+      "id": "p2",
+      "name": "R-102",
+      "label": "R-102",
+      "node_id": "n9",
+      "room_id": "s2",
+      "category": null,
+      "needs_review": false,
+      "provenance": {
+       "source": "auto"
+      }
+     },
+     {
+      "id": "p3",
+      "name": "R-103",
+      "label": "R-103",
+      "node_id": "n11",
+      "room_id": "s3",
+      "category": null,
+      "needs_review": false,
+      "provenance": {
+       "source": "auto"
+      }
+     },
+     {
+      "id": "p4",
+      "name": "R-105",
+      "label": "R-105",
+      "node_id": "n16",
+      "room_id": "s7",
+      "category": null,
+      "needs_review": false,
+      "provenance": {
+       "source": "auto"
+      }
+     },
+     {
+      "id": "p5",
+      "name": "R-106",
+      "label": "R-106",
+      "node_id": "n18",
+      "room_id": "s8",
+      "category": null,
+      "needs_review": false,
+      "provenance": {
+       "source": "auto"
+      }
+     },
+     {
+      "id": "p6",
+      "name": "Stairs 1",
+      "label": null,
+      "node_id": "n20",
+      "room_id": "s4",
+      "category": "stairs",
+      "needs_review": false,
+      "provenance": {
+       "source": "auto"
+      }
+     },
+     {
+      "id": "p7",
+      "name": "Lift 1",
+      "label": null,
+      "node_id": "n22",
+      "room_id": "s6",
+      "category": "lift",
+      "needs_review": false,
+      "provenance": {
+       "source": "auto"
+      }
+     }
+    ],
+    "validation": {
+     "passed": true,
+     "forced": false,
+     "errors": [],
+     "warnings": [
+      {
+       "code": "ROOM_NOT_REACHABLE",
+       "ref": "s9",
+       "message": "room has no door linked to the corridor graph"
+      },
+      {
+       "code": "ROOM_NO_DOOR",
+       "ref": "s9",
+       "message": "no door detected for this room"
+      }
+     ]
+    },
+    "building_frame": {
+     "matrix": [
+      [
+       0.9825,
+       0.0,
+       0.5
+      ],
+      [
+       0.0,
+       0.9825,
+       0.25
+      ]
+     ],
+     "reference_floor_id": "T0",
+     "method": "walls",
+     "confidence": 1.0,
+     "registered_scale": 0.9825
+    }
+   }
+  },
+  {
+   "id": "T2",
+   "building_id": "T",
+   "level": 2,
+   "name": "T Block \u2013 level 2",
+   "source": {
+    "adapter": "image",
+    "file": "tower.png",
+    "sha256": "b02ec4e17b9078ba95278450755bf0bea2396d2ebb06dcc96a59b75030c53434"
+   },
+   "validation_passed": true,
+   "floor": {
+    "floor_id": "T2",
+    "image": {
+     "file": "images/T2.png",
+     "width_px": 800,
+     "height_px": 600
+    },
+    "transform": {
+     "px_to_m": [
+      [
+       0.04,
+       0.0,
+       0.0
+      ],
+      [
+       0.0,
+       0.04,
+       0.0
+      ]
+     ],
+     "scale_m_per_px": 0.04,
+     "scale_source": "operator_two_point",
+     "scale_evidence": [
+      {
+       "p1_px": [
+        25,
+        25
+       ],
+       "p2_px": [
+        775,
+        25
+       ],
+       "distance_m": 30.0,
+       "used_for_fit": true
+      }
+     ]
+    },
+    "bounds_m": {
+     "min_x": 0.0,
+     "min_y": 0.0,
+     "max_x": 32.0,
+     "max_y": 24.0
+    },
+    "walkable": {
+     "type": "MultiPolygon",
+     "coordinates": [
+      [
+       [
+        [
+         4.0,
+         5.92
+        ],
+        [
+         4.0,
+         6.08
+        ],
+        [
+         3.96,
+         6.12
+        ],
+        [
+         1.12,
+         6.12
+        ],
+        [
+         1.12,
+         8.88
+        ],
+        [
+         1.96,
+         8.88
+        ],
+        [
+         2.0,
+         8.92
+        ],
+        [
+         2.0,
+         9.08
+        ],
+        [
+         2.88,
+         9.08
+        ],
+        [
+         2.88,
+         8.92
+        ],
+        [
+         2.92,
+         8.88
+        ],
+        [
+         6.96,
+         8.88
+        ],
+        [
+         7.0,
+         8.92
+        ],
+        [
+         7.0,
+         9.08
+        ],
+        [
+         7.92,
+         9.08
+        ],
+        [
+         7.92,
+         8.92
+        ],
+        [
+         7.96,
+         8.88
+        ],
+        [
+         16.96,
+         8.88
+        ],
+        [
+         17.0,
+         8.92
+        ],
+        [
+         17.0,
+         9.08
+        ],
+        [
+         17.88,
+         9.08
+        ],
+        [
+         17.88,
+         8.92
+        ],
+        [
+         17.92,
+         8.88
+        ],
+        [
+         30.88,
+         8.88
+        ],
+        [
+         30.88,
+         6.12
+        ],
+        [
+         25.96,
+         6.12
+        ],
+        [
+         25.92,
+         6.08
+        ],
+        [
+         25.92,
+         5.92
+        ],
+        [
+         25.0,
+         5.92
+        ],
+        [
+         25.0,
+         6.08
+        ],
+        [
+         24.96,
+         6.12
+        ],
+        [
+         19.92,
+         6.12
+        ],
+        [
+         19.88,
+         6.08
+        ],
+        [
+         19.88,
+         5.92
+        ],
+        [
+         19.0,
+         5.92
+        ],
+        [
+         19.0,
+         6.08
+        ],
+        [
+         18.96,
+         6.12
+        ],
+        [
+         10.92,
+         6.12
+        ],
+        [
+         10.88,
+         6.08
+        ],
+        [
+         10.88,
+         5.92
+        ],
+        [
+         10.0,
+         5.92
+        ],
+        [
+         10.0,
+         6.08
+        ],
+        [
+         9.96,
+         6.12
+        ],
+        [
+         4.96,
+         6.12
+        ],
+        [
+         4.92,
+         6.08
+        ],
+        [
+         4.92,
+         5.92
+        ],
+        [
+         4.0,
+         5.92
+        ]
+       ]
+      ]
+     ],
+     "provenance": {
+      "source": "auto",
+      "confidence": 0.7
+     }
+    },
+    "walls": [
+     {
+      "id": "w1",
+      "a": [
+       8.0,
+       1.01
+      ],
+      "b": [
+       1.04,
+       1.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w2",
+      "a": [
+       1.04,
+       1.0
+      ],
+      "b": [
+       1.01,
+       6.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w3",
+      "a": [
+       8.0,
+       1.01
+      ],
+      "b": [
+       15.0,
+       1.01
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w4",
+      "a": [
+       15.0,
+       1.01
+      ],
+      "b": [
+       23.0,
+       1.01
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w5",
+      "a": [
+       23.0,
+       1.01
+      ],
+      "b": [
+       30.96,
+       1.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w6",
+      "a": [
+       30.96,
+       1.0
+      ],
+      "b": [
+       30.99,
+       6.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w7",
+      "a": [
+       8.0,
+       1.01
+      ],
+      "b": [
+       8.0,
+       5.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w8",
+      "a": [
+       15.0,
+       1.01
+      ],
+      "b": [
+       15.0,
+       5.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w9",
+      "a": [
+       23.0,
+       1.01
+      ],
+      "b": [
+       23.0,
+       5.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w10",
+      "a": [
+       3.92,
+       5.96
+      ],
+      "b": [
+       1.01,
+       6.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w11",
+      "a": [
+       9.92,
+       5.96
+      ],
+      "b": [
+       8.0,
+       5.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w12",
+      "a": [
+       18.92,
+       5.96
+      ],
+      "b": [
+       15.0,
+       5.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w13",
+      "a": [
+       24.92,
+       5.96
+      ],
+      "b": [
+       23.0,
+       5.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w14",
+      "a": [
+       5.04,
+       6.0
+      ],
+      "b": [
+       8.0,
+       5.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w15",
+      "a": [
+       11.0,
+       6.0
+      ],
+      "b": [
+       15.0,
+       5.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w16",
+      "a": [
+       20.0,
+       6.0
+      ],
+      "b": [
+       23.0,
+       5.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w17",
+      "a": [
+       26.04,
+       6.0
+      ],
+      "b": [
+       30.99,
+       6.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w18",
+      "a": [
+       1.01,
+       6.0
+      ],
+      "b": [
+       1.01,
+       9.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w19",
+      "a": [
+       30.99,
+       6.0
+      ],
+      "b": [
+       30.99,
+       9.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w20",
+      "a": [
+       1.92,
+       8.96
+      ],
+      "b": [
+       1.01,
+       9.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w21",
+      "a": [
+       6.92,
+       8.96
+      ],
+      "b": [
+       5.0,
+       9.01
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w22",
+      "a": [
+       16.92,
+       8.96
+      ],
+      "b": [
+       11.0,
+       9.01
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w23",
+      "a": [
+       3.0,
+       9.0
+      ],
+      "b": [
+       5.0,
+       9.01
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w24",
+      "a": [
+       8.04,
+       9.0
+      ],
+      "b": [
+       11.0,
+       9.01
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w25",
+      "a": [
+       18.0,
+       9.0
+      ],
+      "b": [
+       21.0,
+       9.01
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w26",
+      "a": [
+       21.0,
+       9.01
+      ],
+      "b": [
+       30.99,
+       9.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w27",
+      "a": [
+       1.01,
+       9.0
+      ],
+      "b": [
+       1.0,
+       12.96
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w28",
+      "a": [
+       1.0,
+       12.96
+      ],
+      "b": [
+       5.0,
+       12.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w29",
+      "a": [
+       5.0,
+       9.01
+      ],
+      "b": [
+       5.0,
+       12.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w30",
+      "a": [
+       11.0,
+       9.01
+      ],
+      "b": [
+       11.0,
+       12.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w31",
+      "a": [
+       21.0,
+       9.01
+      ],
+      "b": [
+       21.0,
+       12.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w32",
+      "a": [
+       30.99,
+       9.0
+      ],
+      "b": [
+       30.96,
+       13.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w33",
+      "a": [
+       30.96,
+       13.0
+      ],
+      "b": [
+       21.0,
+       12.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w34",
+      "a": [
+       24.85,
+       11.08
+      ],
+      "b": [
+       24.92,
+       10.8
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w35",
+      "a": [
+       24.92,
+       10.8
+      ],
+      "b": [
+       25.16,
+       10.88
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w36",
+      "a": [
+       24.85,
+       11.08
+      ],
+      "b": [
+       25.11,
+       11.08
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w37",
+      "a": [
+       5.0,
+       12.99
+      ],
+      "b": [
+       11.0,
+       12.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w38",
+      "a": [
+       11.0,
+       12.99
+      ],
+      "b": [
+       21.0,
+       12.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     }
+    ],
+    "doors": [
+     {
+      "id": "d1",
+      "a": [
+       4.0,
+       6.0
+      ],
+      "b": [
+       4.92,
+       6.0
+      ],
+      "room_id": "s1",
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.7
+      }
+     },
+     {
+      "id": "d2",
+      "a": [
+       10.0,
+       6.0
+      ],
+      "b": [
+       10.88,
+       6.0
+      ],
+      "room_id": "s2",
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.7
+      }
+     },
+     {
+      "id": "d3",
+      "a": [
+       19.0,
+       6.0
+      ],
+      "b": [
+       19.88,
+       6.0
+      ],
+      "room_id": "s3",
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.7
+      }
+     },
+     {
+      "id": "d4",
+      "a": [
+       25.0,
+       6.0
+      ],
+      "b": [
+       25.92,
+       6.0
+      ],
+      "room_id": "s4",
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.7
+      }
+     },
+     {
+      "id": "d5",
+      "a": [
+       2.0,
+       9.0
+      ],
+      "b": [
+       2.88,
+       9.0
+      ],
+      "room_id": "s6",
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.7
+      }
+     },
+     {
+      "id": "d6",
+      "a": [
+       7.0,
+       9.0
+      ],
+      "b": [
+       7.92,
+       9.0
+      ],
+      "room_id": "s7",
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.7
+      }
+     },
+     {
+      "id": "d7",
+      "a": [
+       17.0,
+       9.0
+      ],
+      "b": [
+       17.88,
+       9.0
+      ],
+      "room_id": "s8",
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.7
+      }
+     }
+    ],
+    "rooms": [
+     {
+      "id": "s1",
+      "polygon": [
+       [
+        1.12,
+        1.12
+       ],
+       [
+        1.12,
+        5.88
+       ],
+       [
+        7.88,
+        5.88
+       ],
+       [
+        7.88,
+        1.12
+       ],
+       [
+        1.12,
+        1.12
+       ]
+      ],
+      "label": "R-101",
+      "name": "R-101",
+      "category": null,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.6,
+       "ocr_confidence": 0.91
+      }
+     },
+     {
+      "id": "s2",
+      "polygon": [
+       [
+        8.12,
+        1.12
+       ],
+       [
+        8.12,
+        5.88
+       ],
+       [
+        14.88,
+        5.88
+       ],
+       [
+        14.88,
+        1.12
+       ],
+       [
+        8.12,
+        1.12
+       ]
+      ],
+      "label": "R-102",
+      "name": "R-102",
+      "category": null,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.6,
+       "ocr_confidence": 0.91
+      }
+     },
+     {
+      "id": "s3",
+      "polygon": [
+       [
+        15.12,
+        1.12
+       ],
+       [
+        15.12,
+        5.88
+       ],
+       [
+        22.88,
+        5.88
+       ],
+       [
+        22.88,
+        1.12
+       ],
+       [
+        15.12,
+        1.12
+       ]
+      ],
+      "label": "R-103",
+      "name": "R-103",
+      "category": null,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.6,
+       "ocr_confidence": 0.91
+      }
+     },
+     {
+      "id": "s4",
+      "polygon": [
+       [
+        23.12,
+        1.12
+       ],
+       [
+        23.12,
+        5.88
+       ],
+       [
+        30.88,
+        5.88
+       ],
+       [
+        30.88,
+        1.12
+       ],
+       [
+        23.12,
+        1.12
+       ]
+      ],
+      "label": null,
+      "name": "STAIRS",
+      "category": "stairs_or_lift",
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.6,
+       "ocr_confidence": 0.95
+      }
+     },
+     {
+      "id": "s6",
+      "polygon": [
+       [
+        1.12,
+        9.12
+       ],
+       [
+        1.12,
+        12.88
+       ],
+       [
+        4.88,
+        12.88
+       ],
+       [
+        4.88,
+        9.12
+       ],
+       [
+        1.12,
+        9.12
+       ]
+      ],
+      "label": null,
+      "name": "LIFT",
+      "category": "stairs_or_lift",
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.6,
+       "ocr_confidence": 0.96
+      }
+     },
+     {
+      "id": "s7",
+      "polygon": [
+       [
+        5.12,
+        9.12
+       ],
+       [
+        5.12,
+        12.88
+       ],
+       [
+        10.88,
+        12.88
+       ],
+       [
+        10.88,
+        9.12
+       ],
+       [
+        5.12,
+        9.12
+       ]
+      ],
+      "label": "R-105",
+      "name": "R-105",
+      "category": null,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.6,
+       "ocr_confidence": 0.91
+      }
+     },
+     {
+      "id": "s8",
+      "polygon": [
+       [
+        11.12,
+        9.12
+       ],
+       [
+        11.12,
+        12.88
+       ],
+       [
+        20.88,
+        12.88
+       ],
+       [
+        20.88,
+        9.12
+       ],
+       [
+        11.12,
+        9.12
+       ]
+      ],
+      "label": "R-106",
+      "name": "R-106",
+      "category": null,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.6,
+       "ocr_confidence": 0.91
+      }
+     },
+     {
+      "id": "s9",
+      "polygon": [
+       [
+        21.12,
+        9.12
+       ],
+       [
+        21.12,
+        12.88
+       ],
+       [
+        30.88,
+        12.88
+       ],
+       [
+        30.88,
+        9.12
+       ],
+       [
+        21.12,
+        9.12
+       ]
+      ],
+      "label": null,
+      "name": "-107",
+      "category": null,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.6,
+       "ocr_confidence": 0.91
+      }
+     }
+    ],
+    "graph": {
+     "nodes": [
+      {
+       "id": "n1",
+       "x": 29.52,
+       "y": 7.48,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n2",
+       "x": 22.77,
+       "y": 7.48,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n3",
+       "x": 16.02,
+       "y": 7.48,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n4",
+       "x": 9.27,
+       "y": 7.48,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n5",
+       "x": 2.52,
+       "y": 7.48,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n6",
+       "x": 2.4,
+       "y": 8.64,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n7",
+       "x": 4.46,
+       "y": 6.0,
+       "kind": "door",
+       "door_id": "d1",
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n8",
+       "x": 4.46,
+       "y": 7.48,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n9",
+       "x": 10.44,
+       "y": 6.0,
+       "kind": "door",
+       "door_id": "d2",
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n10",
+       "x": 10.44,
+       "y": 7.48,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n11",
+       "x": 19.44,
+       "y": 6.0,
+       "kind": "door",
+       "door_id": "d3",
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n12",
+       "x": 19.44,
+       "y": 7.48,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n13",
+       "x": 25.46,
+       "y": 6.0,
+       "kind": "door",
+       "door_id": "d4",
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n14",
+       "x": 25.46,
+       "y": 7.48,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n15",
+       "x": 2.44,
+       "y": 9.0,
+       "kind": "door",
+       "door_id": "d5",
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n16",
+       "x": 7.46,
+       "y": 9.0,
+       "kind": "door",
+       "door_id": "d6",
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n17",
+       "x": 7.46,
+       "y": 7.48,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n18",
+       "x": 17.44,
+       "y": 9.0,
+       "kind": "door",
+       "door_id": "d7",
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n19",
+       "x": 17.44,
+       "y": 7.48,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n20",
+       "x": 27.0,
+       "y": 6.12,
+       "kind": "transition",
+       "door_id": null,
+       "transition": "stairs",
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n21",
+       "x": 27.0,
+       "y": 7.48,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n22",
+       "x": 2.88,
+       "y": 9.08,
+       "kind": "transition",
+       "door_id": null,
+       "transition": "lift",
+       "provenance": {
+        "source": "auto"
+       }
+      }
+     ],
+     "edges": [
+      {
+       "id": "e1",
+       "from": "n1",
+       "to": "n21",
+       "length_m": 2.52,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e2",
+       "from": "n2",
+       "to": "n12",
+       "length_m": 3.33,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e3",
+       "from": "n3",
+       "to": "n10",
+       "length_m": 5.58,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e4",
+       "from": "n4",
+       "to": "n17",
+       "length_m": 1.81,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e5",
+       "from": "n5",
+       "to": "n6",
+       "length_m": 1.166,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e6",
+       "from": "n8",
+       "to": "n5",
+       "length_m": 1.94,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e7",
+       "from": "n7",
+       "to": "n8",
+       "length_m": 1.48,
+       "type": "door",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e8",
+       "from": "n10",
+       "to": "n4",
+       "length_m": 1.17,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e9",
+       "from": "n9",
+       "to": "n10",
+       "length_m": 1.48,
+       "type": "door",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e10",
+       "from": "n12",
+       "to": "n19",
+       "length_m": 2.0,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e11",
+       "from": "n11",
+       "to": "n12",
+       "length_m": 1.48,
+       "type": "door",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e12",
+       "from": "n14",
+       "to": "n2",
+       "length_m": 2.69,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e13",
+       "from": "n13",
+       "to": "n14",
+       "length_m": 1.48,
+       "type": "door",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e14",
+       "from": "n15",
+       "to": "n6",
+       "length_m": 0.362,
+       "type": "door",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e15",
+       "from": "n17",
+       "to": "n8",
+       "length_m": 3.0,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e16",
+       "from": "n16",
+       "to": "n17",
+       "length_m": 1.52,
+       "type": "door",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e17",
+       "from": "n19",
+       "to": "n3",
+       "length_m": 1.42,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e18",
+       "from": "n18",
+       "to": "n19",
+       "length_m": 1.52,
+       "type": "door",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e19",
+       "from": "n21",
+       "to": "n14",
+       "length_m": 1.54,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e20",
+       "from": "n20",
+       "to": "n21",
+       "length_m": 1.36,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e21",
+       "from": "n22",
+       "to": "n6",
+       "length_m": 0.651,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      }
+     ]
+    },
+    "pois": [
+     {
+      "id": "p1",
+      "name": "R-101",
+      "label": "R-101",
+      "node_id": "n7",
+      "room_id": "s1",
+      "category": null,
+      "needs_review": false,
+      "provenance": {
+       "source": "auto"
+      }
+     },
+     {
+      "id": "p2",
+      "name": "R-102",
+      "label": "R-102",
+      "node_id": "n9",
+      "room_id": "s2",
+      "category": null,
+      "needs_review": false,
+      "provenance": {
+       "source": "auto"
+      }
+     },
+     {
+      "id": "p3",
+      "name": "R-103",
+      "label": "R-103",
+      "node_id": "n11",
+      "room_id": "s3",
+      "category": null,
+      "needs_review": false,
+      "provenance": {
+       "source": "auto"
+      }
+     },
+     {
+      "id": "p4",
+      "name": "R-105",
+      "label": "R-105",
+      "node_id": "n16",
+      "room_id": "s7",
+      "category": null,
+      "needs_review": false,
+      "provenance": {
+       "source": "auto"
+      }
+     },
+     {
+      "id": "p5",
+      "name": "R-106",
+      "label": "R-106",
+      "node_id": "n18",
+      "room_id": "s8",
+      "category": null,
+      "needs_review": false,
+      "provenance": {
+       "source": "auto"
+      }
+     },
+     {
+      "id": "p6",
+      "name": "Stairs 1",
+      "label": null,
+      "node_id": "n20",
+      "room_id": "s4",
+      "category": "stairs",
+      "needs_review": false,
+      "provenance": {
+       "source": "auto"
+      }
+     },
+     {
+      "id": "p7",
+      "name": "Lift 1",
+      "label": null,
+      "node_id": "n22",
+      "room_id": "s6",
+      "category": "lift",
+      "needs_review": false,
+      "provenance": {
+       "source": "auto"
+      }
+     }
+    ],
+    "validation": {
+     "passed": true,
+     "forced": false,
+     "errors": [],
+     "warnings": [
+      {
+       "code": "ROOM_NOT_REACHABLE",
+       "ref": "s9",
+       "message": "room has no door linked to the corridor graph"
+      },
+      {
+       "code": "ROOM_NO_DOOR",
+       "ref": "s9",
+       "message": "no door detected for this room"
+      }
+     ]
+    },
+    "building_frame": {
+     "matrix": [
+      [
+       0.965306,
+       0.0,
+       0.99125
+      ],
+      [
+       0.0,
+       0.965306,
+       0.495625
+      ]
+     ],
+     "reference_floor_id": "T0",
+     "method": "walls",
+     "confidence": 1.0,
+     "registered_scale": 0.9825
+    }
+   }
+  },
+  {
+   "id": "W0",
+   "building_id": "W",
+   "level": 0,
+   "name": "W Block \u2013 level 0",
+   "source": {
+    "adapter": "image",
+    "file": "annex.png",
+    "sha256": "38285ff39351e0e19ffd8e58dbadc98453965dbbb966f4eb7db8289608205e22"
+   },
+   "validation_passed": true,
+   "floor": {
+    "floor_id": "W0",
+    "image": {
+     "file": "images/W0.png",
+     "width_px": 800,
+     "height_px": 350
+    },
+    "transform": {
+     "px_to_m": [
+      [
+       0.04,
+       0.0,
+       0.0
+      ],
+      [
+       0.0,
+       0.04,
+       0.0
+      ]
+     ],
+     "scale_m_per_px": 0.04,
+     "scale_source": "operator_two_point",
+     "scale_evidence": [
+      {
+       "p1_px": [
+        25,
+        25
+       ],
+       "p2_px": [
+        775,
+        25
+       ],
+       "distance_m": 30.0,
+       "used_for_fit": true
+      }
+     ]
+    },
+    "bounds_m": {
+     "min_x": 0.0,
+     "min_y": 0.0,
+     "max_x": 32.0,
+     "max_y": 14.0
+    },
+    "walkable": {
+     "type": "MultiPolygon",
+     "coordinates": [
+      [
+       [
+        [
+         4.0,
+         5.92
+        ],
+        [
+         4.0,
+         6.08
+        ],
+        [
+         3.96,
+         6.12
+        ],
+        [
+         1.12,
+         6.12
+        ],
+        [
+         1.12,
+         8.88
+        ],
+        [
+         4.96,
+         8.88
+        ],
+        [
+         5.0,
+         8.92
+        ],
+        [
+         5.0,
+         9.08
+        ],
+        [
+         5.92,
+         9.08
+        ],
+        [
+         5.92,
+         8.92
+        ],
+        [
+         5.96,
+         8.88
+        ],
+        [
+         16.96,
+         8.88
+        ],
+        [
+         17.0,
+         8.92
+        ],
+        [
+         17.0,
+         9.08
+        ],
+        [
+         17.88,
+         9.08
+        ],
+        [
+         17.88,
+         8.92
+        ],
+        [
+         17.92,
+         8.88
+        ],
+        [
+         30.88,
+         8.88
+        ],
+        [
+         30.88,
+         6.12
+        ],
+        [
+         24.92,
+         6.12
+        ],
+        [
+         24.88,
+         6.08
+        ],
+        [
+         24.88,
+         5.92
+        ],
+        [
+         24.0,
+         5.92
+        ],
+        [
+         24.0,
+         6.08
+        ],
+        [
+         23.96,
+         6.12
+        ],
+        [
+         19.92,
+         6.12
+        ],
+        [
+         19.88,
+         6.08
+        ],
+        [
+         19.88,
+         5.92
+        ],
+        [
+         19.0,
+         5.92
+        ],
+        [
+         19.0,
+         6.08
+        ],
+        [
+         18.96,
+         6.12
+        ],
+        [
+         10.92,
+         6.12
+        ],
+        [
+         10.88,
+         6.08
+        ],
+        [
+         10.88,
+         5.92
+        ],
+        [
+         10.0,
+         5.92
+        ],
+        [
+         10.0,
+         6.08
+        ],
+        [
+         9.96,
+         6.12
+        ],
+        [
+         4.96,
+         6.12
+        ],
+        [
+         4.92,
+         6.08
+        ],
+        [
+         4.92,
+         5.92
+        ],
+        [
+         4.0,
+         5.92
+        ]
+       ]
+      ]
+     ],
+     "provenance": {
+      "source": "auto",
+      "confidence": 0.7
+     }
+    },
+    "walls": [
+     {
+      "id": "w1",
+      "a": [
+       8.0,
+       1.01
+      ],
+      "b": [
+       1.04,
+       1.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w2",
+      "a": [
+       1.04,
+       1.0
+      ],
+      "b": [
+       1.01,
+       6.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w3",
+      "a": [
+       8.0,
+       1.01
+      ],
+      "b": [
+       15.0,
+       1.01
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w4",
+      "a": [
+       15.0,
+       1.01
+      ],
+      "b": [
+       23.0,
+       1.01
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w5",
+      "a": [
+       23.0,
+       1.01
+      ],
+      "b": [
+       30.96,
+       1.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w6",
+      "a": [
+       30.96,
+       1.0
+      ],
+      "b": [
+       30.99,
+       6.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w7",
+      "a": [
+       8.0,
+       1.01
+      ],
+      "b": [
+       8.0,
+       5.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w8",
+      "a": [
+       15.0,
+       1.01
+      ],
+      "b": [
+       15.0,
+       5.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w9",
+      "a": [
+       23.0,
+       1.01
+      ],
+      "b": [
+       23.0,
+       5.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w10",
+      "a": [
+       3.92,
+       5.96
+      ],
+      "b": [
+       1.01,
+       6.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w11",
+      "a": [
+       9.92,
+       5.96
+      ],
+      "b": [
+       8.0,
+       5.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w12",
+      "a": [
+       18.92,
+       5.96
+      ],
+      "b": [
+       15.0,
+       5.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w13",
+      "a": [
+       23.92,
+       5.96
+      ],
+      "b": [
+       23.0,
+       5.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w14",
+      "a": [
+       5.04,
+       6.0
+      ],
+      "b": [
+       8.0,
+       5.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w15",
+      "a": [
+       11.0,
+       6.0
+      ],
+      "b": [
+       15.0,
+       5.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w16",
+      "a": [
+       20.0,
+       6.0
+      ],
+      "b": [
+       23.0,
+       5.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w17",
+      "a": [
+       25.0,
+       6.0
+      ],
+      "b": [
+       30.99,
+       6.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w18",
+      "a": [
+       1.01,
+       6.0
+      ],
+      "b": [
+       1.01,
+       9.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w19",
+      "a": [
+       30.99,
+       6.0
+      ],
+      "b": [
+       30.99,
+       9.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w20",
+      "a": [
+       4.92,
+       8.96
+      ],
+      "b": [
+       1.01,
+       9.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w21",
+      "a": [
+       16.92,
+       8.96
+      ],
+      "b": [
+       11.0,
+       9.01
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w22",
+      "a": [
+       6.04,
+       9.0
+      ],
+      "b": [
+       11.0,
+       9.01
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w23",
+      "a": [
+       18.0,
+       9.0
+      ],
+      "b": [
+       21.0,
+       9.01
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w24",
+      "a": [
+       21.0,
+       9.01
+      ],
+      "b": [
+       30.99,
+       9.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w25",
+      "a": [
+       1.01,
+       9.0
+      ],
+      "b": [
+       1.04,
+       13.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w26",
+      "a": [
+       1.04,
+       13.0
+      ],
+      "b": [
+       11.0,
+       12.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w27",
+      "a": [
+       11.0,
+       9.01
+      ],
+      "b": [
+       11.0,
+       12.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w28",
+      "a": [
+       21.0,
+       9.01
+      ],
+      "b": [
+       21.0,
+       12.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w29",
+      "a": [
+       30.99,
+       9.0
+      ],
+      "b": [
+       30.96,
+       13.0
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w30",
+      "a": [
+       30.96,
+       13.0
+      ],
+      "b": [
+       21.0,
+       12.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w31",
+      "a": [
+       26.72,
+       10.84
+      ],
+      "b": [
+       27.0,
+       10.84
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w32",
+      "a": [
+       27.0,
+       10.84
+      ],
+      "b": [
+       26.88,
+       11.28
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w33",
+      "a": [
+       25.88,
+       10.88
+      ],
+      "b": [
+       25.88,
+       11.24
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w34",
+      "a": [
+       24.85,
+       11.08
+      ],
+      "b": [
+       24.92,
+       10.8
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w35",
+      "a": [
+       24.92,
+       10.8
+      ],
+      "b": [
+       25.16,
+       10.88
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w36",
+      "a": [
+       24.85,
+       11.08
+      ],
+      "b": [
+       25.11,
+       11.08
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w37",
+      "a": [
+       11.0,
+       12.99
+      ],
+      "b": [
+       21.0,
+       12.99
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w38",
+      "a": [
+       26.32,
+       10.84
+      ],
+      "b": [
+       26.56,
+       10.96
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w39",
+      "a": [
+       26.56,
+       10.96
+      ],
+      "b": [
+       26.44,
+       11.28
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w40",
+      "a": [
+       26.44,
+       11.28
+      ],
+      "b": [
+       26.24,
+       11.12
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     },
+     {
+      "id": "w41",
+      "a": [
+       26.24,
+       11.12
+      ],
+      "b": [
+       26.32,
+       10.84
+      ],
+      "thickness_m": 0.229,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.9
+      }
+     }
+    ],
+    "doors": [
+     {
+      "id": "d1",
+      "a": [
+       4.0,
+       6.0
+      ],
+      "b": [
+       4.92,
+       6.0
+      ],
+      "room_id": "s1",
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.7
+      }
+     },
+     {
+      "id": "d2",
+      "a": [
+       10.0,
+       6.0
+      ],
+      "b": [
+       10.88,
+       6.0
+      ],
+      "room_id": "s2",
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.7
+      }
+     },
+     {
+      "id": "d3",
+      "a": [
+       19.0,
+       6.0
+      ],
+      "b": [
+       19.88,
+       6.0
+      ],
+      "room_id": "s3",
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.7
+      }
+     },
+     {
+      "id": "d4",
+      "a": [
+       24.0,
+       6.0
+      ],
+      "b": [
+       24.88,
+       6.0
+      ],
+      "room_id": "s4",
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.7
+      }
+     },
+     {
+      "id": "d5",
+      "a": [
+       5.0,
+       9.0
+      ],
+      "b": [
+       5.92,
+       9.0
+      ],
+      "room_id": "s6",
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.7
+      }
+     },
+     {
+      "id": "d6",
+      "a": [
+       17.0,
+       9.0
+      ],
+      "b": [
+       17.88,
+       9.0
+      ],
+      "room_id": "s7",
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.7
+      }
+     }
+    ],
+    "rooms": [
+     {
+      "id": "s1",
+      "polygon": [
+       [
+        1.12,
+        1.12
+       ],
+       [
+        1.12,
+        5.88
+       ],
+       [
+        7.88,
+        5.88
+       ],
+       [
+        7.88,
+        1.12
+       ],
+       [
+        1.12,
+        1.12
+       ]
+      ],
+      "label": "R-101",
+      "name": "R-101",
+      "category": null,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.6,
+       "ocr_confidence": 0.91
+      }
+     },
+     {
+      "id": "s2",
+      "polygon": [
+       [
+        8.12,
+        1.12
+       ],
+       [
+        8.12,
+        5.88
+       ],
+       [
+        14.88,
+        5.88
+       ],
+       [
+        14.88,
+        1.12
+       ],
+       [
+        8.12,
+        1.12
+       ]
+      ],
+      "label": "R-102",
+      "name": "R-102",
+      "category": null,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.6,
+       "ocr_confidence": 0.91
+      }
+     },
+     {
+      "id": "s3",
+      "polygon": [
+       [
+        15.12,
+        1.12
+       ],
+       [
+        15.12,
+        5.88
+       ],
+       [
+        22.88,
+        5.88
+       ],
+       [
+        22.88,
+        1.12
+       ],
+       [
+        15.12,
+        1.12
+       ]
+      ],
+      "label": "R-103",
+      "name": "R-103",
+      "category": null,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.6,
+       "ocr_confidence": 0.91
+      }
+     },
+     {
+      "id": "s4",
+      "polygon": [
+       [
+        23.12,
+        1.12
+       ],
+       [
+        23.12,
+        5.88
+       ],
+       [
+        30.88,
+        5.88
+       ],
+       [
+        30.88,
+        1.12
+       ],
+       [
+        23.12,
+        1.12
+       ]
+      ],
+      "label": "R-104",
+      "name": "R-104",
+      "category": null,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.6,
+       "ocr_confidence": 0.91
+      }
+     },
+     {
+      "id": "s6",
+      "polygon": [
+       [
+        1.12,
+        9.12
+       ],
+       [
+        1.12,
+        12.88
+       ],
+       [
+        10.88,
+        12.88
+       ],
+       [
+        10.88,
+        9.12
+       ],
+       [
+        1.12,
+        9.12
+       ]
+      ],
+      "label": "R-105",
+      "name": "R-105",
+      "category": null,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.6,
+       "ocr_confidence": 0.91
+      }
+     },
+     {
+      "id": "s7",
+      "polygon": [
+       [
+        11.12,
+        9.12
+       ],
+       [
+        11.12,
+        12.88
+       ],
+       [
+        20.88,
+        12.88
+       ],
+       [
+        20.88,
+        9.12
+       ],
+       [
+        11.12,
+        9.12
+       ]
+      ],
+      "label": "R-106",
+      "name": "R-106",
+      "category": null,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.6,
+       "ocr_confidence": 0.91
+      }
+     },
+     {
+      "id": "s8",
+      "polygon": [
+       [
+        21.12,
+        9.12
+       ],
+       [
+        21.12,
+        12.88
+       ],
+       [
+        30.88,
+        12.88
+       ],
+       [
+        30.88,
+        9.12
+       ],
+       [
+        21.12,
+        9.12
+       ]
+      ],
+      "label": null,
+      "name": null,
+      "category": null,
+      "provenance": {
+       "source": "auto",
+       "confidence": 0.6
+      }
+     }
+    ],
+    "graph": {
+     "nodes": [
+      {
+       "id": "n1",
+       "x": 29.52,
+       "y": 7.48,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n2",
+       "x": 22.75,
+       "y": 7.49,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n3",
+       "x": 15.98,
+       "y": 7.5,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n4",
+       "x": 9.21,
+       "y": 7.51,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n5",
+       "x": 2.44,
+       "y": 7.52,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n6",
+       "x": 4.46,
+       "y": 6.0,
+       "kind": "door",
+       "door_id": "d1",
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n7",
+       "x": 4.462,
+       "y": 7.517,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n8",
+       "x": 10.44,
+       "y": 6.0,
+       "kind": "door",
+       "door_id": "d2",
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n9",
+       "x": 10.442,
+       "y": 7.508,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n10",
+       "x": 19.44,
+       "y": 6.0,
+       "kind": "door",
+       "door_id": "d3",
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n11",
+       "x": 19.442,
+       "y": 7.495,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n12",
+       "x": 24.44,
+       "y": 6.0,
+       "kind": "door",
+       "door_id": "d4",
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n13",
+       "x": 24.442,
+       "y": 7.488,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n14",
+       "x": 5.46,
+       "y": 9.0,
+       "kind": "door",
+       "door_id": "d5",
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n15",
+       "x": 5.458,
+       "y": 7.516,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n16",
+       "x": 17.44,
+       "y": 9.0,
+       "kind": "door",
+       "door_id": "d6",
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "n17",
+       "x": 17.438,
+       "y": 7.498,
+       "kind": "corridor",
+       "door_id": null,
+       "provenance": {
+        "source": "auto"
+       }
+      }
+     ],
+     "edges": [
+      {
+       "id": "e1",
+       "from": "n1",
+       "to": "n13",
+       "length_m": 5.078,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e2",
+       "from": "n2",
+       "to": "n11",
+       "length_m": 3.308,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e3",
+       "from": "n3",
+       "to": "n9",
+       "length_m": 5.538,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e4",
+       "from": "n4",
+       "to": "n15",
+       "length_m": 3.752,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e5",
+       "from": "n7",
+       "to": "n5",
+       "length_m": 2.022,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e6",
+       "from": "n6",
+       "to": "n7",
+       "length_m": 1.517,
+       "type": "door",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e7",
+       "from": "n9",
+       "to": "n4",
+       "length_m": 1.232,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e8",
+       "from": "n8",
+       "to": "n9",
+       "length_m": 1.508,
+       "type": "door",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e9",
+       "from": "n11",
+       "to": "n17",
+       "length_m": 2.004,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e10",
+       "from": "n10",
+       "to": "n11",
+       "length_m": 1.495,
+       "type": "door",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e11",
+       "from": "n13",
+       "to": "n2",
+       "length_m": 1.692,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e12",
+       "from": "n12",
+       "to": "n13",
+       "length_m": 1.488,
+       "type": "door",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e13",
+       "from": "n15",
+       "to": "n7",
+       "length_m": 0.996,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e14",
+       "from": "n14",
+       "to": "n15",
+       "length_m": 1.484,
+       "type": "door",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e15",
+       "from": "n17",
+       "to": "n3",
+       "length_m": 1.458,
+       "type": "corridor",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      },
+      {
+       "id": "e16",
+       "from": "n16",
+       "to": "n17",
+       "length_m": 1.502,
+       "type": "door",
+       "bidirectional": true,
+       "accessible": null,
+       "provenance": {
+        "source": "auto"
+       }
+      }
+     ]
+    },
+    "pois": [
+     {
+      "id": "p1",
+      "name": "R-101",
+      "label": "R-101",
+      "node_id": "n6",
+      "room_id": "s1",
+      "category": null,
+      "needs_review": false,
+      "provenance": {
+       "source": "auto"
+      }
+     },
+     {
+      "id": "p2",
+      "name": "R-102",
+      "label": "R-102",
+      "node_id": "n8",
+      "room_id": "s2",
+      "category": null,
+      "needs_review": false,
+      "provenance": {
+       "source": "auto"
+      }
+     },
+     {
+      "id": "p3",
+      "name": "R-103",
+      "label": "R-103",
+      "node_id": "n10",
+      "room_id": "s3",
+      "category": null,
+      "needs_review": false,
+      "provenance": {
+       "source": "auto"
+      }
+     },
+     {
+      "id": "p4",
+      "name": "R-104",
+      "label": "R-104",
+      "node_id": "n12",
+      "room_id": "s4",
+      "category": null,
+      "needs_review": false,
+      "provenance": {
+       "source": "auto"
+      }
+     },
+     {
+      "id": "p5",
+      "name": "R-105",
+      "label": "R-105",
+      "node_id": "n14",
+      "room_id": "s6",
+      "category": null,
+      "needs_review": false,
+      "provenance": {
+       "source": "auto"
+      }
+     },
+     {
+      "id": "p6",
+      "name": "R-106",
+      "label": "R-106",
+      "node_id": "n16",
+      "room_id": "s7",
+      "category": null,
+      "needs_review": false,
+      "provenance": {
+       "source": "auto"
+      }
+     }
+    ],
+    "validation": {
+     "passed": true,
+     "forced": false,
+     "errors": [],
+     "warnings": [
+      {
+       "code": "ROOM_NOT_REACHABLE",
+       "ref": "s8",
+       "message": "room has no door linked to the corridor graph"
+      },
+      {
+       "code": "ROOM_NO_DOOR",
+       "ref": "s8",
+       "message": "no door detected for this room"
+      }
+     ]
+    },
+    "building_frame": {
+     "matrix": [
+      [
+       1.0,
+       0.0,
+       0.0
+      ],
+      [
+       0.0,
+       1.0,
+       0.0
+      ]
+     ],
+     "reference_floor_id": "W0",
+     "method": "reference",
+     "confidence": 1.0,
+     "registered_scale": 1.0
+    }
+   }
+  }
+ ],
+ "transitions": [
+  {
+   "id": "t1",
+   "type": "walkway",
+   "from": {
+    "floor_id": "T0",
+    "node_id": "n7"
+   },
+   "to": {
+    "floor_id": "W0",
+    "node_id": "n12"
+   },
+   "length_m": 25.0,
+   "length_estimated": false,
+   "accessible": true,
+   "provenance": {
+    "source": "manual",
+    "confidence": 1.0
+   }
+  },
+  {
+   "id": "t2",
+   "type": "stairs",
+   "from": {
+    "floor_id": "T0",
+    "node_id": "n20"
+   },
+   "to": {
+    "floor_id": "T1",
+    "node_id": "n20"
+   },
+   "length_m": 6.0,
+   "length_estimated": true,
+   "accessible": false,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.98
+   },
+   "match_distance_m": 0.15,
+   "shaft": "shaft1"
+  },
+  {
+   "id": "t3",
+   "type": "lift",
+   "from": {
+    "floor_id": "T0",
+    "node_id": "n22"
+   },
+   "to": {
+    "floor_id": "T1",
+    "node_id": "n22"
+   },
+   "length_m": 4.0,
+   "length_estimated": true,
+   "accessible": true,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.94
+   },
+   "match_distance_m": 0.46,
+   "shaft": "shaft2"
+  },
+  {
+   "id": "t4",
+   "type": "stairs",
+   "from": {
+    "floor_id": "T1",
+    "node_id": "n20"
+   },
+   "to": {
+    "floor_id": "T2",
+    "node_id": "n20"
+   },
+   "length_m": 6.0,
+   "length_estimated": true,
+   "accessible": false,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.98
+   },
+   "match_distance_m": 0.14,
+   "shaft": "shaft1"
+  },
+  {
+   "id": "t5",
+   "type": "lift",
+   "from": {
+    "floor_id": "T1",
+    "node_id": "n22"
+   },
+   "to": {
+    "floor_id": "T2",
+    "node_id": "n22"
+   },
+   "length_m": 4.0,
+   "length_estimated": true,
+   "accessible": true,
+   "provenance": {
+    "source": "auto",
+    "confidence": 0.94
+   },
+   "match_distance_m": 0.45,
+   "shaft": "shaft2"
+  }
+ ]
+}

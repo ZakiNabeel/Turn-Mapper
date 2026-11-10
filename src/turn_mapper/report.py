@@ -82,8 +82,47 @@ def route_overlay(fr: FloorResult, routes: list) -> np.ndarray:
     return vis
 
 
-def write_html(out_dir: Path, run: dict, floors: list[dict]) -> Path:
-    rows = []
+def _venue_section(v: dict) -> str:
+    """Multi-floor summary: which floors reach which, links, scale corrections, warnings."""
+    reach = v.get("reach") or {}
+    ids = sorted(reach)
+    head = "".join(f"<th>{html.escape(b)}</th>" for b in ids)
+    body = "".join(
+        f"<tr><th>{html.escape(a)}</th>"
+        + "".join(
+            "<td>·</td>" if a == b else ("<td class=ok>✓</td>" if reach[a][b] else "<td class=bad>✗</td>")
+            for b in ids
+        )
+        + "</tr>"
+        for a in ids
+    )
+    warns = v.get("warnings", []) + v.get("link_warnings", [])
+    wl = "".join(f"<li><b>{html.escape(w['code'])}</b> {html.escape(w['message'])}</li>" for w in warns[:80])
+    resc = ", ".join(f"{k} ×{f:.3f}" for k, f in (v.get("rescaled_floors") or {}).items()) or "none"
+    qrows = "".join(
+        f"<tr><th>{html.escape(fid)}</th><td class={'ok' if q['grade'] == 'ready' else 'bad' if q['grade'] == 'needs work' else ''}>"
+        f"{html.escape(q['grade'])}</td><td>{q['pieces']}</td><td>{q['destinations_reachable']:.0%}</td>"
+        f"<td>{'measured' if q['scale_measured'] else 'estimate'}</td><td>{html.escape(q['transitions_linked'])}</td>"
+        f"<td>{html.escape('; '.join(q['reasons']))}</td></tr>"
+        for fid, f in sorted((v.get("floors") or {}).items())
+        if (q := f.get("quality"))
+    )
+    return f"""
+<section><h2>Venue: multi-floor routing</h2>
+<p class=stats>floor links {v.get("transitions", 0)} · floor pairs connected {v.get("floor_pairs_connected", 0)} /
+{v.get("floor_pairs_total", 0)} · sampled cross-floor routes {v.get("routed", 0)} / {v.get("sampled_cross_floor_routes", 0)}
+found ({v.get("routed_step_free", 0)} step-free) · scales corrected by wall alignment: {html.escape(resc)}</p>
+<details open><summary>which floors' destinations can reach which (✓ / ✗)</summary>
+<table class=reach><tr><th></th>{head}</tr>{body}</table></details>
+<details open><summary>map quality per floor</summary>
+<table class=reach><tr><th>floor</th><th>grade</th><th>graph pieces</th><th>destinations reachable</th><th>scale</th>
+<th>stairs/lifts linked</th><th>what is missing</th></tr>{qrows}</table></details>
+<details><summary>multi-floor warnings ({len(warns)})</summary><ul>{wl or "<li>none</li>"}</ul></details>
+</section>"""
+
+
+def write_html(out_dir: Path, run: dict, floors: list[dict], venue: dict | None = None) -> Path:
+    rows = [_venue_section(venue)] if venue else []
     for f in floors:
         errs = "".join(
             f"<li class=e><b>{html.escape(i['code'])}</b> {html.escape(i['ref'] or '')} "
@@ -128,7 +167,7 @@ h1{{font-size:22px}} h2{{font-size:17px;margin:4px 0}} .stats{{color:#445}}
 .imgs{{display:flex;gap:12px;flex-wrap:wrap}} figure{{margin:0;flex:1 1 480px}} img{{width:100%;border:1px solid #ccd}}
 figcaption{{font-size:12px;color:#667}} .ok{{background:#72E0B1;padding:2px 8px;border-radius:6px;font-size:12px}}
 .bad{{background:#FF7C7C;padding:2px 8px;border-radius:6px;font-size:12px}} .test{{color:#b06000;font-size:12px}}
-li.e{{color:#a00}} table td{{padding:2px 10px}} code{{background:#eef}}</style></head><body>
+li.e{{color:#a00}} table td{{padding:2px 10px}} table.reach td,table.reach th{{padding:1px 4px;font-size:11px;text-align:center}} code{{background:#eef}}</style></head><body>
 <h1>TURN-Mapper QA report</h1>
 <p>run <code>{html.escape(run["run_id"])}</code> · generator {html.escape(run["generator"])} ·
 method <b>{html.escape(run["method"])}</b> · git {html.escape(str(run.get("git_commit")))}<br>

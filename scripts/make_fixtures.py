@@ -21,6 +21,40 @@ ROOT = Path(__file__).resolve().parents[1]
 FIX = ROOT / "contract" / "fixtures"
 
 
+MULTIFLOOR_YAML = """venue: {id: synth-campus, name: Synthetic campus}
+buildings:
+  - {id: T, name: Tower}
+  - {id: W, name: Annex}
+floors:
+  - {id: T0, building: T, level: 0, file: tower.png}
+  - {id: T1, building: T, level: 1, file: tower.png}
+  - {id: T2, building: T, level: 2, file: tower.png}
+  - {id: W0, building: W, level: 0, file: annex.png}
+scale_evidence:
+  T: [{p1_px: [25, 25], p2_px: [775, 25], distance_m: 30.0}]
+  W: [{p1_px: [25, 25], p2_px: [775, 25], distance_m: 30.0}]
+multifloor:
+  connections:
+    - {from: "T0:R-101", to: "W0:R-104", type: walkway, length_m: 25}
+"""
+
+
+def multifloor(tmp: Path) -> None:
+    """json_synthetic_multifloor: a 3-level tower (stairs + lift) and an annex joined by a walkway."""
+    d = tmp / "multifloor"
+    d.mkdir()
+    for name, variant in (("tower", "tower"), ("annex", "basic")):
+        cv2.imwrite(str(d / f"{name}.png"), cv2.cvtColor(make_plan(variant).rgb, cv2.COLOR_RGB2BGR))
+    (d / "venue.yaml").write_text(MULTIFLOOR_YAML)
+    res = convert(str(d / "tower.png"), venue_config=str(d / "venue.yaml"), out_dir=str(d / "run"))
+    assert res.all_passed
+    jdir = FIX / "json_synthetic_multifloor"
+    shutil.rmtree(jdir, ignore_errors=True)
+    jdir.mkdir()
+    shutil.copy(d / "run" / "venue.json", jdir / "venue.json")
+    shutil.copytree(d / "run" / "images", jdir / "images")
+
+
 def main() -> None:
     FIX.mkdir(parents=True, exist_ok=True)
     tmp = Path(tempfile.mkdtemp())
@@ -35,6 +69,7 @@ def main() -> None:
         jdir.mkdir()
         shutil.copy(tmp / v / "venue.json", jdir / "venue.json")
         shutil.copytree(tmp / v / "images", jdir / "images")
+    multifloor(tmp)
     fd = load_package(str(FIX / "valid_synthetic_basic.turnmap"))["floors"]["F1"]
 
     def bad(name, code, mutate):

@@ -37,7 +37,8 @@ from ..export import floor_to_dict, png_bytes, venue_dict, write_json_package, w
 from ..ingest import dwg_to_dxf, inspect_file, load_floor
 from ..ir import FloorSpec, Segmentation
 from ..learned.classes import BG, DOOR, ROOM, STAIRS, WALKABLE, WALL
-from ..link import link_floors
+from ..link import link_venue
+from ..route import VenueGraph, venue_checks
 from ..segment import estimate_levels
 from ..validate import route_lengths, validate_floor
 
@@ -473,14 +474,60 @@ class Studio:
         d = self.project(pid)
         floors = self._ready_floors(pid, include_failed=True)
         meta = [({**r, "building_id": r["building"]}, f) for r, f in floors]
-        links, warns = link_floors(meta, d.get("manual_links", []))
+        lv = link_venue(meta, d.get("manual_links", []), correct_scales=d.get("correct_scales", True))
+        links, warns = lv["transitions"], lv["warnings"]
         nodes = {
             r["id"]: [
                 {"id": n["id"], "type": n["transition"]} for n in f["graph"]["nodes"] if n.get("transition")
             ]
             for r, f in floors
         }
-        return {"links": links, "warnings": warns, "nodes": nodes, "manual": d.get("manual_links", [])}
+        quality = {}
+        if floors:
+            vd = {
+                "floors": [
+                    {
+                        "id": r["id"],
+                        "building_id": r["building"],
+                        "level": r["level"],
+                        "name": r.get("name") or r["id"],
+                    }
+                    for r, _ in floors
+                ],
+                "transitions": links,
+            }
+            vc = venue_checks(VenueGraph(vd, {r["id"]: f for r, f in floors}), samples=0)
+            quality = {fid: v["quality"] for fid, v in vc["floors"].items() if "quality" in v}
+        return {
+            "links": links,
+            "quality": quality,
+            "warnings": warns,
+            "nodes": nodes,
+            "manual": d.get("manual_links", []),
+            "frames": lv["frames"],
+            "rescaled": lv["rescaled"],
+        }
+
+    def places(self, pid: str) -> list[dict]:
+        """Destinations of all floors, for the route panel."""
+        out = []
+        for r, f in self._ready_floors(pid, include_failed=True):
+            for p in f.get("pois", []):
+                out.append(
+                    {"floor_id": r["id"], "node_id": p["node_id"], "name": p["name"], "label": p.get("label")}
+                )
+        return out
+
+    def route(self, pid: str, src: str, dst: str, step_free: bool = False) -> dict:
+        """A route across the project's floors. Node ids refer to the floors as stored (and shown) in Studio;
+        lengths use the export's scales (estimated scales corrected by wall alignment when possible)."""
+        floors = self._ready_floors(pid, include_failed=True)
+        vd = self._venue(pid, floors)
+        vg = VenueGraph(vd, {r["id"]: f for r, f in floors})
+        r = vg.route(src, dst, step_free=step_free)
+        if r is None:
+            return {"found": False, "step_free": step_free}
+        return {"found": True, **r.to_dict()}
 
     def set_manual_links(self, pid: str, manual: list[dict]) -> dict:
         d = self.project(pid)
@@ -515,9 +562,11 @@ class Studio:
             f"studio-{_now()}",
             None,
             "studio",
-            link_floors(
-                [({**r, "building_id": r["building"]}, f) for r, f in floors], d.get("manual_links", [])
-            )[0],
+            link_venue(
+                [({**r, "building_id": r["building"]}, f) for r, f in floors],
+                d.get("manual_links", []),
+                correct_scales=d.get("correct_scales", True),
+            )["transitions"],
         )
 
     def export(self, pid: str, fmt: str, include_failed: bool = False) -> tuple[bytes, str, str]:

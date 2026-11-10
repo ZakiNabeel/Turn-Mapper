@@ -189,3 +189,11 @@ correct 8–10 B/C floors in Studio and export training annotations (S3); try St
 - Kaggle version 2 (learned on 87941eb, with the arc fix) was still running at the time of writing.
 - Not done: FloorPlanCAD classifier (HF copy is raster only; SVG release is a Google Drive download, CC BY-NC — needs the team's OK). Bern ExWi slow (26 min) in graph bridging.
 - Deck updated: Round 3 slide, learning verdict, conclusions, next steps.
+
+## 2026-11-10 — multi-floor and multi-building routing; contract 0.1.3
+
+- Plan: `docs/PLAN_MULTIFLOOR_2026-11-10.md` (Track A routing, B per-floor quality, C needs the team). Results: `docs/RESULTS_MULTIFLOOR_2026-11-10.md`. ADR-019.
+- New `route.py` (venue graph, find_place, time-based routes, step-free, turn-by-turn, venue checks, per-floor grade); `link.py` rewritten (wall-alignment building frames, estimated-scale correction from measured floors, Hungarian matching, shafts, `multifloor.connections`, `LINK_SHAFT_GAP`); `turn-mapper route`; Studio route panel + grades; graph bridging avoids wall pixels and nudges lone nodes ≤ 1 m; config `file:` resolves next to the YAML; contract 0.1.3 (typed transitions, `building_frame`, fixture `json_synthetic_multifloor`).
+- FAST (classical): within-building floor pairs 8/60 → 60/60; links 6 → 18; floors with >1 graph piece 7 → 0; stranded stairs/lifts 7 → 0; grades 3/4/7 → 4/10/0 (ready/usable/needs work). Room/door/destination counts unchanged. Synthetic eval and style stress identical to HEAD; 131 tests pass.
+- Not verified: wall-alignment scale corrections on C-GF (×1.257) and C-F1 (×1.157) — need a site measurement. Step-free routes 0 on FAST (lifts detected on 3 C floors only).
+- Next (team): walkways between A/B/C into `fast_isb.yaml` `multifloor.connections`; mark the C lift on C-F3/C-F4 in Studio; floor height + one stair run per block; Android reads typed `transitions` (contract 0.1.3).

@@ -120,8 +120,56 @@ def validate(package: str) -> None:
             click.echo(f"   ERROR {e['code']} {e['ref'] or ''} {e['message']}")
     for e in r["venue"]:
         click.echo(f"venue ERROR {e['message']}")
+    mf = r.get("multifloor")
+    if mf and mf["floor_pairs_total"]:
+        click.echo(
+            f"multi-floor: {mf['transitions']} links; floor pairs connected {mf['floor_pairs_connected']}/"
+            f"{mf['floor_pairs_total']} (within buildings {mf['floor_pairs_in_building_connected']}/"
+            f"{mf['floor_pairs_in_building_total']}); sampled cross-floor routes {mf['routed']}/"
+            f"{mf['sampled_cross_floor_routes']} ({mf['routed_step_free']} step-free)"
+        )
+        for fid, f in sorted(mf.get("floors", {}).items()):
+            q = f.get("quality")
+            if q:
+                why = "; ".join(q["reasons"])
+                click.echo(f"   {fid:6s} {q['grade']:10s} {why}")
+        for w in mf["warnings"][:30]:
+            click.echo(f"   WARN {w['code']} {w['message']}")
     click.echo("PASSED" if r["passed"] else "FAILED")
     sys.exit(0 if r["passed"] else 1)
+
+
+@main.command()
+@click.argument("package", type=click.Path(exists=True))
+@click.option("--from", "src", required=True, help="room label/name, or FLOOR:node_id")
+@click.option("--to", "dst", required=True, help="room label/name, or FLOOR:node_id")
+@click.option("--step-free", is_flag=True, help="avoid stairs and escalators (lifts, ramps only)")
+@click.option("--json", "as_json", is_flag=True, help="print the route as JSON")
+def route(package: str, src: str, dst: str, step_free: bool, as_json: bool) -> None:
+    """Route between two places of a venue.json / .turnmap, across floors and buildings."""
+    import json
+
+    from .route import VenueGraph
+
+    vg = VenueGraph.from_package(package)
+    try:
+        r = vg.route(src, dst, step_free=step_free)
+    except KeyError as e:
+        click.echo(e.args[0] if e.args else str(e), err=True)
+        sys.exit(2)
+    if r is None:
+        click.echo("no route" + (" without stairs" if step_free else ""), err=True)
+        sys.exit(1)
+    if as_json:
+        click.echo(json.dumps(r.to_dict(), indent=1))
+        return
+    click.echo(
+        f"{r.start.name} ({r.start.floor_id}) -> {r.end.name} ({r.end.floor_id}): {r.length_m:.0f} m, "
+        f"about {r.time_s / 60:.1f} min, floors {' > '.join(dict.fromkeys(r.floors))}"
+        + (" (some stair/lift lengths are estimates)" if any(c.length_estimated for c in r.changes) else "")
+    )
+    for i, line in enumerate(r.instructions, 1):
+        click.echo(f"{i:2d}. {line}")
 
 
 @main.group()

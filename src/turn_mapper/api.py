@@ -23,10 +23,11 @@ from .export import floor_to_dict, png_bytes, read_package, venue_dict, write_js
 from .graph import build_graph
 from .ingest import load_floor, sha256_file
 from .ir import FloorResult, FloorSpec, Issue, Segmentation
-from .link import link_floors
+from .link import MAX_DIST_M, link_venue
 from .pois import label_rooms, make_pois
 from .preprocess import preprocess
 from .report import overlay, route_overlay, write_html
+from .route import VenueGraph, venue_checks
 from .scale import ROOM_METHODS, estimate_scale, point_evidence, room_evidence_scale, scale_from_evidence
 from .segment import SEGMENTERS
 from .transitions import find_transitions
@@ -371,19 +372,34 @@ def convert(
                 }
             )
 
+    pkg_path = out / ("venue.json" if output_format == "json" else "venue.turnmap")
+    link_warns: list[dict] = []
+    venue_report: dict = {}
+    if venue_floors:
+        mf = cfg.multifloor or {}
+        lv = link_venue(
+            [(v, pkg_floors[v["id"]][0]) for v in venue_floors if v["id"] in pkg_floors],
+            manual=mf.get("links"),
+            connections=mf.get("connections"),
+            lengths=mf.get("lengths"),
+            max_dist_m=float(mf.get("max_link_dist_m", MAX_DIST_M)),
+            correct_scales=bool(mf.get("correct_scales", True)),
+        )
+        links, link_warns = lv["transitions"], lv["warnings"]
+        vd = venue_dict(cfg.id, cfg.name, cfg.buildings, venue_floors, run_id, commit, method, links)
+        venue_report = venue_checks(
+            VenueGraph(vd, {k: v[0] for k, v in pkg_floors.items()}, costs=mf.get("costs")), samples=200
+        )
+        venue_report["rescaled_floors"] = lv["rescaled"]
+        venue_report["link_warnings"] = link_warns
     report = write_html(
         out,
         {"run_id": run_id, "generator": f"turn-mapper {__version__}", "method": method, "git_commit": commit},
         summaries,
+        venue=venue_report or None,
     )
     qa_files["index.html"] = report.read_bytes()
-    pkg_path = out / ("venue.json" if output_format == "json" else "venue.turnmap")
-    link_warns: list[dict] = []
     if venue_floors:
-        links, link_warns = link_floors(
-            [(v, pkg_floors[v["id"]][0]) for v in venue_floors if v["id"] in pkg_floors]
-        )
-        vd = venue_dict(cfg.id, cfg.name, cfg.buildings, venue_floors, run_id, commit, method, links)
         if output_format in ("turnmap", "both"):
             write_package(out / "venue.turnmap", vd, pkg_floors, qa_files)
         if output_format in ("json", "both"):
@@ -398,6 +414,7 @@ def convert(
         "params": cfg.params.to_dict(),
         "floors": [{k: v for k, v in s.items() if k not in ("routes",)} for s in summaries],
         "link_warnings": link_warns,
+        "venue_checks": {k: v for k, v in venue_report.items() if k != "reach"},
         "door_width_calibration": calibration,
         "package": str(pkg_path) if venue_floors else None,
     }
@@ -409,13 +426,30 @@ def convert(
 def validate_package(path: str) -> dict:
     """Schema + geometry validation of a ``venue.json`` or ``.turnmap``.
 
-    Returns {'passed', 'venue', 'floors'}."""
+    Returns {'passed', 'venue', 'floors', 'multifloor' (warnings only, for venues with several floors)}."""
     pkg = read_package(path)
     out = {"venue": [e.to_dict() for e in schema_errors(pkg["venue"], "venue")], "floors": {}}
     for fid, fd in pkg["floors"].items():
         errs, warns = validate_floor(fd)
         out["floors"][fid] = {"errors": [e.to_dict() for e in errs], "warnings": [w.to_dict() for w in warns]}
+    for t in pkg["venue"].get("transitions") or []:
+        for end in ("from", "to"):
+            ref = t.get(end) or {}
+            fl = pkg["floors"].get(ref.get("floor_id"))
+            if fl is None or ref.get("node_id") not in {n["id"] for n in fl["graph"]["nodes"]}:
+                out["venue"].append(
+                    {
+                        "code": "E_TRANSITION_DANGLING",
+                        "ref": t.get("id"),
+                        "message": f"transition {t.get('id')} {end} {ref} points at a missing floor or node",
+                    }
+                )
     out["passed"] = not out["venue"] and all(not f["errors"] for f in out["floors"].values())
+    if len(pkg["floors"]) > 1 and not out["venue"]:
+        from .route import VenueGraph, venue_checks
+
+        mf = venue_checks(VenueGraph(pkg["venue"], pkg["floors"]), samples=100)
+        out["multifloor"] = {k: v for k, v in mf.items() if k != "reach"}
     return out
 
 

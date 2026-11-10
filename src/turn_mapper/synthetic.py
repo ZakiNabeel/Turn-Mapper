@@ -45,7 +45,9 @@ def _px(v: float) -> int:
 
 def make_plan(variant: str = "basic") -> SynthPlan:
     """``basic``: 30x12 m, central corridor, 4 rooms above and 3 below (one without a door).
-    ``lshape``: adds a vertical corridor wing with 2 more rooms (tests junctions)."""
+    ``lshape``: adds a vertical corridor wing with 2 more rooms (tests junctions).
+    ``tower``: the basic floor with a stair core ("STAIRS", right end) and a lift ("LIFT", left end) for
+    multi-floor tests: stack it on several levels and the stairs/lift line up."""
     W, H = (30.0, 12.0) if variant == "basic" else (30.0, 22.0)
     margin = 1.0
     img = np.full((_px(H + 2 * margin), _px(W + 2 * margin), 3), 255, np.uint8)
@@ -75,6 +77,10 @@ def make_plan(variant: str = "basic") -> SynthPlan:
         SynthRoom("R-106", 10, 8, 20, 12, ("top", 6.0)),
         SynthRoom("R-107", 20, 8, 30, 12, None),  # no door -> must be reported, not routed to
     ]
+    if variant == "tower":
+        rooms[3] = SynthRoom("STAIRS", 22, 0, 30, 5, ("bottom", 2.0))
+        rooms[4] = SynthRoom("LIFT", 0, 8, 4, 12, ("top", 1.0))
+        rooms.insert(5, SynthRoom("R-105", 4, 8, 10, 12, ("top", 2.0)))
     corridor = (0.0, 5.0, 30.0, 8.0)
     building = [(0.0, 0.0, W, 12.0)]
     if variant == "lshape":

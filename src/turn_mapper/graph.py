@@ -379,13 +379,25 @@ def build_graph(
                     door.id,
                 )
             )
+    # pixels a routed link may use: inside the validity region and not on a wall (the region's wall bands and
+    # the raw wall mask can disagree by a pixel, which made routed links start on a wall and fail)
+    valid_mask = _region_mask(region, walk.shape) & ~wall_hard
     for t in geom.transitions:
         tid = add_node((t.anchor.x, t.anchor.y), kind="transition", door_id=t.id)
         nodes[tid].door_id = None
         nodes[tid].transition = t.type
         geom.debug.setdefault("transition_nodes", {})[t.id] = tid
-        if not _link_point(
-            tid, nodes, edges, add_node, add_edge, rprep, wall_hard, params.door_link_max_m * px, "corridor"
+        if not _link_transition(
+            tid,
+            nodes,
+            edges,
+            add_node,
+            add_edge,
+            rprep,
+            wall_hard,
+            params.door_link_max_m * px,
+            valid_mask,
+            px,
         ):
             issues.append(Issue("TRANSITION_UNLINKED", f"{t.type} could not be linked to the graph", t.id))
     _bridge_components(
@@ -397,7 +409,8 @@ def build_graph(
         wall_hard,
         params.door_link_max_m * px,
         issues,
-        _region_mask(region, walk.shape),
+        valid_mask,
+        px,
     )
     return NavGraph(nodes=nodes, edges=edges), issues
 
@@ -441,10 +454,31 @@ def _routed_path(mask: np.ndarray, a: tuple[float, float], b: tuple[float, float
     return [a] + [(float(x), float(y)) for y, x in path] + [b]
 
 
-def _bridge_components(nodes, edges, add_node, add_edge, rprep, wall_hard, max_d, issues, valid_mask) -> None:
+def _nudge_into(nodes, nid, mask: np.ndarray, r_px: int) -> bool:
+    """Move node ``nid`` to the nearest pixel of ``mask`` within ``r_px`` if it is not on one already."""
+    x, y = nodes[nid].x, nodes[nid].y
+    h, w = mask.shape
+    xi, yi = int(round(x)), int(round(y))
+    if 0 <= yi < h and 0 <= xi < w and mask[yi, xi]:
+        return False
+    y0, y1, x0, x1 = max(yi - r_px, 0), min(yi + r_px + 1, h), max(xi - r_px, 0), min(xi + r_px + 1, w)
+    ys, xs = np.nonzero(mask[y0:y1, x0:x1])
+    if not len(xs):
+        return False
+    i = int(np.argmin((xs + x0 - x) ** 2 + (ys + y0 - y) ** 2))
+    if (xs[i] + x0 - x) ** 2 + (ys[i] + y0 - y) ** 2 > r_px**2:
+        return False
+    nodes[nid].x, nodes[nid].y = float(xs[i] + x0), float(ys[i] + y0)
+    return True
+
+
+def _bridge_components(
+    nodes, edges, add_node, add_edge, rprep, wall_hard, max_d, issues, valid_mask, px: float = 0.0
+) -> None:
     """Join small graph components to the largest: first with the shortest valid straight edge, else with
     a routed path through the valid area (repairs breaks at narrow passages, e.g. beside a stairwell).
-    Components that can't be joined are reported."""
+    A lone node (a door centre in its wall gap, a stair/lift anchor on a wall line) that is not on a valid
+    pixel first moves to the nearest one, at most 1 m away. Components that can't be joined are reported."""
     unroutable: set[frozenset] = set()  # pieces whose routed fallback already failed: do not route them again
     for _ in range(20):
         g = nx.Graph([(e.a, e.b) for e in edges])
@@ -477,6 +511,8 @@ def _bridge_components(nodes, edges, add_node, add_edge, rprep, wall_hard, max_d
             key = frozenset(comp)
             if key in unroutable:
                 continue
+            if len(comp) == 1 and px > 0:
+                _nudge_into(nodes, next(iter(comp)), valid_mask, max(1, int(round(1.0 * px))))
             pairs = []
             hub = np.array([nodes[m].kind in ("corridor", "junction") for m in main_ids])
             for n in comp:
@@ -513,12 +549,23 @@ def _bridge_components(nodes, edges, add_node, add_edge, rprep, wall_hard, max_d
             return
 
 
-def _link_point(did: str, nodes, edges, add_node, add_edge, rprep, wall_hard, max_d, edge_type: str) -> bool:
-    """Connect node ``did`` to the nearest corridor edge with a straight, wall-safe segment."""
+def _link_point(
+    did: str,
+    nodes,
+    edges,
+    add_node,
+    add_edge,
+    rprep,
+    wall_hard,
+    max_d,
+    edge_type: str,
+    edge_types: tuple[str, ...] = ("corridor",),
+) -> bool:
+    """Connect node ``did`` to the nearest edge (of ``edge_types``) with a straight, wall-safe segment."""
     c = (nodes[did].x, nodes[did].y)
     cands = []
     for e in edges:
-        if e.type != "corridor":
+        if e.type not in edge_types:
             continue
         a, b = nodes[e.a], nodes[e.b]
         ls = LineString([(a.x, a.y), (b.x, b.y)])
@@ -543,5 +590,46 @@ def _link_point(did: str, nodes, edges, add_node, add_edge, rprep, wall_hard, ma
             e.length = float(np.hypot(nodes[mid].x - a.x, nodes[mid].y - a.y))
             add_edge(mid, old_b)
         add_edge(did, mid, edge_type)
+        return True
+    return False
+
+
+def _link_transition(
+    tid: str, nodes, edges, add_node, add_edge, rprep, wall_hard, max_d, valid_mask, px
+) -> bool:
+    """Join a stairs/lift node to the graph. The anchor sits where the stair or lift meets the floor, often
+    on a wall line or in a door gap, so: (1) a straight link to a corridor edge; (2) also door-link edges;
+    (3) move the anchor to the nearest point of the valid walkable area (at most 1.5 m) and retry; (4) a
+    routed link through the valid area to the nearest corridor/junction node."""
+    args = (nodes, edges, add_node, add_edge, rprep, wall_hard, max_d, "corridor")
+    if _link_point(tid, *args) or _link_point(tid, *args, edge_types=("corridor", "door")):
+        return True
+    x, y = nodes[tid].x, nodes[tid].y
+    h, w = valid_mask.shape
+    xi, yi = int(round(x)), int(round(y))
+    inside = 0 <= yi < h and 0 <= xi < w and valid_mask[yi, xi]
+    if not inside and valid_mask.any():
+        r = int(1.5 * px)
+        y0, y1, x0, x1 = max(yi - r, 0), min(yi + r + 1, h), max(xi - r, 0), min(xi + r + 1, w)
+        ys, xs = np.nonzero(valid_mask[y0:y1, x0:x1])
+        if len(xs):
+            i = int(np.argmin((xs + x0 - x) ** 2 + (ys + y0 - y) ** 2))
+            nodes[tid].x, nodes[tid].y = float(xs[i] + x0), float(ys[i] + y0)
+            if _link_point(tid, *args, edge_types=("corridor", "door")):
+                return True
+    hubs = [n for n in nodes.values() if n.kind in ("corridor", "junction") and n.id != tid]
+    hubs.sort(key=lambda n: (n.x - nodes[tid].x) ** 2 + (n.y - nodes[tid].y) ** 2)
+    for m in hubs[:3]:
+        if np.hypot(m.x - nodes[tid].x, m.y - nodes[tid].y) > 2 * max_d:
+            break
+        path = _routed_path(valid_mask, (nodes[tid].x, nodes[tid].y), (m.x, m.y))
+        if path is None:
+            continue
+        simp = greedy_visible(path, rprep, wall_hard)
+        if not simp:
+            continue
+        ids = [tid] + [add_node(p) for p in simp[1:-1]] + [m.id]
+        for u, v in zip(ids[:-1], ids[1:], strict=False):
+            add_edge(u, v)
         return True
     return False

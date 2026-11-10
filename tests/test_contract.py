@@ -42,3 +42,45 @@ def test_fixtures_exist():
 def test_valid_json_fixtures(pkg):
     r = validate_package(str(pkg))
     assert r["passed"], r
+
+
+MF = FIX / "json_synthetic_multifloor" / "venue.json"
+
+
+def test_multifloor_fixture_has_typed_links_and_frames():
+    from turn_mapper.api import load_package
+    from turn_mapper.route import VenueGraph
+
+    pkg = load_package(str(MF))
+    assert pkg["venue"]["schema_version"] == "0.1.3"
+    types = {t["type"] for t in pkg["venue"]["transitions"]}
+    assert {"stairs", "lift", "walkway"} <= types
+    assert all("building_frame" in fd for fd in pkg["floors"].values())
+    r = VenueGraph.from_package(str(MF)).route("T2:R-103", "W0:R-106", step_free=True)
+    assert r is not None and r.floors[0] == "T2" and r.floors[-1] == "W0"
+
+
+@pytest.mark.parametrize(
+    "mutate",
+    [
+        lambda t: t.update({"type": "teleport"}),
+        lambda t: t.pop("length_m"),
+        lambda t: t["from"].pop("node_id"),
+        lambda t: t.update({"length_m": -1}),
+    ],
+    ids=["bad_type", "no_length", "no_node", "negative_length"],
+)
+def test_bad_transitions_fail_the_schema(mutate):
+    from turn_mapper.api import load_package
+
+    venue = load_package(str(MF))["venue"]
+    mutate(venue["transitions"][0])
+    assert any(e.code == "SCHEMA" for e in schema_errors(venue, "venue"))
+
+
+def test_bad_building_frame_fails_the_schema():
+    from turn_mapper.api import load_package
+
+    fd = next(iter(load_package(str(MF))["floors"].values()))
+    fd["building_frame"]["matrix"] = [[1, 0], [0, 1]]
+    assert any(e.code == "SCHEMA" for e in schema_errors(fd, "floor"))

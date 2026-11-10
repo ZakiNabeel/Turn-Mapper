@@ -198,7 +198,10 @@
           }
         },
         "transitions": {
-          "type": "array"
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/transition"
+          }
         }
       }
     },
@@ -611,6 +614,122 @@
               }
             }
           }
+        },
+        "building_frame": {
+          "$ref": "#/$defs/building_frame"
+        }
+      }
+    },
+    "floor_ref": {
+      "type": "object",
+      "required": [
+        "floor_id",
+        "node_id"
+      ],
+      "properties": {
+        "floor_id": {
+          "type": "string"
+        },
+        "node_id": {
+          "type": "string"
+        }
+      }
+    },
+    "transition": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "from",
+        "to",
+        "length_m"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "stairs",
+            "lift",
+            "escalator",
+            "ramp",
+            "walkway"
+          ]
+        },
+        "from": {
+          "$ref": "#/$defs/floor_ref"
+        },
+        "to": {
+          "$ref": "#/$defs/floor_ref"
+        },
+        "length_m": {
+          "type": "number",
+          "minimum": 0
+        },
+        "length_estimated": {
+          "type": "boolean"
+        },
+        "accessible": {
+          "type": "boolean"
+        },
+        "provenance": {
+          "$ref": "#/$defs/provenance"
+        },
+        "match_distance_m": {
+          "type": "number",
+          "minimum": 0
+        },
+        "shaft": {
+          "type": "string"
+        }
+      }
+    },
+    "building_frame": {
+      "type": "object",
+      "required": [
+        "matrix",
+        "reference_floor_id",
+        "method"
+      ],
+      "properties": {
+        "matrix": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 3,
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "reference_floor_id": {
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "reference",
+            "walls",
+            "bounds",
+            "none"
+          ]
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "registered_scale": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "scale_corrected": {
+          "type": "boolean"
         }
       }
     }

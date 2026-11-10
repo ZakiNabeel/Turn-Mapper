@@ -148,6 +148,17 @@
         <div class="row"><select id="linkA"></select><select id="linkB"></select></div>
         <button id="addLink" class="wide">Add manual link</button>
       </div>
+      <div class="group">
+        <div class="label">Route across floors</div>
+        <p class="note">Pick two destinations on any floors. The route uses the floor links above; stair and lift
+          lengths are estimates until measured.</p>
+        <label class="fld">From <select id="routeFrom"></select></label>
+        <label class="fld">To <select id="routeTo"></select></label>
+        <label class="fld chk"><input type="checkbox" id="routeStepFree"> Step-free (lifts and ramps only)</label>
+        <button id="routeBtn" class="wide">Find route</button>
+        <div id="routeSummary" class="summary"></div>
+        <ol id="routeSteps" class="list small steps"></ol>
+      </div>
     </section>
   </aside>
 </div>

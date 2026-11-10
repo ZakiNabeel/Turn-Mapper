@@ -1664,5 +1664,23 @@
    }
   ]
  },
+ "building_frame": {
+  "matrix": [
+   [
+    1.0,
+    0.0,
+    0.0
+   ],
+   [
+    0.0,
+    1.0,
+    0.0
+   ]
+  ],
+  "reference_floor_id": "F1",
+  "method": "reference",
+  "confidence": 1.0,
+  "registered_scale": 1.0
+ },
  "_expect_error": "POI_BAD_NODE"
 }

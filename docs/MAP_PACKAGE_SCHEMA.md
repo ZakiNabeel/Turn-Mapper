@@ -1,6 +1,6 @@
 # TURN Map Package (`.turnmap`) — Schema v0.1 (draft)
 
-Status: **v0.1.2 implemented** (0.1.1 added embedded-floor JSON output; 0.1.2 adds two `scale_source` values; both backward compatible) in `contract/turnmap.schema.json` + `src/turn_mapper/export.py`; fixtures in `contract/fixtures/`. Not tagged yet. Items marked `VERIFY` must be reconciled with the Android app's Room entities (via the app audit, Prompt A1) before `contract-v0.1.0` is tagged.
+Status: **v0.1.3 implemented** (0.1.1 added embedded-floor JSON output; 0.1.2 adds two `scale_source` values; 0.1.3 types `venue.transitions` and `floor.building_frame`; all backward compatible) in `contract/turnmap.schema.json` + `src/turn_mapper/export.py`; fixtures in `contract/fixtures/`. Not tagged yet. Items marked `VERIFY` must be reconciled with the Android app's Room entities (via the app audit, Prompt A1) before `contract-v0.1.0` is tagged.
 
 Machine-checkable source of truth: `contract/turnmap.schema.json` (JSON Schema 2020-12). This document explains it.
 
@@ -22,20 +22,21 @@ venue.turnmap
 └── qa/                             # optional; ignored by the app (QA report, overlays)
 ```
 
-The app's v1 importer may import one floor at a time (user picks from `venue.json.floors`). Multi-floor routing uses `transitions` later.
+The app's v1 importer may import one floor at a time (user picks from `venue.json.floors`). Multi-floor routing uses `transitions` (typed since 0.1.3, section 3.2).
 
 ## 2. Coordinate frame
 
 - Units: **metres**. Each floor has its own frame.
 - Origin / axis direction: **VERIFY** from the app source (Prompt A1). Default proposal until verified: origin at the floor image top-left, x → right, y → down (image-aligned). The app audit must confirm or change this, and the decision is recorded as ADR-007.
 - `transform.px_to_m`: 2×3 affine mapping image pixel `(u, v)` → `(x, y)` metres.
-- Optional `building_frame`: a 2×3 affine from floor frame to a shared building frame, so floors of one block stack correctly (needed for multi-floor; may be identity/absent in v0.1).
+- Optional `building_frame` (written since 0.1.3): a 2×3 affine from the floor frame to a shared building frame, so
+  floors of one block stack correctly. Shape and meaning in section 3.2. Absent = identity.
 
 ## 3. `venue.json`
 
 ```jsonc
 {
-  "schema_version": "0.1.2",
+  "schema_version": "0.1.3",
   "generator": { "name": "turn-mapper", "version": "0.3.0", "git_commit": "…", "run_id": "…",
                  "model": { "name": "classical", "checksum": null } },
   "venue": { "id": "fast-isb", "name": "FAST-NUCES Islamabad" },
@@ -47,10 +48,12 @@ The app's v1 importer may import one floor at a time (user picks from `venue.jso
       "validation_passed": true }
   ],
   "transitions": [
-    // filled by turn-mapper >= 0.3.x multi-floor linking (docs/MASTER_PLAN.md W4.1); empty for one floor
-    // { "id": "t1", "type": "stairs", "from": {"floor_id":"C-GF","node_id":"n12"}, "to": {"floor_id":"C-F1","node_id":"n3"}, "length_m": 6.0, "accessible": null }
-    // extra informational keys written today: length_estimated (true until measured), provenance {source: auto|manual,
-    // confidence}, match_distance_m. Lift links have accessible=true, stairs false. The schema types this array loosely.
+    // empty for one floor; typed since 0.1.3 (section 3.2)
+    { "id": "t1", "type": "stairs", "from": {"floor_id":"C-GF","node_id":"n12"}, "to": {"floor_id":"C-F1","node_id":"n3"},
+      "length_m": 6.0, "length_estimated": true, "accessible": false,
+      "provenance": {"source": "auto", "confidence": 0.91}, "match_distance_m": 0.7, "shaft": "shaft1" },
+    { "id": "t9", "type": "walkway", "from": {"floor_id":"A-GF","node_id":"n4"}, "to": {"floor_id":"B-GF","node_id":"n40"},
+      "length_m": 25.0, "length_estimated": false, "accessible": true, "provenance": {"source": "manual", "confidence": 1.0} }
   ]
 }
 ```
@@ -60,6 +63,37 @@ The app's v1 importer may import one floor at a time (user picks from `venue.jso
 `turn-mapper run` writes `venue.json` with every floor **embedded**: each `floors[i]` has `"floor": { …floor.json… }`
 instead of `"path"`, and the floor image is a sibling file referenced by `floor.image.file` (`images/<id>.png`).
 Exactly one of `path` (zipped `.turnmap`) or `floor` (plain JSON) is present. `--format turnmap|both` still writes the zip.
+
+### 3.2 Transitions and building frames (0.1.3)
+
+**`venue.transitions[]`** — links between graph nodes on different floors (or buildings). Required: `id`, `type`,
+`from`, `to` (`{floor_id, node_id}`, both existing nodes), `length_m` (≥ 0, the walking/riding length used for
+routing). `type ∈ {stairs, lift, escalator, ramp, walkway}`. Optional:
+
+| key | meaning |
+|---|---|
+| `length_estimated` | `true` while the length is a default (stairs 6 m, lift 4 m, escalator 8 m, or `multifloor.lengths` in the venue config) rather than measured |
+| `accessible` | step-free use: `true` for lift/ramp/walkway, `false` for stairs/escalator; absent when unknown. A step-free route uses only links with `accessible: true` |
+| `provenance` | `{source: auto\|manual\|corrected, confidence}`. `manual` = drawn in Studio or listed under `multifloor.connections` in the venue config |
+| `match_distance_m` | auto links: distance between the two nodes in the building frame (how well they line up) |
+| `shaft` | links that chain through several levels (one stair core, one lift) share this id |
+
+Auto links pair stair/lift/escalator nodes of the same type on **adjacent levels of one building** by optimal
+assignment in the building frame (≤ 8 m apart). Walkways and ramps between buildings are never guessed: they come
+from the venue config (`multifloor.connections`) or Studio.
+
+**`floor.building_frame`** — `{matrix, reference_floor_id, method, confidence, registered_scale, scale_corrected}`.
+`matrix` is a 2×3 affine floor metres → building metres (the reference floor's frame). `method`: `reference` (this is
+the reference floor, identity), `walls` (found by aligning the wall drawings of adjacent levels), `bounds`
+(fallback: footprints aligned), `none`. `confidence ∈ [0,1]`. `registered_scale` is the scale the alignment found;
+when a floor's scale was an estimate and it aligned with a measured floor of the same building (confidence ≥ 0.5),
+the floor's geometry was rescaled by that factor (`scale_corrected: true`, `transform.scale_source:
+footprint_transfer`, evidence `wall_registration` in `transform.scale_evidence`).
+
+Routing across floors (reference implementation: `turn_mapper.route.VenueGraph`): one graph over
+`(floor_id, node_id)`; floor edges weighted by `length_m / 1.3 m/s`; stairs 20 s per level, escalator 15 s per level,
+lift 30 s wait + 5 s per level, walkway at walking speed, ramp at 1.1 m/s. These costs are defaults, not part of
+the contract.
 
 ## 4. `floor.json`
 
@@ -110,7 +144,7 @@ Exactly one of `path` (zipped `.turnmap`) or `floor` (plain JSON) is present. `-
 
 - IDs: strings, unique within a floor (`floor_id` + `id` unique within venue).
 - `provenance.source ∈ {auto, manual, corrected}`; `confidence ∈ [0,1]`, absent for manual.
-- `accessible`: `null` unless verified (context §5.12).
+- `accessible`: on floor elements `null` unless verified (context §5.12); on transitions it follows the type (3.2).
 - Edge rules: endpoints exist; `length_m` = Euclidean ±1 cm; no wall intersection except a door edge through its own door; inside walkable (5 cm tolerance).
 - Every POI references an existing node on the same floor.
 - Consumers ignore unknown optional fields; reject unknown MAJOR versions.

@@ -53,11 +53,20 @@ one is active; **Labels: OFF** means neither is available and rooms will be "Unl
      The door inspector says which it is.
 5. **Scale** tab: click two points with a known real distance (tape-measured on site), type metres; add more
    pairs as checks (residuals shown) → *Apply scale*. All geometry is rescaled; your edits are kept.
-6. **Check** tab: errors (block export) and warnings; click one to jump to it. Below them, **Floor links**: with two or
-   more floors in a project, stairs and lifts on adjacent levels of a building are paired automatically
-   (same type, nearest position after aligning the floors' corners, 4 m cap). Unpaired ones are listed as
-   warnings, never guessed. Pick two nodes on different floors and *Add manual link* to override. Links go into
-   `venue.json` → `transitions`. Lengths are flagged estimates (stairs 6 m, lift 4 m) until measured.
+6. **Check** tab: errors (block export) and warnings; click one to jump to it. Below them:
+   - **Floor links**: with two or more floors in a project, the floors of each building are first aligned by
+     their wall drawings (shared building frame), then stairs, lifts and escalators on adjacent levels are paired
+     by type and position (optimal matching, 8 m cap). A floor whose scale was only estimated is rescaled when
+     its walls line up with a *measured* floor of the same building (project setting `correct_scales`, on by
+     default); measured floors are never changed. Unpaired nodes are listed as warnings, never guessed; a lift
+     seen on two non-adjacent floors at the same place gets `LINK_SHAFT_GAP` naming the floors to mark it on.
+     Pick two nodes on different floors and *Add manual link* to override. Each floor also gets a grade:
+     **ready** (one graph piece, every destination reachable, measured scale, every stair/lift linked),
+     **usable**, or **needs work**, with what is missing. Links go into `venue.json` → `transitions`. Lengths
+     are flagged estimates (stairs 6 m, lift 4 m) until measured.
+   - **Route across floors**: pick a start and a destination (any floor), optionally *step-free* (lifts, ramps,
+     walkways only), *Route*. The summary gives length, time and floors; the steps read like "Take the stairs
+     up 2 floors to …"; *Show <floor>* switches the canvas to a floor, where its leg is drawn.
 7. **Edit as CAD** (any input -> editable CAD): *Export ▾ → Editable CAD (DXF)* writes the extracted plan in
    metres: `A-WALL` (each wall a centre line with its thickness; door openings are gaps), `A-AREA-IDEN` (room
    labels as text), and reference layers `TURN-DOORS`, `TURN-ROOMS`, `TURN-GRAPH`, `TURN-PLACES` that are ignored

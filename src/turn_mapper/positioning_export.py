@@ -230,6 +230,18 @@ def to_venue_package(
         b = _id(t["to"]["floor_id"], t["to"]["node_id"])
         if a not in node_ids or b not in node_ids or a == b:
             continue
+        if t.get("type") == "walkway":  # a walk between buildings/areas: an ordinary edge, not a connector
+            edges.append(
+                {
+                    "id": _id("conn", t["id"], "edge"),
+                    "from": a,
+                    "to": b,
+                    "distanceMetres": _r(max(float(t.get("length_m") or 0.0), 0.01)),
+                    "bidirectional": True,
+                    "stepFree": t.get("accessible") is not False,
+                }
+            )
+            continue
         kind = t.get("type") if t.get("type") in ("stairs", "lift", "escalator", "ramp") else "stairs"
         cid = _id("conn", t["id"])
         connectors.append({"id": cid, "kind": kind, "nodeIds": [a, b]})

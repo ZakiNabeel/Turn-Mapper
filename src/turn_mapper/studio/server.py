@@ -168,6 +168,14 @@ def create_app(root: str | Path) -> FastAPI:
     def set_links(pid: str, body: dict = Body(...)):
         return guard(st.set_manual_links, pid, body.get("manual", []))
 
+    @app.get("/api/projects/{pid}/places")
+    def places(pid: str):
+        return guard(st.places, pid)
+
+    @app.post("/api/projects/{pid}/route")
+    def route(pid: str, body: dict = Body(...)):
+        return guard(st.route, pid, body["from"], body["to"], bool(body.get("step_free")))
+
     @app.get("/api/projects/{pid}/export/{fmt}")
     def export(pid: str, fmt: str, include_failed: bool = False):
         data, name, mime = guard(st.export, pid, fmt, include_failed)

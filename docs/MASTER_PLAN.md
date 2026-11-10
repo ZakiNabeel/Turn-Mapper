@@ -106,7 +106,7 @@ block it has 0 wall-crossing edges and routable % ≥ classical, and on syntheti
 
 | # | Item | Plan |
 |---|---|---|
-| 4.1 | FR-18 multi-floor linking | **done 10-16** (`link.py`): stair/lift nodes on adjacent levels paired by type + position; manual link tool in Studio; 5 tests. On FAST: 12 links; C-B1/C-GF footprints differ 39%, so unmatched and flagged |
+| 4.1 | FR-18 multi-floor linking | **done 10-16** (`link.py`): stair/lift nodes on adjacent levels paired by type + position; manual link tool in Studio; 5 tests. On FAST: 12 links; C-B1/C-GF footprints differ 39%, so unmatched and flagged. **Extended 11-10 to multi-floor routing** (`route.py`, wall-alignment building frames, scale correction, Hungarian matching, shafts, venue `connections`, step-free routes, `turn-mapper route`, Studio route panel, venue checks + per-floor grade, contract 0.1.3): FAST floor pairs within buildings 8/60 → 60/60; `docs/RESULTS_MULTIFLOOR_2026-11-10.md` |
 | 4.2 | FR-19 correction step | = W1 |
 | 4.3 | D-07 stairs FP on door arcs | **partly done 10-16**: blobs under 1 m2 (arcs, symbols) are dropped, tested on a synthetic arc; FAST results unchanged (12 links, same transitions). A stricter fat-blob test was tried and rejected: it removed a real staircase on C-F2. The learned-model arc case itself is not reproduced (no weights here) |
 | 4.4 | D-08 voids | Studio "not walkable" tool now; learned class `other` later |
