@@ -1,7 +1,7 @@
-"""Look at real FloorPlanCAD tiles: which drawn symbols carry semantic ids 28 / 29 / 30 and the wall ids.
+"""Look at real FloorPlanCAD tiles: which drawn symbols carry which semantic id.
 
 Downloads the test archive (research use only, nothing kept in git), counts semantic ids per tile and writes
-a contact sheet where id 28 is red, 29 blue, 30 green, walls (33-35) black and everything else light grey.
+a contact sheet: the ids given with --ids in colour, the --walls ids black, everything else light grey.
 
     python scripts/fpc_preview.py --out /kaggle/working/fpc_preview.png [--svg-dir DIR]
 """
@@ -23,7 +23,9 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from turn_mapper.learned.floorplancad import read_svg  # noqa: E402
 
-COL = {28: (40, 40, 230), 29: (230, 90, 30), 30: (40, 170, 40)}  # BGR: red, blue, green
+COL: dict[int, tuple] = {}
+WALLS: tuple = ()
+PALETTE = [(40, 40, 230), (230, 90, 30), (40, 170, 40), (200, 40, 200), (0, 160, 220)]  # BGR
 
 
 def fetch(dest: str) -> str:
@@ -59,9 +61,9 @@ def draw(path: str, size: int = 420) -> np.ndarray:
             p = np.round([[(x - x0) * k * 16, (y - y0) * k * 16] for x, y in e["pts"]]).astype(np.int32)
             if sem in COL and wall_pass:
                 cv2.polylines(img, [p], False, COL[sem], 2, cv2.LINE_AA, shift=4)
-            elif sem in (33, 34, 35) and wall_pass:
+            elif sem in WALLS and wall_pass:
                 cv2.polylines(img, [p], False, (0, 0, 0), 2, cv2.LINE_AA, shift=4)
-            elif not wall_pass and sem not in COL and sem not in (33, 34, 35):
+            elif not wall_pass and sem not in COL and sem not in WALLS:
                 cv2.polylines(
                     img, [p], False, (190, 190, 190) if sem == 0 else (150, 170, 200), 1, cv2.LINE_AA, shift=4
                 )
@@ -73,7 +75,14 @@ def main() -> None:
     ap.add_argument("--out", required=True)
     ap.add_argument("--svg-dir", default=None)
     ap.add_argument("--scan", type=int, default=1500)
+    ap.add_argument(
+        "--ids", type=int, nargs="+", default=[30, 31, 32], help="ids to colour (red, blue, green ...)"
+    )
+    ap.add_argument("--walls", type=int, nargs="+", default=[35], help="ids drawn black")
     a = ap.parse_args()
+    global WALLS
+    WALLS = tuple(a.walls)
+    COL.update({s: PALETTE[i % len(PALETTE)] for i, s in enumerate(a.ids)})
     d = a.svg_dir or fetch("/tmp/fpc_preview")
     files = sorted(glob.glob(f"{d}/**/*.svg", recursive=True))[: a.scan]
     print("FILES", len(files))
@@ -81,7 +90,7 @@ def main() -> None:
     print("HEAD", head.replace("\n", " ")[:1500])
     tiles = collections.Counter()
     strokes = collections.Counter()
-    picks: dict[int, list[str]] = {28: [], 29: [], 30: []}
+    picks: dict[int, list[str]] = {s: [] for s in a.ids}
     for f in files:
         try:
             els, _ = read_svg(f)

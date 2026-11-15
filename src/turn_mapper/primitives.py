@@ -15,20 +15,21 @@ from pathlib import Path
 
 import numpy as np
 
-# FloorPlanCAD semantic ids (1-35) -> TURN groups. 0/36 and anything else = other.
+# FloorPlanCAD semantic ids -> TURN groups, as numbered in the SVG release on the authors' Google Drive
+# (checked by eye 2026-11-15, see learned/floorplancad.py: the published list plus two from the windows on).
+# The classifier results in RESULTS_PUBLIC_PLANS_2026-10-28 were trained with the published numbers, i.e.
+# with wrong labels for stairs, walls and windows; retrain before using it.
 GROUPS = ["other", "wall", "door", "window", "furniture", "stairs"]
 FPC_GROUP = {
-    **{i: "door" for i in range(1, 7)},  # single, double, sliding, folding, revolving, rolling door
-    **{i: "window" for i in range(7, 11)},  # window, bay window, blind window, opening symbol
-    **{i: "furniture" for i in range(11, 28)},  # sofa .. toilet (fixtures and furniture)
-    28: "stairs",
-    29: "stairs",  # elevator
-    30: "stairs",  # escalator
-    31: "furniture",  # row chairs
-    32: "furniture",  # parking spot
-    33: "wall",
-    34: "wall",  # curtain wall
-    35: "wall",  # railing
+    **{i: "door" for i in range(1, 9)},
+    **{i: "window" for i in range(9, 12)},
+    **{i: "furniture" for i in range(12, 30)},
+    30: "stairs",
+    31: "stairs",  # elevator
+    32: "stairs",  # escalator
+    33: "furniture",  # row chairs
+    34: "furniture",  # parking spot
+    35: "wall",
 }
 FEATURES = [
     "is_curve",

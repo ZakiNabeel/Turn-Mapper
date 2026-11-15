@@ -8,12 +8,18 @@ What it gives the segmenter that CubiCasa and ResPlan (homes) do not: **real sta
 symbols and real institutional wall drawings**. What it does not give: rooms and corridors. So the masks are
 *partial* (see ``classes.OPEN``):
 
-    wall (33), curtain wall (34), railing (35), windows (7-9)   -> WALL  (double lines closed into a band)
-    stairs (28) / elevator (29) / escalator (30)                -> STAIRS / LIFT / ESCALATOR (instance hull)
-    doors (1-6), opening symbol (10), furniture (11-27, 31, 32) -> IGNORE (our door class is the opening in
+    wall (35), windows (9-11)                                   -> WALL  (double lines closed into a band)
+    stairs (30) / elevator (31) / escalator (32)                -> STAIRS / LIFT / ESCALATOR (instance hull)
+    doors (1-8), furniture and fixtures (12-29), row chairs (33),
+    parking spots (34)                                          -> IGNORE (our door class is the opening in
                                                                    the wall, not the swing symbol)
     unlabelled linework (dimensions, axes, hatching)            -> IGNORE in a thin band
     everything else                                             -> OPEN  (not wall, not a transition)
+
+**Semantic ids.** The numbers above are the ones in the SVG release on the authors' Google Drive (attribute
+``semantic-id``), checked by eye on 2026-11-15 (``scripts/fpc_preview.py``): from the windows on they are the
+published class list **plus two** (published: stairs 28, elevator 29, escalator 30, wall 33; in the files:
+30, 31, 32, 35; 28 and 29 are urinals and toilets). Using the published numbers trains toilets as lifts.
 
 The image is the drawing itself: every element stroked dark on light paper at a random resolution.
 """
@@ -31,9 +37,9 @@ import numpy as np
 from .classes import ESCALATOR, IGNORE, LIFT, OPEN, STAIRS, WALL
 
 TILE_M = 14.0  # FloorPlanCAD tiles are 14 m x 14 m squares
-WALL_IDS = {33, 34, 35, 7, 8, 9}
-TRANSITION = {28: STAIRS, 29: LIFT, 30: ESCALATOR}
-IGNORE_IDS = set(range(1, 7)) | {10} | set(range(11, 28)) | {31, 32}
+WALL_IDS = {35, 9, 10, 11}
+TRANSITION = {30: STAIRS, 31: LIFT, 32: ESCALATOR}
+IGNORE_IDS = set(range(1, 9)) | set(range(12, 30)) | {33, 34}
 _NUM = re.compile(r"-?\d*\.?\d+(?:[eE][-+]?\d+)?")
 
 
@@ -330,18 +336,18 @@ def fake_tile(path: str | Path, seed: int = 0, lift: bool = True) -> None:
         )
 
     for y in (10 + o, 11.6 + o, 60 + o, 61.6 + o):  # two double-line walls
-        line(5, y, 95, y, 33)
+        line(5, y, 95, y, 35)
     for x in (5, 6.6, 93.4, 95):
-        line(x, 10 + o, x, 61.6 + o, 33)
+        line(x, 10 + o, x, 61.6 + o, 35)
     for i in range(8):  # a stair: treads
-        line(20 + 2 * i, 20 + o, 20 + 2 * i, 34 + o, 28, 1)
-    line(20, 20 + o, 34, 20 + o, 28, 1)
-    line(20, 34 + o, 34, 34 + o, 28, 1)
+        line(20 + 2 * i, 20 + o, 20 + 2 * i, 34 + o, 30, 1)
+    line(20, 20 + o, 34, 20 + o, 30, 1)
+    line(20, 34 + o, 34, 34 + o, 30, 1)
     if lift:
         for a, b, c, d in ((60, 20, 72, 20), (72, 20, 72, 32), (72, 32, 60, 32), (60, 32, 60, 20)):
-            line(a, b + o, c, d + o, 29, 2)
-        line(60, 20 + o, 72, 32 + o, 29, 2)
-        line(72, 20 + o, 60, 32 + o, 29, 2)
+            line(a, b + o, c, d + o, 31, 2)
+        line(60, 20 + o, 72, 32 + o, 31, 2)
+        line(72, 20 + o, 60, 32 + o, 31, 2)
     s.append(
         f'<path d="M 45,{61.6 + o} L 45,{55 + o} A 6.6,6.6 0 0 1 51.6,{61.6 + o}" semantic-id="1" '
         'instance-id="3" stroke-width="0.1" stroke="black" fill="none"/>'
