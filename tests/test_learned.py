@@ -103,3 +103,70 @@ def test_svg_size_attribute_does_not_rescale_labels(tmp_path):
     assert g.shape == m.shape == (200, 300)
     wall = m == WALL
     assert wall.sum() > 0 and g[wall].mean() < 60  # labels sit on the dark wall
+
+
+def test_open_space_loss_rewards_any_allowed_class():
+    from turn_mapper.learned.classes import BG, CLASSES, OPEN, ROOM, WALKABLE, WALL
+    from turn_mapper.learned.train import confusion, open_space_loss
+
+    y = torch.full((1, 4, 4), OPEN, dtype=torch.long)
+
+    def logits_for(c):
+        z = torch.full((1, len(CLASSES), 4, 4), -8.0)
+        z[:, c] = 8.0
+        return z
+
+    as_wall, as_room, as_corr = (float(open_space_loss(logits_for(c), y)) for c in (WALL, ROOM, WALKABLE))
+    assert as_wall > 10 and as_room < 1e-3 and as_corr < 1e-3  # only "wall" (or a transition) is wrong
+    assert float(open_space_loss(logits_for(WALL), torch.zeros((1, 4, 4), dtype=torch.long))) == 0.0
+    # OPEN and IGNORE pixels are not scored
+    gt = np.array([[OPEN, 255, WALL, BG]])
+    assert confusion(np.array([[WALL, WALL, WALL, BG]]), gt).sum() == 2
+
+
+def test_train_on_partial_floorplancad_masks(mask_ds, tmp_path):
+    """Stage S4 plumbing: partial masks (OPEN / IGNORE) train together with full masks, without NaN."""
+    from turn_mapper.learned.floorplancad import fake_tile, prepare
+    from turn_mapper.learned.train import evaluate, train
+
+    raw = tmp_path / "fpc_raw"
+    raw.mkdir()
+    for i in range(6):
+        fake_tile(raw / f"t{i}.svg", i)
+    info = prepare([raw], tmp_path / "fpc", [raw], limit=3)
+    assert info["splits"]["test"] == 3
+    ck = tmp_path / "s4.pt"
+    r = train(
+        [str(tmp_path / "fpc"), str(mask_ds)],
+        str(ck),
+        epochs=1,
+        batch=2,
+        crop=128,
+        encoder="resnet18",
+        encoder_weights=None,
+        max_iters=4,
+        val_items=1,
+        workers=0,
+        device="cpu",
+    )
+    assert ck.exists() and np.isfinite(r["log"][0]["loss"])
+    # FloorPlanCAD-only batches (no fully labelled pixel in some crops) must also give a finite loss
+    r2 = train(
+        [str(tmp_path / "fpc")],
+        str(tmp_path / "s4b.pt"),
+        epochs=1,
+        batch=2,
+        crop=96,
+        encoder="resnet18",
+        encoder_weights=None,
+        max_iters=3,
+        val_items=1,
+        workers=0,
+        device="cpu",
+    )
+    assert np.isfinite(r2["log"][0]["loss"])
+    from turn_mapper.learned.model import load_checkpoint
+
+    model, _ = load_checkpoint(str(ck), "cpu")
+    m = evaluate(model, [str(tmp_path / "fpc")], "test", "cpu", 128)
+    assert set(m["per_class"]) >= {"wall", "stairs", "lift"} and m["per_class"]["room"] is None

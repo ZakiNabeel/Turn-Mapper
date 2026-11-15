@@ -1,5 +1,6 @@
 """Mask datasets for training: ``<dir>/images/<id>.png`` (any image) + ``<dir>/masks/<id>.png`` (uint8 class
-ids from ``classes.CLASSES``, 255 = ignore) + optional ``<dir>/{train,val,test}.txt`` id lists.
+ids from ``classes.CLASSES``, 255 = ignore, 254 = open space of unknown use) + optional
+``<dir>/{train,val,test}.txt`` id lists.
 
 CubiCasa5K is converted into this format by ``cubicasa.prepare``; our own annotated plans (any venue)
 use the same format, so pre-training and fine-tuning share one loader.
@@ -15,7 +16,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from .classes import BG, DOOR, ESCALATOR, IGNORE, LIFT, OTHER, ROOM, STAIRS, WALKABLE, WALL
+from .classes import BG, DOOR, ESCALATOR, IGNORE, LIFT, OPEN, OTHER, ROOM, STAIRS, WALKABLE, WALL
 
 MEAN = np.array([0.485, 0.456, 0.406], np.float32)
 STD = np.array([0.229, 0.224, 0.225], np.float32)
@@ -125,7 +126,8 @@ class MaskDataset:
                 img, None, fx=s, fy=s, interpolation=cv2.INTER_AREA if s < 1 else cv2.INTER_LINEAR
             )
             mask = cv2.resize(mask, (img.shape[1], img.shape[0]), interpolation=cv2.INTER_NEAREST)
-        if rng.random() < self.restyle_p:
+        # a partially labelled drawing (OPEN pixels) cannot be redrawn from its mask: keep the real drawing
+        if rng.random() < self.restyle_p and not (mask == OPEN).any():
             img = restyle(
                 np.where(mask == IGNORE, WALKABLE, mask).astype(np.uint8), rng
             )  # ignored = inside, unknown use

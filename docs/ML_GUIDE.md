@@ -147,6 +147,37 @@ corrected in TURN Studio (Export → Training annotations).
 
 ![institutional floors in the eight styles](img/s2_institutional_styles.png)
 
+## 3c. Stage S4: real CAD drawings (FloorPlanCAD) for stairs, lifts and institutional walls (2026-11-15)
+
+CubiCasa and ResPlan are homes: almost no lifts, no escalators, small stairs. FloorPlanCAD is about 15,000 real
+CAD tiles of offices, schools, hospitals and malls where every stroke is labelled (wall, door, stairs,
+elevator, escalator, furniture ...). It has **no room labels**, so its masks are *partial*:
+
+| in the drawing | in the mask |
+|---|---|
+| wall, curtain wall, railing, windows | `wall` (the two outline strokes closed into one band) |
+| stairs / elevator / escalator | `stairs` / `lift` / `escalator` (hull of the symbol) |
+| doors, furniture, unlabelled linework | 255 = no loss |
+| everything else | 254 = **open space of unknown use**: not a wall, not a transition |
+
+On the 254 pixels the loss only asks that the allowed classes (background, room, walkable, door, other)
+together hold the probability (`train.open_space_loss`); cross-entropy and Dice skip them. So the model learns
+"this is not a wall" from real drawings without being told a wrong room class. ResPlan, generated
+institutional floors and the CubiCasa replay are trained alongside so rooms, corridors and doors are kept.
+
+Run: `notebooks/finetune_s4_kaggle.ipynb` (GPU T4, Internet On, attach the S3a notebook output). It calls
+`scripts/kaggle_finetune_s4.sh`, which downloads FloorPlanCAD, runs
+`turn-mapper ml prepare-floorplancad <train dirs> --test <test dir> --out <dir>`, trains about 5 h and writes
+`eval_s4_*` and `eval_init_*` (same test splits before and after; the FloorPlanCAD test split is the real
+stairs / lift / escalator score) plus the synthetic tables. Licence: annotations CC BY-NC 4.0, drawings not
+owned by the dataset authors: research use only, data and weights never committed.
+
+In the pipeline the learned model's **lift** class is now used (`Segmentation.lifts` → lift transitions), next
+to its stairs class; before S4 it was predicted but thrown away.
+
+Status: the stage is written and tested on fake tiles in the FloorPlanCAD convention (`tests/test_floorplancad.py`,
+`tests/test_learned.py`). **It has not been run on the real data yet**: that needs the Kaggle GPU.
+
 ## 4. What "done" looks like for the FYP
 
 | milestone | evidence |

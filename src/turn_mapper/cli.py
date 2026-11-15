@@ -225,6 +225,21 @@ def ml_prepare_resplan(pkl, out, split_json, limit, variants, seed, ignore_resid
     click.echo(json.dumps(info, indent=1))
 
 
+@ml.command("prepare-floorplancad")
+@click.argument("train_dirs", nargs=-1, required=True, type=click.Path(exists=True))
+@click.option("--test", "test_dirs", multiple=True, type=click.Path(exists=True), help="test SVG folder(s)")
+@click.option("--out", required=True, help="output mask dataset folder")
+@click.option("--limit", type=int, default=None, help="only the first N drawings per split")
+@click.option("--seed", default=0, show_default=True)
+def ml_prepare_floorplancad(train_dirs, test_dirs, out, limit, seed) -> None:
+    """Real CAD drawings (FloorPlanCAD, research use only) -> images + partial masks: walls, stairs, lifts,
+    escalators; everything else is 'open space of unknown use'."""
+    from .learned.floorplancad import prepare
+
+    info = prepare(list(train_dirs), out, list(test_dirs), limit, seed=seed)
+    click.echo(json.dumps(info, indent=1))
+
+
 @ml.command("make-institutional")
 @click.option("--out", required=True, help="output mask dataset folder")
 @click.option("-n", "n", default=2000, show_default=True, help="number of floors")

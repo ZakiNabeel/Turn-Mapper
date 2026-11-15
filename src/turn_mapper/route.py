@@ -286,7 +286,10 @@ class VenueGraph:
                 where = f"{'up' if levels > 0 else 'down'} {n} floor{'s' if n != 1 else ''} " if n else ""
                 out.append(f"{verb[c0.type]} {where}to {dest}.")
             else:
-                out.append(f"Follow the {c0.type} ({c1.length_m:.0f} m) to {dest}.")
+                if c1.length_m < 0.5:  # the buildings meet: the corridor simply continues
+                    out.append(f"Continue into {dest}.")
+                else:
+                    out.append(f"Follow the {c0.type} ({c1.length_m:.0f} m) to {dest}.")
             i = j + 1
         out.append(f"Arrive at {r.end.name}.")
         return out

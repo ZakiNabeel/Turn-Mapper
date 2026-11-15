@@ -10,6 +10,11 @@ from __future__ import annotations
 CLASSES = ("background", "wall", "room", "walkable", "door", "stairs", "lift", "escalator", "other")
 BG, WALL, ROOM, WALKABLE, DOOR, STAIRS, LIFT, ESCALATOR, OTHER = range(len(CLASSES))
 IGNORE = 255  # mask value excluded from the loss (unlabelled pixels in partial annotations)
+# Partial labels from drawings that mark walls and symbols but not room use (FloorPlanCAD): "open space of
+# unknown use". The pixel is known NOT to be a wall or a stair/lift/escalator, but not which of the other
+# classes it is. The loss only asks that the probability of the allowed classes adds up to 1.
+OPEN = 254
+OPEN_ALLOWED = (0, 2, 3, 4, 8)  # background, room, walkable, door, other
 
 # colours for previews (RGB)
 PALETTE = (

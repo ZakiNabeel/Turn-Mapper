@@ -128,6 +128,7 @@ class LearnedSegmenter:
             stairs=stairs,
             partitions=None,
             doors=doors,
+            lifts=cls == LIFT,
         )
 
 
@@ -173,6 +174,7 @@ class HybridSegmenter:
             stairs=stairs,
             partitions=c.partitions,
             doors=doors,
+            lifts=cls == LIFT,
         )
 
 

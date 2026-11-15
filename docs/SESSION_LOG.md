@@ -197,3 +197,12 @@ correct 8–10 B/C floors in Studio and export training annotations (S3); try St
 - FAST (classical): within-building floor pairs 8/60 → 60/60; links 6 → 18; floors with >1 graph piece 7 → 0; stranded stairs/lifts 7 → 0; grades 3/4/7 → 4/10/0 (ready/usable/needs work). Room/door/destination counts unchanged. Synthetic eval and style stress identical to HEAD; 131 tests pass.
 - Not verified: wall-alignment scale corrections on C-GF (×1.257) and C-F1 (×1.157) — need a site measurement. Step-free routes 0 on FAST (lifts detected on 3 C floors only).
 - Next (team): walkways between A/B/C into `fast_isb.yaml` `multifloor.connections`; mark the C lift on C-F3/C-F4 in Studio; floor height + one stair run per block; Android reads typed `transitions` (contract 0.1.3).
+
+## 2026-11-15 — connections between buildings, lifts, real-CAD training stage S4
+
+- Site facts from Zaki: A-GF joins B-GF; floors 1 and 2 join A, B, C; the rest stand alone. Entered in `fast_isb.yaml` (`multifloor.connections`, chain A–B–C from the site plan on page 1).
+- Generic: connection ends by drawing edge (`FLOOR@side`, `BUILDING@side` + `levels`), `LINK_ENDPOINT_ESTIMATED`; Studio "Connections between buildings" panel; lifts from plan text and from the learned lift class; proposed lift stops (`LINK_SHAFT_INFERRED`); ADR-020. No contract change.
+- FAST: floor pairs connected 60/182 → 182/182; sampled routes 58 → 200 of 200; step-free 0 → 86; lifts on 6 of 7 C floors. `docs/RESULTS_CONNECTIVITY_2026-11-15.md`. Synthetic eval and style stress unchanged; 145 tests pass.
+- ML stage S4 (FloorPlanCAD, real CAD drawings): `learned/floorplancad.py`, partial labels (mask 254 = open space of unknown use, `open_space_loss`), `turn-mapper ml prepare-floorplancad`, `scripts/kaggle_finetune_s4.sh`, `notebooks/finetune_s4_kaggle.ipynb`. Tested on fake tiles only.
+- Not verified: the walkway ends (estimates); S4 on real data (not run: needs Kaggle GPU); whether FloorPlanCAD's real SVGs have quirks the fake tiles do not.
+- Next (team): run `finetune_s4_kaggle.ipynb` (attach the S3a output), copy the eval JSONs into a results doc; check the five walkway ends and mark the C-GF lift in Studio; site scale measurements.

@@ -70,6 +70,7 @@ class Segmentation:
     stairs: np.ndarray | None = None  # bool; stair texture (transition areas)
     partitions: np.ndarray | None = None  # bool; thin straight partition lines (light/open-plan walls)
     doors: np.ndarray | None = None  # bool; door openings predicted by a learned segmenter (None: unknown)
+    lifts: np.ndarray | None = None  # bool; lift shafts predicted by a learned segmenter (None: unknown)
 
 
 @dataclass

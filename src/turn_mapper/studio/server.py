@@ -166,7 +166,7 @@ def create_app(root: str | Path) -> FastAPI:
 
     @app.put("/api/projects/{pid}/links")
     def set_links(pid: str, body: dict = Body(...)):
-        return guard(st.set_manual_links, pid, body.get("manual", []))
+        return guard(st.set_manual_links, pid, body.get("manual", []), body.get("connections"))
 
     @app.get("/api/projects/{pid}/places")
     def places(pid: str):

@@ -377,12 +377,12 @@ def link_floors(
             length_m=m.get("length_m"),
         )
 
-    for c in connections or []:
+    for c in expand_connections(connections, floors):
         try:
-            a = resolve_place(by_id, c["from"])
-            b = resolve_place(by_id, c["to"])
+            a = resolve_place(by_id, str(c["from"]))
+            b = resolve_place(by_id, str(c["to"]))
         except KeyError as e:
-            warns.append(_w("LINK_CONNECTION_UNRESOLVED", str(e)))
+            warns.append(_w("LINK_CONNECTION_UNRESOLVED", str(e.args[0])))
             continue
         kind = c.get("type") or "walkway"
         length = c.get("length_m")
@@ -391,7 +391,19 @@ def link_floors(
             na = next(n for n in fl["graph"]["nodes"] if n["id"] == a[1])
             nb = next(n for n in fl["graph"]["nodes"] if n["id"] == b[1])
             length = math.dist((na["x"], na["y"]), (nb["x"], nb["y"]))
-        add(kind, a, b, "manual", 1.0, length_m=length)  # operator-entered in the venue config
+        if is_estimated_end(str(c["from"])) or is_estimated_end(str(c["to"])):
+            # the connection is a site fact, but where it meets each floor is the tool's estimate
+            add(kind, a, b, "auto", 0.5, length_m=length)
+            warns.append(
+                _w(
+                    "LINK_ENDPOINT_ESTIMATED",
+                    f"{c['from']} - {c['to']} ({kind}): joined at {a[0]}:{a[1]} and {b[0]}:{b[1]}, "
+                    "the corridor nodes nearest those edges of the drawings; check the two ends (Studio) "
+                    "or give exact nodes",
+                )
+            )
+        else:
+            add(kind, a, b, "manual", 1.0, length_m=length)  # operator-entered in the venue config
 
     blds: dict[str, list[tuple[dict, dict]]] = {}
     for m, fl in floors:
@@ -444,37 +456,100 @@ def link_floors(
                                 f"{mb['id']}:{n['id']} ({kind}) has no partner on {ma['id']}",
                             )
                         )
-        warns += _shaft_gaps(bid, fs, frames, max_dist_m)
+        warns += _shaft_gaps(bid, fs, frames, max_dist_m, add)
     _shafts(links)
     return links, warns
 
 
-def _shaft_gaps(bid, fs, frames, max_dist_m) -> list[dict]:
+INFER_REACH_M = 4.0  # an inferred lift stop must have a graph node this close
+INFER_MIN_CONF = 0.35  # ... and every floor involved must be placed in the building frame at least this well
+
+
+def _invert(t: list[list[float]]) -> list[list[float]] | None:
+    (a, b, tx), (c, d, ty) = t
+    det = a * d - b * c
+    if abs(det) < 1e-9:
+        return None
+    ia, ib, ic, id_ = d / det, -b / det, -c / det, a / det
+    return [[ia, ib, -(ia * tx + ib * ty)], [ic, id_, -(ic * tx + id_ * ty)]]
+
+
+def _placed(frames: dict, fid: str) -> bool:
+    f = frames.get(fid, {})
+    return f.get("method") == "reference" or (
+        f.get("method") == "walls" and (f.get("confidence") or 0) >= INFER_MIN_CONF
+    )
+
+
+def _shaft_gaps(bid, fs, frames, max_dist_m, add=None) -> list[dict]:
     """A lift or escalator found on two non-adjacent levels at the same place in the building frame, but on no
-    level between: probably missed on those levels. Reported with the position to mark (never auto-linked:
-    a link that skips floors would hide the floors in between)."""
+    level between: it was missed on those levels.
+
+    A **lift** passes through every floor between its stops, so when the floors are placed in the building
+    frame by their walls, the stop on each missed floor is *proposed*: the graph node nearest the shaft
+    (within ``INFER_REACH_M``) is linked, with low confidence, and reported as ``LINK_SHAFT_INFERRED``.
+    Otherwise (an escalator, floors not aligned, no node near the shaft) nothing is linked and
+    ``LINK_SHAFT_GAP`` names the floors to mark by hand: a link that skips floors would hide the floors
+    in between."""
     out = []
+    by_fid = {m["id"]: fl for m, fl in fs}
     for kind in ("lift", "escalator"):
         pos = []
         for m, fl in fs:
             t = frames.get(m["id"], {}).get("matrix") or IDENTITY
             pos += [
-                (m["level"], m["id"], _apply(t, n["x"], n["y"]))
+                (m["level"], m["id"], _apply(t, n["x"], n["y"]), n["id"])
                 for n in _tnodes(fl)
                 if n["transition"] == kind
             ]
-        pos.sort()
+        pos.sort(key=lambda p: (p[0], p[1], p[3]))
         levels = {m["level"]: m["id"] for m, _ in fs}
-        for i, (la, fa_id, pa) in enumerate(pos):
-            nxt = [(lb, fb_id, pb) for lb, fb_id, pb in pos[i + 1 :] if lb > la]
+        for i, (la, fa_id, pa, na) in enumerate(pos):
+            nxt = [q for q in pos[i + 1 :] if q[0] > la]
             if not nxt or nxt[0][0] == la + 1:
                 continue
-            lb, fb_id, pb = nxt[0]
+            lb, fb_id, pb, nb = nxt[0]
             if math.dist(pa, pb) > max_dist_m:
                 continue
             missing = [levels[lv] for lv in range(la + 1, lb) if lv in levels]
-            if missing:
-                x, y = (pa[0] + pb[0]) / 2, (pa[1] + pb[1]) / 2
+            if not missing or len(missing) != lb - la - 1:
+                continue
+            x, y = (pa[0] + pb[0]) / 2, (pa[1] + pb[1]) / 2
+            chain = [(fa_id, na)]
+            ok = (
+                kind == "lift"
+                and add is not None
+                and all(_placed(frames, f) for f in [fa_id, fb_id, *missing])
+            )
+            dists = []
+            for fid in missing if ok else []:
+                inv = _invert(frames.get(fid, {}).get("matrix") or IDENTITY)
+                cand = _main_piece(by_fid[fid])
+                if inv is None or not cand:
+                    ok = False
+                    break
+                fx, fy = _apply(inv, x, y)
+                n = min(cand, key=lambda n: math.dist((n["x"], n["y"]), (fx, fy)))
+                d = math.dist((n["x"], n["y"]), (fx, fy))
+                if d > INFER_REACH_M:
+                    ok = False
+                    break
+                chain.append((fid, n["id"]))
+                dists.append(d)
+            if ok:
+                chain.append((fb_id, nb))
+                for u, v in zip(chain[:-1], chain[1:], strict=False):
+                    add(kind, u, v, "auto", 0.4, d=max(dists))
+                stops = ", ".join(f"{f}:{n}" for f, n in chain[1:-1])
+                out.append(
+                    _w(
+                        "LINK_SHAFT_INFERRED",
+                        f"{bid}: {kind} found on {fa_id} and {fb_id} at the same place but not on "
+                        f"{', '.join(missing)}; a lift passes through, so a stop was proposed at {stops} "
+                        "(nearest graph node to the shaft). Check it (Studio)",
+                    )
+                )
+            else:
                 out.append(
                     _w(
                         "LINK_SHAFT_GAP",
@@ -508,15 +583,93 @@ def _shafts(links: list[dict]) -> None:
         k["shaft"] = roots[r]
 
 
-def resolve_place(floors: dict[str, dict], ref: str) -> tuple[str, str]:
-    """'FLOOR:node_id', 'FLOOR:<room label or name>' or 'FLOOR:x,y' (metres) -> (floor_id, node_id).
+SIDES = ("left", "right", "top", "bottom")
 
-    Labels resolve to the destination's node; a point resolves to the nearest node on the floor's largest
-    graph piece."""
+
+def _main_piece(fl: dict) -> list[dict]:
     import networkx as nx
 
+    g = nx.Graph()
+    g.add_nodes_from(n["id"] for n in fl["graph"]["nodes"])
+    g.add_edges_from((e["from"], e["to"]) for e in fl["graph"]["edges"])
+    if not g:
+        return []
+    big = max(nx.connected_components(g), key=len)
+    return [n for n in fl["graph"]["nodes"] if n["id"] in big]
+
+
+def side_node(fl: dict, side: str) -> str:
+    """The corridor node of the floor's main graph piece furthest towards one edge of the drawing.
+
+    Used for a connection end written as ``FLOOR@side``: the place where a corridor leaves the floor towards a
+    neighbouring building. The result is an estimate (the exact doorway is not known from the plan)."""
+    cand = [n for n in _main_piece(fl) if n.get("kind") in ("corridor", "junction")] or _main_piece(fl)
+    if not cand:
+        raise KeyError("floor has no graph")
+    key = {
+        "left": lambda n: n["x"],
+        "right": lambda n: -n["x"],
+        "top": lambda n: n["y"],
+        "bottom": lambda n: -n["y"],
+    }[side]
+    return min(cand, key=key)["id"]
+
+
+def is_estimated_end(ref: str) -> bool:
+    """True for ``FLOOR@side`` ends: the node is chosen by the tool, not given by a person."""
+    return ":" not in ref and "@" in ref
+
+
+def expand_connections(connections: list[dict] | None, floors: list[tuple[dict, dict]]) -> list[dict]:
+    """Building-level connections -> one connection per level.
+
+    ``{from: "A@right", to: "B@right", levels: [0, 1, 2]}`` (ends that name a *building*, not a floor) becomes
+    one connection per listed level between the two buildings' floors on that level. Without ``levels`` every
+    level both buildings have is used. Floor-level connections pass through unchanged."""
+    fids = {m["id"] for m, _ in floors}
+    by_bl = {(m.get("building_id") or m.get("building"), m["level"]): m["id"] for m, _ in floors}
+    blds = {b for b, _ in by_bl}
+    out: list[dict] = []
+    for c in connections or []:
+        ends = []
+        for ref in (str(c.get("from", "")), str(c.get("to", ""))):
+            head, sep, rest = re.match(r"^([^:@]*)([:@]?)(.*)$", ref).groups()
+            ends.append((head, sep + rest, head in blds and head not in fids))
+        if not (ends[0][2] and ends[1][2]):
+            out.append(c)
+            continue
+        (ba, ra, _), (bb, rb, _) = ends
+        common = sorted({lv for b, lv in by_bl if b == ba} & {lv for b, lv in by_bl if b == bb})
+        levels = c.get("levels", common)
+        for lv in levels:
+            if (ba, lv) in by_bl and (bb, lv) in by_bl:
+                rest_c = {k: v for k, v in c.items() if k not in ("from", "to", "levels")}
+                out.append({**rest_c, "from": by_bl[(ba, lv)] + ra, "to": by_bl[(bb, lv)] + rb})
+            else:
+                out.append({**c, "from": f"{ba}[level {lv}]{ra}", "to": f"{bb}[level {lv}]{rb}"})  # reported
+    return out
+
+
+def resolve_place(floors: dict[str, dict], ref: str) -> tuple[str, str]:
+    """'FLOOR:node_id', 'FLOOR:<label or name>', 'FLOOR:x,y' (metres) or 'FLOOR@side' -> (floor_id, node_id).
+
+    Labels resolve to the destination's node; a point resolves to the nearest node on the floor's largest
+    graph piece; a side (left/right/top/bottom of the drawing) to the corridor node furthest that way."""
+    import networkx as nx
+
+    if is_estimated_end(ref):
+        fid, side = ref.split("@", 1)
+        side = side.strip().lower()
+        if fid not in floors:
+            raise KeyError(f"connection end {ref!r}: no floor {fid!r}")
+        if side not in SIDES:
+            raise KeyError(f"connection end {ref!r}: side must be one of {', '.join(SIDES)}")
+        try:
+            return fid, side_node(floors[fid], side)
+        except KeyError as e:
+            raise KeyError(f"connection end {ref!r}: {e.args[0]}") from None
     if ":" not in ref:
-        raise KeyError(f"connection end {ref!r}: write it as FLOOR:node, FLOOR:label or FLOOR:x,y")
+        raise KeyError(f"connection end {ref!r}: use FLOOR:node, FLOOR:label, FLOOR:x,y or FLOOR@side")
     fid, rest = ref.split(":", 1)
     if fid not in floors:
         raise KeyError(f"connection end {ref!r}: no floor {fid!r}")

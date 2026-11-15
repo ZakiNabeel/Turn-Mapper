@@ -37,7 +37,7 @@ from ..export import floor_to_dict, png_bytes, venue_dict, write_json_package, w
 from ..ingest import dwg_to_dxf, inspect_file, load_floor
 from ..ir import FloorSpec, Segmentation
 from ..learned.classes import BG, DOOR, ROOM, STAIRS, WALKABLE, WALL
-from ..link import link_venue
+from ..link import LINK_TYPES, link_venue
 from ..route import VenueGraph, venue_checks
 from ..segment import estimate_levels
 from ..validate import route_lengths, validate_floor
@@ -474,7 +474,12 @@ class Studio:
         d = self.project(pid)
         floors = self._ready_floors(pid, include_failed=True)
         meta = [({**r, "building_id": r["building"]}, f) for r, f in floors]
-        lv = link_venue(meta, d.get("manual_links", []), correct_scales=d.get("correct_scales", True))
+        lv = link_venue(
+            meta,
+            d.get("manual_links", []),
+            connections=d.get("connections", []),
+            correct_scales=d.get("correct_scales", True),
+        )
         links, warns = lv["transitions"], lv["warnings"]
         nodes = {
             r["id"]: [
@@ -504,6 +509,8 @@ class Studio:
             "warnings": warns,
             "nodes": nodes,
             "manual": d.get("manual_links", []),
+            "connections": d.get("connections", []),
+            "floors": [r["id"] for r, _ in floors],
             "frames": lv["frames"],
             "rescaled": lv["rescaled"],
         }
@@ -529,12 +536,29 @@ class Studio:
             return {"found": False, "step_free": step_free}
         return {"found": True, **r.to_dict()}
 
-    def set_manual_links(self, pid: str, manual: list[dict]) -> dict:
+    def set_manual_links(self, pid: str, manual: list[dict], connections: list[dict] | None = None) -> dict:
+        """Manual stair/lift links, and (when given) connections between buildings or split levels.
+
+        A connection has the venue-config form: ``{from, to, type, length_m?}`` with ends ``FLOOR:node``,
+        ``FLOOR:label``, ``FLOOR:x,y`` or ``FLOOR@left|right|top|bottom``."""
         d = self.project(pid)
         d["manual_links"] = [
             {"from": m["from"], "to": m["to"], **({"type": m["type"]} if m.get("type") else {})}
             for m in manual
         ]
+        if connections is not None:
+            clean = []
+            for c in connections:
+                if not (isinstance(c.get("from"), str) and isinstance(c.get("to"), str)):
+                    raise ValueError("a connection needs 'from' and 'to' (FLOOR:node or FLOOR@side)")
+                kind = c.get("type") or "walkway"
+                if kind not in LINK_TYPES:
+                    raise ValueError(f"connection type must be one of {', '.join(LINK_TYPES)}")
+                item = {"from": c["from"], "to": c["to"], "type": kind}
+                if c.get("length_m") is not None:
+                    item["length_m"] = float(c["length_m"])
+                clean.append(item)
+            d["connections"] = clean
         d["updated"] = _now()
         self._save(d)
         return self.links(pid)
@@ -565,6 +589,7 @@ class Studio:
             link_venue(
                 [({**r, "building_id": r["building"]}, f) for r, f in floors],
                 d.get("manual_links", []),
+                connections=d.get("connections", []),
                 correct_scales=d.get("correct_scales", True),
             )["transitions"],
         )

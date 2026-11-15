@@ -149,6 +149,15 @@
         <button id="addLink" class="wide">Add manual link</button>
       </div>
       <div class="group">
+        <div class="label">Connections between buildings</div>
+        <p class="note">A walkway, bridge or ramp joining two floors (usually the same level of two buildings). Pick the edge of each drawing where the corridor leaves, or type an exact node id (click a graph node to see it). Never guessed automatically.</p>
+        <ul id="connList" class="list small"></ul>
+        <div class="row"><select id="connA"></select><select id="connASide"></select><input id="connANode" placeholder="node id" size="6"></div>
+        <div class="row"><select id="connB"></select><select id="connBSide"></select><input id="connBNode" placeholder="node id" size="6"></div>
+        <div class="row"><select id="connType"><option>walkway</option><option>ramp</option><option>stairs</option><option>lift</option><option>escalator</option></select><input id="connLen" placeholder="length m (optional)" size="14"></div>
+        <button id="addConn" class="wide">Add connection</button>
+      </div>
+      <div class="group">
         <div class="label">Route across floors</div>
         <p class="note">Pick two destinations on any floors. The route uses the floor links above; stair and lift
           lengths are estimates until measured.</p>

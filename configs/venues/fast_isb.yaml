@@ -50,3 +50,14 @@ scale_evidence:
     - {method: typical_room, size_ft: [30, 25]}
   A-F2:
     - {method: corridor_width, width_ft: 12, length_ft: 90, check_only: true}
+# Walking links between blocks (team, 2026-11-15): A-GF joins B-GF; on floors 1 and 2 A, B and C are joined;
+# C-B1, C-GF and every floor above 2 stand alone. From the site plan on page 1 the blocks form a chain A-B-C.
+# Ends are "BUILDING@edge of that building's drawing": the tool takes the corridor node nearest that edge
+# (an estimate, reported as LINK_ENDPOINT_ESTIMATED; replace with FLOOR:node once checked on site).
+#   A's drawing is turned 180 degrees from the site plan, so its west end (towards B) is the drawing's right edge;
+#   B's drawing matches the site plan: east end (towards A) = right edge, south end (towards C) = bottom edge;
+#   C's drawing is turned 90 degrees: its north end (towards B) is the drawing's right edge.
+multifloor:
+  connections:
+    - {from: "A@right", to: "B@right", type: walkway, levels: [0, 1, 2]}
+    - {from: "B@bottom", to: "C@right", type: walkway, levels: [1, 2]}

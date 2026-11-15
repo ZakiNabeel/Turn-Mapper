@@ -60,6 +60,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const manual = [...((S.links && S.links.manual) || []), { from: { floor_id: fa, node_id: na }, to: { floor_id: fb, node_id: nb }, type: ta }];
     await api(`${P()}/links`, { method: "PUT", json: { manual } }); renderLinks();
   };
+  const c = $("#addConn"); if (!c) return;
+  c.onclick = async () => {
+    const end = (f, side, node) => (node.trim() ? `${f}:${node.trim()}` : `${f}@${side}`);
+    const fa = $("#connA").value, fb = $("#connB").value;
+    if (!fa || !fb) { status("Needs two floors."); return; }
+    const a = end(fa, $("#connASide").value, $("#connANode").value), b = end(fb, $("#connBSide").value, $("#connBNode").value);
+    if (a === b) { status("Pick two different ends."); return; }
+    const conn = { from: a, to: b, type: $("#connType").value };
+    const len = parseFloat($("#connLen").value); if (!Number.isNaN(len)) conn.length_m = len;
+    const connections = [...((S.links && S.links.connections) || []), conn];
+    try {
+      await api(`${P()}/links`, { method: "PUT", json: { manual: (S.links && S.links.manual) || [], connections } });
+      $("#connANode").value = ""; $("#connBNode").value = ""; $("#connLen").value = "";
+    } catch (e) { status(String(e.message || e)); }
+    renderLinks();
+  };
 });
 
 // ---------------------------------------------------------------- projects & files
@@ -328,6 +344,25 @@ async function renderLinks() {
   L.warnings.forEach((w) => ul.appendChild(h("li", { className: "issue" }, `<code>${esc(w.code)}</code><br>${esc(w.message)}`)));
   const opts = Object.entries(L.nodes).flatMap(([f, ns]) => ns.map((n) => `<option value="${esc(f)}:${esc(n.id)}:${esc(n.type)}">${esc(f)} · ${esc(n.id)} (${esc(n.type)})</option>`)).join("");
   $("#linkA").innerHTML = opts; $("#linkB").innerHTML = opts;
+  if ($("#connA")) {
+    const fo = (L.floors || []).map((f) => `<option>${esc(f)}</option>`).join("");
+    const keepA = $("#connA").value, keepB = $("#connB").value;
+    $("#connA").innerHTML = fo; $("#connB").innerHTML = fo;
+    if (keepA) $("#connA").value = keepA; if (keepB) $("#connB").value = keepB;
+    const so = ["left", "right", "top", "bottom"].map((x) => `<option value="${x}">${x} edge</option>`).join("");
+    if (!$("#connASide").options.length) { $("#connASide").innerHTML = so; $("#connBSide").innerHTML = so; }
+    const cl = $("#connList"); cl.innerHTML = "";
+    const conns = L.connections || [];
+    if (!conns.length) cl.appendChild(h("li", { className: "empty" }, "No connections."));
+    conns.forEach((cn, i) => {
+      const li = h("li", {}, `${esc(cn.type)} · ${esc(cn.from)} ⇄ ${esc(cn.to)}${cn.length_m != null ? ` · ${esc(cn.length_m)} m` : ""}`);
+      const b = h("button", { className: "act danger" }, "×");
+      b.onclick = async () => {
+        await api(`${P()}/links`, { method: "PUT", json: { manual: L.manual || [], connections: conns.filter((_, j) => j !== i) } }); renderLinks();
+      };
+      li.prepend(b); cl.appendChild(li);
+    });
+  }
 }
 // ---------------------------------------------------------------- route across floors
 async function renderRoutePanel() {

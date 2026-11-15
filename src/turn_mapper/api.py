@@ -193,7 +193,7 @@ def process_floor(
         s_ev = list(s_ev) + room_records
         issues = list(issues) + room_issues
     t["_footprint"] = (fw, fh)
-    t_issues = find_transitions(geom, seg, s)
+    t_issues = find_transitions(geom, seg, s, words=pre.text)
     t0 = time.perf_counter()
     graph, g_issues = build_graph(geom, s, p, seg.wall)
     t["graph"] = time.perf_counter() - t0

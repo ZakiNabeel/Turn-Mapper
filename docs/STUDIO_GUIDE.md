@@ -64,6 +64,15 @@ one is active; **Labels: OFF** means neither is available and rooms will be "Unl
      **ready** (one graph piece, every destination reachable, measured scale, every stair/lift linked),
      **usable**, or **needs work**, with what is missing. Links go into `venue.json` → `transitions`. Lengths
      are flagged estimates (stairs 6 m, lift 4 m) until measured.
+   - **Connections between buildings**: a walkway, bridge or ramp that joins two floors (usually the same level
+     of two buildings). Pick the two floors and, for each, the edge of the drawing where the corridor leaves
+     (left / right / top / bottom) or type an exact node id; choose the type and, if known, the length. A
+     connection given by an edge is marked as an estimate (`LINK_ENDPOINT_ESTIMATED`) until you replace the
+     edge with a node. Connections are never guessed. Stored in the project and exported as `transitions`.
+   - **Lifts**: found from the lift shaft's label ("Elevator", "Lift") anywhere on the plan, or from the learned
+     model's lift class. If a lift is found on two floors but not on a floor between them, a stop is proposed
+     there when a graph node is within 4 m of the shaft (`LINK_SHAFT_INFERRED`, low confidence); otherwise
+     `LINK_SHAFT_GAP` names the floor to mark it on.
    - **Route across floors**: pick a start and a destination (any floor), optionally *step-free* (lifts, ramps,
      walkways only), *Route*. The summary gives length, time and floors; the steps read like "Take the stairs
      up 2 floors to …"; *Show <floor>* switches the canvas to a floor, where its leg is drawn.

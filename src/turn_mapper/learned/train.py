@@ -19,14 +19,26 @@ from pathlib import Path
 
 import numpy as np
 
-from .classes import CLASSES, IGNORE
+from .classes import CLASSES, IGNORE, OPEN, OPEN_ALLOWED
 from .data import MaskDataset
 from .model import _torch, build_model, load_checkpoint, predict_proba, save_checkpoint
 
 
 def confusion(pred: np.ndarray, gt: np.ndarray, n: int = len(CLASSES)) -> np.ndarray:
-    m = gt != IGNORE
+    m = gt < n  # IGNORE and OPEN (partial labels) are not scored
     return np.bincount(n * gt[m].astype(int) + pred[m], minlength=n * n).reshape(n, n)
+
+
+def open_space_loss(logits, y):
+    """Partial labels: on OPEN pixels the allowed classes (not wall, not a transition) must hold the
+    probability mass. Returns 0 when the batch has no OPEN pixel."""
+    torch, _ = _torch()
+    m = y == OPEN
+    if not bool(m.any()):
+        return logits.sum() * 0.0
+    logp = torch.log_softmax(logits, dim=1)
+    allowed = torch.logsumexp(logp[:, list(OPEN_ALLOWED)], dim=1)
+    return -(allowed[m]).mean()
 
 
 def iou_from_conf(conf: np.ndarray) -> dict:
@@ -117,7 +129,10 @@ def train(
             x, y = x.to(device), y.to(device)
             with torch.autocast("cuda", enabled=use_amp):
                 logits = model(x)
-                loss = ce(logits.float(), y) + dice(logits.float(), y)
+                y_full = torch.where(y == OPEN, torch.full_like(y, IGNORE), y)
+                loss = open_space_loss(logits.float(), y)
+                if bool((y_full != IGNORE).any()):  # a batch of only unlabelled pixels has no CE/Dice term
+                    loss = loss + ce(logits.float(), y_full) + dice(logits.float(), y_full)
             opt.zero_grad()
             scaler.scale(loss).backward()
             scaler.step(opt)

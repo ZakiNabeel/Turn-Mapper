@@ -106,3 +106,37 @@ def test_stairs_filter_drops_door_arc_keeps_flight():
     assert len(geom.transitions) == 1
     assert box(150, 150, 200, 230).contains(geom.transitions[0].polygon.centroid)
     assert any(i.code == "STAIRS_TOO_SMALL" for i in issues)
+
+
+def test_lifts_from_a_learned_mask_and_from_plan_text():
+    import numpy as np
+    from shapely.geometry import MultiPolygon
+
+    from turn_mapper.ir import GeometryPx, Segmentation, TextBox
+    from turn_mapper.transitions import find_transitions
+
+    z = np.zeros((400, 400), bool)
+    walk = np.ones((400, 400), bool)
+    lift = z.copy()
+    lift[50:120, 50:120] = True  # a shaft the model labelled 'lift' (1.4 m square at 0.02 m/px)
+    lift[300:303, 300:340] = True  # a stray stroke: too small
+    walk[lift] = False
+    seg = Segmentation(wall=z, floor=walk, background=z, levels={}, method="t", lifts=lift)
+    geom = GeometryPx(
+        regions=[],
+        doors=[],
+        walkable=MultiPolygon(),
+        wall_segments=[],
+        wall_mask_closed=z,
+        debug={"walk_mask": walk},
+    )
+    words = [
+        TextBox("Elevator", 0.9, (60, 125, 110, 140)),  # beside the shaft already found: no second lift
+        TextBox("LIFT", 0.9, (300, 60, 330, 75)),  # a shaft the model missed
+        TextBox("Uplifting", 0.9, (200, 300, 260, 315)),  # not a lift word
+    ]
+    issues = find_transitions(geom, seg, 0.02, words=words)
+    lifts = [t for t in geom.transitions if t.type == "lift"]
+    assert len(lifts) == 2 and any(i.code == "LIFT_TOO_SMALL" for i in issues)
+    assert sorted(round(t.polygon.centroid.x) for t in lifts) == [84, 315]
+    assert all(walk[int(t.anchor.y), int(t.anchor.x)] for t in lifts)  # a person can stand at the anchor

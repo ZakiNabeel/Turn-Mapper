@@ -160,3 +160,34 @@ def test_floor_quality_grades(campus):
     assert est["grade"] == "usable" and "estimate" in est["reasons"][0]
     assert floor_quality(**{**base, "destinations_on_main": 8, "pieces": 2})["grade"] == "needs work"
     assert floor_quality(**{**base, "reaches_building": False})["grade"] == "needs work"
+
+
+def test_studio_connection_between_buildings(tmp_path):
+    pytest.importorskip("fastapi")
+    pytest.importorskip("httpx")
+    from fastapi.testclient import TestClient
+
+    from turn_mapper.studio.server import create_app
+
+    c = TestClient(create_app(tmp_path))
+    pid = c.post("/api/projects", json={"name": "Two blocks"}).json()["id"]
+    _, buf = cv2.imencode(".png", cv2.cvtColor(make_plan("tower").rgb, cv2.COLOR_RGB2BGR))
+    c.post(f"/api/projects/{pid}/files", files={"file": ("t.png", buf.tobytes(), "image/png")})
+    for fid, b in (("T0", "T"), ("W0", "W")):
+        c.post(f"/api/projects/{pid}/floors", json={"source": "t.png", "id": fid, "building": b, "level": 0})
+        assert c.post(f"/api/projects/{pid}/floors/{fid}/run", json={}).status_code == 200
+    r = c.post(f"/api/projects/{pid}/route", json={"from": "T0:R-102", "to": "W0:R-106"}).json()
+    assert not r["found"]  # two buildings, nothing joins them yet
+    body = {
+        "manual": [],
+        "connections": [{"from": "T0@right", "to": "W0@left", "type": "walkway", "length_m": 12}],
+    }
+    L = c.put(f"/api/projects/{pid}/links", json=body).json()
+    w = [t for t in L["links"] if t["type"] == "walkway"]
+    assert len(w) == 1 and w[0]["length_m"] == 12 and w[0]["provenance"]["source"] == "auto"
+    assert L["connections"] == body["connections"] and set(L["floors"]) == {"T0", "W0"}
+    assert any(x["code"] == "LINK_ENDPOINT_ESTIMATED" for x in L["warnings"])
+    r = c.post(f"/api/projects/{pid}/route", json={"from": "T0:R-102", "to": "W0:R-106"}).json()
+    assert r["found"] and r["floors"] == ["T0", "W0"] and r["changes"][0]["type"] == "walkway"
+    bad = {"manual": [], "connections": [{"from": "T0@right", "to": "W0@left", "type": "teleport"}]}
+    assert c.put(f"/api/projects/{pid}/links", json=bad).status_code == 400

@@ -74,13 +74,16 @@ routing). `type ∈ {stairs, lift, escalator, ramp, walkway}`. Optional:
 |---|---|
 | `length_estimated` | `true` while the length is a default (stairs 6 m, lift 4 m, escalator 8 m, or `multifloor.lengths` in the venue config) rather than measured |
 | `accessible` | step-free use: `true` for lift/ramp/walkway, `false` for stairs/escalator; absent when unknown. A step-free route uses only links with `accessible: true` |
-| `provenance` | `{source: auto\|manual\|corrected, confidence}`. `manual` = drawn in Studio or listed under `multifloor.connections` in the venue config |
+| `provenance` | `{source: auto\|manual\|corrected, confidence}`. `manual` = drawn in Studio or listed with exact ends under `multifloor.connections`. `auto` 0.5 = a listed connection whose ends were given only as an edge of the drawing (`FLOOR@side`): the link exists, where it meets each floor is an estimate. `auto` 0.4 = a lift stop proposed on a floor between two detected stops |
 | `match_distance_m` | auto links: distance between the two nodes in the building frame (how well they line up) |
 | `shaft` | links that chain through several levels (one stair core, one lift) share this id |
 
 Auto links pair stair/lift/escalator nodes of the same type on **adjacent levels of one building** by optimal
 assignment in the building frame (≤ 8 m apart). Walkways and ramps between buildings are never guessed: they come
-from the venue config (`multifloor.connections`) or Studio.
+from the venue config (`multifloor.connections`) or Studio. A connection end is `FLOOR:node`, `FLOOR:label`,
+`FLOOR:x,y` (metres) or `FLOOR@left|right|top|bottom` (the corridor node nearest that edge of the drawing). Ends
+that name a *building* (`A@right`) with `levels: [...]` make one connection per level. A length of 0 means the
+buildings meet and the corridor simply continues.
 
 **`floor.building_frame`** — `{matrix, reference_floor_id, method, confidence, registered_scale, scale_corrected}`.
 `matrix` is a 2×3 affine floor metres → building metres (the reference floor's frame). `method`: `reference` (this is

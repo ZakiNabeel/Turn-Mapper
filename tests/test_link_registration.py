@@ -177,3 +177,60 @@ def test_lift_missing_on_middle_floors_is_reported_not_linked():
     assert not [t for t in out["transitions"] if t["type"] == "lift"]
     gap = [w for w in out["warnings"] if w["code"] == "LINK_SHAFT_GAP"]
     assert len(gap) == 1 and "T1, T2" in gap[0]["message"]
+
+
+def test_lift_stop_is_proposed_on_a_missed_floor_when_floors_are_aligned():
+    lift = [("l", "lift", (36, 10))]
+    near = [("c1", None, (35, 11))]  # an ordinary corridor node beside the shaft
+
+    def fl(tn):
+        f = _floor(tnodes=[t for t in tn if t[1]])
+        for nid, kind, q in tn:
+            if not kind:
+                f["graph"]["nodes"].append({"id": nid, "x": q[0], "y": q[1], "kind": "corridor"})
+                f["graph"]["edges"].append({"id": "ex", "from": "c0", "to": nid, "length_m": 30.0})
+        return f
+
+    floors = [
+        ({"id": "T0", "building_id": "T", "level": 0}, fl(lift)),
+        ({"id": "T1", "building_id": "T", "level": 1}, fl(near)),
+        ({"id": "T2", "building_id": "T", "level": 2}, fl(lift)),
+    ]
+    out = link_venue(floors)
+    lifts = [t for t in out["transitions"] if t["type"] == "lift"]
+    assert [(t["from"]["floor_id"], t["to"]["floor_id"]) for t in lifts] == [("T0", "T1"), ("T1", "T2")]
+    assert lifts[0]["to"]["node_id"] == "c1"
+    assert all(t["provenance"] == {"source": "auto", "confidence": 0.4} for t in lifts)
+    assert any(w["code"] == "LINK_SHAFT_INFERRED" for w in out["warnings"])
+
+
+def test_side_ends_and_building_level_connections():
+    from turn_mapper.link import expand_connections, side_node
+
+    f0 = _venue()[0][1]
+    assert side_node(f0, "left") == "c0" and side_node(f0, "right") == "l"  # extreme nodes of the graph
+    two = [
+        ({"id": "P0", "building_id": "P", "level": 0}, _floor()),
+        ({"id": "P1", "building_id": "P", "level": 1}, _floor()),
+        ({"id": "Q0", "building_id": "Q", "level": 0}, _floor()),
+        ({"id": "Q1", "building_id": "Q", "level": 1}, _floor()),
+        ({"id": "Q2", "building_id": "Q", "level": 2}, _floor()),
+    ]
+    ex = expand_connections([{"from": "P@right", "to": "Q@left", "type": "walkway"}], two)
+    assert [(c["from"], c["to"]) for c in ex] == [("P0@right", "Q0@left"), ("P1@right", "Q1@left")]
+    ex = expand_connections([{"from": "P@right", "to": "Q@left", "levels": [1]}], two)
+    assert [(c["from"], c["to"]) for c in ex] == [("P1@right", "Q1@left")]
+    keep = [{"from": "P0:c0", "to": "Q0:c0"}]
+    assert expand_connections(keep, two) == keep
+    out = link_venue(two, connections=[{"from": "P@right", "to": "Q@left", "levels": [0, 1]}])
+    w = [t for t in out["transitions"] if t["type"] == "walkway"]
+    assert len(w) == 2 and all(t["provenance"] == {"source": "auto", "confidence": 0.5} for t in w)
+    assert sum(x["code"] == "LINK_ENDPOINT_ESTIMATED" for x in out["warnings"]) == 2
+    bad = link_venue(
+        two,
+        connections=[
+            {"from": "P0@sideways", "to": "Q0@left"},
+            {"from": "P@left", "to": "Q@left", "levels": [7]},
+        ],
+    )
+    assert sum(x["code"] == "LINK_CONNECTION_UNRESOLVED" for x in bad["warnings"]) == 2
