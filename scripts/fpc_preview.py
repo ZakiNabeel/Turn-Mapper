@@ -79,10 +79,10 @@ def main() -> None:
         "--ids", type=int, nargs="+", default=[30, 31, 32], help="ids to colour (red, blue, green ...)"
     )
     ap.add_argument("--walls", type=int, nargs="+", default=[35], help="ids drawn black")
+    ap.add_argument("--ids2", type=int, nargs="+", default=[35, 1, 9, 3, 23], help="second sheet, no black")
     a = ap.parse_args()
     global WALLS
     WALLS = tuple(a.walls)
-    COL.update({s: PALETTE[i % len(PALETTE)] for i, s in enumerate(a.ids)})
     d = a.svg_dir or fetch("/tmp/fpc_preview")
     files = sorted(glob.glob(f"{d}/**/*.svg", recursive=True))[: a.scan]
     print("FILES", len(files))
@@ -90,7 +90,7 @@ def main() -> None:
     print("HEAD", head.replace("\n", " ")[:1500])
     tiles = collections.Counter()
     strokes = collections.Counter()
-    picks: dict[int, list[str]] = {s: [] for s in a.ids}
+    picks_all: dict[int, list[str]] = {s: [] for s in [*a.ids, *a.ids2]}
     for f in files:
         try:
             els, _ = read_svg(f)
@@ -100,18 +100,27 @@ def main() -> None:
         strokes.update(c)
         for s in c:
             tiles[s] += 1
-        for s in picks:
-            if c.get(s, 0) >= 4 and len(picks[s]) < 8:
-                picks[s].append(f)
+        for s in picks_all:
+            if c.get(s, 0) >= 4 and len(picks_all[s]) < 8:
+                picks_all[s].append(f)
     print("TILES_WITH_ID", dict(sorted(tiles.items())))
     print("STROKES_BY_ID", dict(sorted(strokes.items())))
-    rows = []
-    for s, fs in picks.items():
-        ims = [draw(f) for f in fs] + [np.full((420, 420, 3), 255, np.uint8)] * (8 - len(fs))
-        row = np.hstack(ims[:8])
-        cv2.putText(row, f"id {s}", (8, 28), cv2.FONT_HERSHEY_SIMPLEX, 0.9, COL[s], 2)
-        rows.append(row)
-    cv2.imwrite(a.out, np.vstack(rows))
+
+    def sheet(out_path: str, ids: list[int]) -> None:
+        COL.clear()
+        COL.update({s: PALETTE[i % len(PALETTE)] for i, s in enumerate(ids)})
+        rows = []
+        for s in ids:
+            fs = [f for f in picks_all.get(s, [])][:8]
+            ims = [draw(f) for f in fs] + [np.full((420, 420, 3), 255, np.uint8)] * (8 - len(fs))
+            row = np.hstack(ims[:8])
+            cv2.putText(row, f"id {s}", (8, 28), cv2.FONT_HERSHEY_SIMPLEX, 0.9, COL[s], 2)
+            rows.append(row)
+        cv2.imwrite(out_path, np.vstack(rows))
+
+    sheet(a.out, a.ids)
+    WALLS = ()
+    sheet(a.out.replace(".png", "_b.png"), a.ids2)
     print("WROTE", a.out)
 
 
