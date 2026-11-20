@@ -6,6 +6,7 @@
 # Kaggle: GPU T4, Internet On. Inputs (Add Input):
 #   - output of the S3a notebook (turn_seg_s3a.pt)  [preferred]  or of the S2 notebook (turn_seg_s2.pt)
 #   - dataset qmarva/cubicasa5k                      [optional replay]
+#   - dataset catwhisker/floorplancad-dataset        [recommended: avoids Google Drive's download quota]
 # FloorPlanCAD is downloaded from the authors' Google Drive (annotations CC BY-NC 4.0, research use only);
 # data and weights stay in /kaggle/working and are never committed.
 # Run from the repo root:  bash scripts/kaggle_finetune_s4.sh [epochs] [fpc_limit] [institutional_n] [train_min]
@@ -26,9 +27,16 @@ import glob, os, shutil, subprocess
 D = "/tmp/turn/fpc_raw"; os.makedirs(D, exist_ok=True)
 ids = {"train1": "1HcyKt6qWeXog-tRfvEjdO3O3TN91PXGL", "train2": "1kSS7OB_EEu7VJzb0W8DK9_nu1EvshioV",
        "test": "1jxpYgxnLUbXEzMOsjaMPQFSuvmvHimiZ"}
+# Prefer an attached Kaggle copy of the same archives (e.g. dataset catwhisker/floorplancad-dataset:
+# train-00.tar.xz, train-01.tar.xz, test-00.tar.xz); Google Drive refuses after its daily download quota.
+local = {"train1": "train-00", "train2": "train-01", "test": "test-00"}
 for name, fid in ids.items():
     out = f"{D}/{name}.archive"
-    subprocess.run(["gdown", "-q", "--fuzzy", f"https://drive.google.com/file/d/{fid}/view", "-O", out])
+    hit = [p for p in glob.glob(f"/kaggle/input/**/{local[name]}*", recursive=True) if os.path.isfile(p)]
+    if hit:
+        print("LOCAL", name, hit[0]); shutil.copy(hit[0], out)
+    else:
+        subprocess.run(["gdown", "-q", "--fuzzy", f"https://drive.google.com/file/d/{fid}/view", "-O", out])
     if not os.path.exists(out):
         print("FETCH FAIL", name); continue
     os.makedirs(f"{D}/{name}", exist_ok=True)
