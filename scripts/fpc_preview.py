@@ -78,8 +78,8 @@ def main() -> None:
     ap.add_argument(
         "--ids", type=int, nargs="+", default=[30, 31, 32], help="ids to colour (red, blue, green ...)"
     )
-    ap.add_argument("--walls", type=int, nargs="+", default=[35], help="ids drawn black")
-    ap.add_argument("--ids2", type=int, nargs="+", default=[35, 1, 9, 3, 23], help="second sheet, no black")
+    ap.add_argument("--walls", type=int, nargs="+", default=[1, 2], help="ids drawn black")
+    ap.add_argument("--ids2", type=int, nargs="+", default=[1, 2, 9, 33, 34], help="second sheet, no black")
     a = ap.parse_args()
     global WALLS
     WALLS = tuple(a.walls)

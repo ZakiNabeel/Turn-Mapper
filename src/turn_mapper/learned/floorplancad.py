@@ -8,18 +8,21 @@ What it gives the segmenter that CubiCasa and ResPlan (homes) do not: **real sta
 symbols and real institutional wall drawings**. What it does not give: rooms and corridors. So the masks are
 *partial* (see ``classes.OPEN``):
 
-    wall (35), windows (9-11)                                   -> WALL  (double lines closed into a band)
+    wall (1), curtain wall (2), windows (9-11)                  -> WALL  (double lines closed into a band)
     stairs (30) / elevator (31) / escalator (32)                -> STAIRS / LIFT / ESCALATOR (instance hull)
-    doors (1-8), furniture and fixtures (12-29), row chairs (33),
-    parking spots (34)                                          -> IGNORE (our door class is the opening in
+    doors (3-8), opening symbol (12), furniture and fixtures
+    (13-29), 33, 34, parking spots (35)                         -> IGNORE (our door class is the opening in
                                                                    the wall, not the swing symbol)
     unlabelled linework (dimensions, axes, hatching)            -> IGNORE in a thin band
     everything else                                             -> OPEN  (not wall, not a transition)
 
 **Semantic ids.** The numbers above are the ones in the SVG release on the authors' Google Drive (attribute
-``semantic-id``), checked by eye on 2026-11-15 (``scripts/fpc_preview.py``): from the windows on they are the
-published class list **plus two** (published: stairs 28, elevator 29, escalator 30, wall 33; in the files:
-30, 31, 32, 35; 28 and 29 are urinals and toilets). Using the published numbers trains toilets as lifts.
+``semantic-id``), checked by eye on 2026-11-15 with ``scripts/fpc_preview.py``: 1 = walls, 3 = door swings,
+9 = windows, 28/29 = urinals and toilets, 30 = stairs, 31 = lifts, 32 = escalators, 35 = parking spots. That
+is the published class list with wall and curtain wall moved to the front and everything else **plus two**
+(published: stairs 28, elevator 29, escalator 30, wall 33). Using the published numbers trains toilets as
+lifts and parking spots as walls. Ids 2, 10-12, 33 and 34 were not looked at: 2 and 10-11 are taken from the
+shifted list (curtain wall, bay / blind window); 12, 33 and 34 get no loss.
 
 The image is the drawing itself: every element stroked dark on light paper at a random resolution.
 """
@@ -37,9 +40,9 @@ import numpy as np
 from .classes import ESCALATOR, IGNORE, LIFT, OPEN, STAIRS, WALL
 
 TILE_M = 14.0  # FloorPlanCAD tiles are 14 m x 14 m squares
-WALL_IDS = {35, 9, 10, 11}
+WALL_IDS = {1, 2, 9, 10, 11}
 TRANSITION = {30: STAIRS, 31: LIFT, 32: ESCALATOR}
-IGNORE_IDS = set(range(1, 9)) | set(range(12, 30)) | {33, 34}
+IGNORE_IDS = set(range(3, 9)) | set(range(12, 30)) | {33, 34, 35}
 _NUM = re.compile(r"-?\d*\.?\d+(?:[eE][-+]?\d+)?")
 
 
@@ -336,9 +339,9 @@ def fake_tile(path: str | Path, seed: int = 0, lift: bool = True) -> None:
         )
 
     for y in (10 + o, 11.6 + o, 60 + o, 61.6 + o):  # two double-line walls
-        line(5, y, 95, y, 35)
+        line(5, y, 95, y, 1)
     for x in (5, 6.6, 93.4, 95):
-        line(x, 10 + o, x, 61.6 + o, 35)
+        line(x, 10 + o, x, 61.6 + o, 1)
     for i in range(8):  # a stair: treads
         line(20 + 2 * i, 20 + o, 20 + 2 * i, 34 + o, 30, 1)
     line(20, 20 + o, 34, 20 + o, 30, 1)
@@ -349,7 +352,7 @@ def fake_tile(path: str | Path, seed: int = 0, lift: bool = True) -> None:
         line(60, 20 + o, 72, 32 + o, 31, 2)
         line(72, 20 + o, 60, 32 + o, 31, 2)
     s.append(
-        f'<path d="M 45,{61.6 + o} L 45,{55 + o} A 6.6,6.6 0 0 1 51.6,{61.6 + o}" semantic-id="1" '
+        f'<path d="M 45,{61.6 + o} L 45,{55 + o} A 6.6,6.6 0 0 1 51.6,{61.6 + o}" semantic-id="3" '
         'instance-id="3" stroke-width="0.1" stroke="black" fill="none"/>'
     )
     s.append(f'<circle cx="80" cy="{48 + o}" r="3" semantic-id="20" instance-id="4" stroke-width="0.1"/>')

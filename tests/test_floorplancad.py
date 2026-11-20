@@ -55,8 +55,8 @@ def test_masks_are_partial_and_aligned(fpc):
 def test_escalator_and_plain_elements():
     els = [
         {"pts": [(10, 10), (30, 10), (30, 20), (10, 20), (10, 10)], "sem": 32, "inst": 5, "width": 0.1},
-        {"pts": [(0, 50), (100, 50)], "sem": 35, "inst": -1, "width": 0.1},
-        {"pts": [(0, 51.5), (100, 51.5)], "sem": 35, "inst": -1, "width": 0.1},
+        {"pts": [(0, 50), (100, 50)], "sem": 1, "inst": -1, "width": 0.1},
+        {"pts": [(0, 51.5), (100, 51.5)], "sem": 1, "inst": -1, "width": 0.1},
     ]
     _, m = rasterize(els, (0, 0, 100, 100), 400, np.random.default_rng(0))
     assert m[60, 80] == ESCALATOR and m[203, 200] == WALL and m[300, 200] == OPEN
