@@ -41,7 +41,7 @@ turn_mapper = ["py.typed", "schema/*.json", "studio/static/*"]
 
 [tool.ruff]
 line-length = 110
-extend-exclude = ["notebooks"]
+extend-exclude = ["notebooks", "docs/poster"]
 target-version = "py311"
 
 [tool.ruff.lint]
