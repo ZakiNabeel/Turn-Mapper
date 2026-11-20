@@ -175,8 +175,20 @@ owned by the dataset authors: research use only, data and weights never committe
 In the pipeline the learned model's **lift** class is now used (`Segmentation.lifts` → lift transitions), next
 to its stairs class; before S4 it was predicted but thrown away.
 
-Status: the stage is written and tested on fake tiles in the FloorPlanCAD convention (`tests/test_floorplancad.py`,
-`tests/test_learned.py`). **It has not been run on the real data yet**: that needs the Kaggle GPU.
+**Label numbers (found 2026-11-15, by eye on real tiles with `scripts/fpc_preview.py` /
+`notebooks/fpc_preview_kaggle.ipynb`).** The SVG files on the authors' Google Drive do *not* use the numbers
+in the published class list: wall = 1, door swing = 3, window = 9, stairs = 30, lift = 31, escalator = 32,
+urinal/toilet = 28/29, parking spot = 35. With the published numbers (stairs 28, lift 29, escalator 30,
+wall 33) a model learns toilets as lifts and parking spots as walls. The first S4 run (Version 1, 15 Nov)
+used the published numbers and was cancelled after one hour; `floorplancad.py` now uses the numbers in the
+files. The line classifier (`primitives.FPC_GROUP`, results of 2026-10-28) was trained with the published
+numbers too, so its FloorPlanCAD scores are not valid; it must be retrained before any number is quoted.
+
+Status: tested on fake tiles (`tests/test_floorplancad.py`, `tests/test_learned.py`). Real run: Kaggle
+notebook `turn-segmenter-s4-finetune`, **Version 2, started 2026-11-21 01:15 PKT** with the corrected labels
+(commit 93f6148), about 6 hours. Its output folder `out_s4/` holds `eval_s4_*.json` vs `eval_init_*.json`
+(same test splits, before and after) and the two synthetic tables; copy them into
+`docs/RESULTS_ML_S4_<date>.md` and apply the promotion rule before using `turn_seg_s4.pt`.
 
 ## 4. What "done" looks like for the FYP
 

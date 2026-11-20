@@ -206,3 +206,11 @@ correct 8–10 B/C floors in Studio and export training annotations (S3); try St
 - ML stage S4 (FloorPlanCAD, real CAD drawings): `learned/floorplancad.py`, partial labels (mask 254 = open space of unknown use, `open_space_loss`), `turn-mapper ml prepare-floorplancad`, `scripts/kaggle_finetune_s4.sh`, `notebooks/finetune_s4_kaggle.ipynb`. Tested on fake tiles only.
 - Not verified: the walkway ends (estimates); S4 on real data (not run: needs Kaggle GPU); whether FloorPlanCAD's real SVGs have quirks the fake tiles do not.
 - Next (team): run `finetune_s4_kaggle.ipynb` (attach the S3a output), copy the eval JSONs into a results doc; check the five walkway ends and mark the C-GF lift in Studio; site scale measurements.
+
+## 2026-11-15 / 2026-11-21 — FloorPlanCAD label numbers; S4 restarted
+
+- First real S4 run (Kaggle, 15 Nov, Version 1): FloorPlanCAD downloaded and converted (12,502 tiles read, 5,909 kept, 0 failed), but the counts looked wrong (173 tiles with stairs vs 1,267 "lift" and 1,450 "escalator"). Drawing real tiles by label (`scripts/fpc_preview.py`) showed the files use different numbers from the published list: wall 1, door 3, window 9, stairs 30, lift 31, escalator 32, toilets 28/29, parking 35. Run cancelled after ~1 GPU hour; fixed in fbc6157 + 93f6148.
+- The October line classifier used the published numbers: its FloorPlanCAD numbers are invalid until retrained.
+- S4 Version 2 started 2026-11-21 01:15 PKT with the corrected labels (~6 h). Results not yet collected.
+- Next: when Version 2 finishes, copy `out_s4/eval_*.json` and the synthetic tables into `docs/RESULTS_ML_S4_<date>.md`; check the conversion log shows many more stair tiles than lift tiles.
+
