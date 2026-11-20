@@ -27,6 +27,9 @@ def test_prepare_counts_and_splits(fpc):
     assert info["read"] == 9 and info["kept"] == 7 and info["failed"] == 1 and info["skipped_no_wall"] == 1
     assert info["with_stairs"] == 7 and info["with_lift"] == 4 and info["with_escalator"] == 0
     assert info["splits"]["test"] == 1
+    m = info["strokes_mapped"]
+    assert m["wall"] > 0 and m["stairs"] > m["lift"] > 0 and m["escalator"] == 0
+    assert info["strokes_per_semantic_id"]["1"] == m["wall"]
     train = (out / "train.txt").read_text().split()
     assert len(train) == 3 * len(set(train))  # tiles with a stair or lift are listed three times
 

@@ -280,6 +280,9 @@ def prepare(
     lists: dict[str, list[str]] = {"train": [], "val": [], "test": []}
     stats = {"read": 0, "kept": 0, "skipped_no_wall": 0, "failed": 0, "with_stairs": 0, "with_lift": 0}
     stats["with_escalator"] = 0
+    # strokes per semantic id: a wrong id table (e.g. the published list instead of the numbers in the files)
+    # shows up here as stairs rarer than lifts, or no wall strokes at all
+    per_id: dict[int, int] = {}
 
     def run(dirs, split):
         files = sorted(f for d in dirs for f in Path(d).rglob("*.svg"))
@@ -289,6 +292,8 @@ def prepare(
             stats["read"] += 1
             try:
                 els, vb = read_svg(f)
+                for e in els:
+                    per_id[e["sem"]] = per_id.get(e["sem"], 0) + 1
                 size = int(round(TILE_M / float(rng.uniform(*size_m_per_px))))
                 img, mask = rasterize(els, vb, size, rng)
             except Exception:  # noqa: BLE001  a malformed drawing must not stop a 15,000-file conversion
@@ -321,6 +326,13 @@ def prepare(
         "splits": {k: len(v) for k, v in lists.items()},
         "m_per_px": list(size_m_per_px),
         "boost_transitions": boost_transitions,
+        "strokes_per_semantic_id": {str(k): v for k, v in sorted(per_id.items())},
+        "strokes_mapped": {
+            "wall": sum(v for k, v in per_id.items() if k in WALL_IDS),
+            "stairs": per_id.get(30, 0),
+            "lift": per_id.get(31, 0),
+            "escalator": per_id.get(32, 0),
+        },
     }
     (out / "dataset.json").write_text(json.dumps(info, indent=1))
     return info
