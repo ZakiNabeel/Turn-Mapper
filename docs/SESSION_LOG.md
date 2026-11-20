@@ -214,3 +214,4 @@ correct 8–10 B/C floors in Studio and export training annotations (S3); try St
 - S4 Version 2 started 2026-11-21 01:15 PKT with the corrected labels (~6 h). Results not yet collected.
 - Next: when Version 2 finishes, copy `out_s4/eval_*.json` and the synthetic tables into `docs/RESULTS_ML_S4_<date>.md`; check the conversion log shows many more stair tiles than lift tiles.
 
+- 2026-11-21 01:16 PKT: S4 Version 2 failed after 2.5 min (Google Drive daily download quota). Version 3 (commit 8da3bc8) reads the Kaggle copy `catwhisker/floorplancad-dataset` (same archives: 3,760 + 6,401 train, 5,502 test SVGs). Conversion with the corrected ids: 12,502 read, **11,278 kept** (was 5,909 with the wrong wall id), 0 failed, tiles with stairs 2,879 / lift 1,676 / escalator 143 (was 173 / 1,267 / 1,450), splits 10,530 train / 319 val / 4,891 test. Training follows (~5 h).
