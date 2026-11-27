@@ -1,6 +1,6 @@
 # TURN-Mapper v0.4.0 — FYP-1 final release (2026-11-27)
 
-Since v0.3.0 (mid-evaluation, `e00ee57`). Contract: **schema 0.1.3** (additive; 0.1.1 readers still work).
+Tag target `047e726`. Since v0.3.0 (mid-evaluation, `e00ee57`). Contract: **schema 0.1.3** (additive; 0.1.1 readers still work).
 Every number is from a recorded run; the results files are linked.
 
 ## Map intelligence
