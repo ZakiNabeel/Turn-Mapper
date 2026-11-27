@@ -363,6 +363,8 @@ def floor_quality(
     reasons = []
     measured = bool(scale_source) and scale_source not in ESTIMATED_SCALES
     share = destinations_on_main / destinations if destinations else 1.0
+    if destinations == 0:
+        reasons.append("no destinations found")
     if pieces > 1:
         reasons.append(f"{pieces} graph pieces")
     if share < 1:
@@ -379,7 +381,7 @@ def floor_quality(
         reasons.append("no route to another floor of its building")
     if not reasons:
         grade = "ready"
-    elif share >= 0.9 and (reaches_building or not multi_floor_building):
+    elif destinations and share >= 0.9 and (reaches_building or not multi_floor_building):
         grade = "usable"
     else:
         grade = "needs work"

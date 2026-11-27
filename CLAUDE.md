@@ -88,6 +88,9 @@ python scripts/style_stress.py --out runs/<name>              # generality: 2 la
 python eval/evaluate_synthetic.py --out runs/<name>           # Level B/C metrics vs exact ground truth
 python scripts/demo_prepare.py --out demo_inputs              # inputs for the live demo (docs/mideval/06)
 turn-mapper run plan.png --segmenter learned                  # needs TURN_SEG_WEIGHTS (docs/ML_GUIDE.md)
+turn-mapper route runs/<name>/venue.json --from "C-F3:Stairs 1" --to "C-F4:C-406" [--step-free]
+python scripts/compare_fast_segmenters.py plan.pdf --venue cfg.yaml --out runs/<name>   # classical vs learned vs hybrid
+python scripts/eval_real_block.py --studio studio_projects/<id> --methods classical learned hybrid  # vs Studio corrections
 turn-mapper ml prepare-cubicasa | bootstrap-masks | train | eval
 turn-mapper studio [--dir studio_projects] [--port 8765]  # GUI (needs .[studio]); docs/STUDIO_GUIDE.md
 ```

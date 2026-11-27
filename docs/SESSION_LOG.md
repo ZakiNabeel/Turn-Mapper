@@ -215,3 +215,14 @@ correct 8–10 B/C floors in Studio and export training annotations (S3); try St
 - Next: when Version 2 finishes, copy `out_s4/eval_*.json` and the synthetic tables into `docs/RESULTS_ML_S4_<date>.md`; check the conversion log shows many more stair tiles than lift tiles.
 
 - 2026-11-21 01:16 PKT: S4 Version 2 failed after 2.5 min (Google Drive daily download quota). Version 3 (commit 8da3bc8) reads the Kaggle copy `catwhisker/floorplancad-dataset` (same archives: 3,760 + 6,401 train, 5,502 test SVGs). Conversion with the corrected ids: 12,502 read, **11,278 kept** (was 5,909 with the wrong wall id), 0 failed, tiles with stairs 2,879 / lift 1,676 / escalator 143 (was 173 / 1,267 / 1,450), splits 10,530 train / 319 val / 4,891 test. Training follows (~5 h).
+
+## 2026-11-27 — FYP-1 final checklist: S4 results, three-way comparison, release v0.4.0 prep
+
+- Checklist `TURN_FYP1_Final_Eval_Checklist.pdf` mapped item by item: `docs/FYP1_FINAL_STATUS.md` (status, evidence, what is left, site sheet for scale checks, annotation steps, laptop comparison steps, C-F3 route-test printouts).
+- S4 (Kaggle v3, 9.7 h, sha256 3f38249e…): FloorPlanCAD test mIoU 0.157 → 0.661 (stairs 0.001 → 0.852, lift 0 → 0.929, wall 0.626 → 0.862); ResPlan/institutional/CubiCasa unchanged within ±0.01; synthetic pipeline = S3a (thin-line failure kept). Promotion rule not met → classical stays default. `docs/RESULTS_ML_S4_2026-11-27.md`.
+- `scripts/compare_fast_segmenters.py` (+ test): per-floor/venue map-quality comparison of methods without an answer key. The S4 weights could not be brought into the cloud session (in-app browser download truncated twice; no Kaggle/GCS egress), so the FAST run is for the laptop.
+- `route.floor_quality`: a floor with no destinations is "needs work" (was "usable").
+- Release v0.4.0 prepared: version bump, `docs/RELEASE_NOTES_v0.4.0.md`, fixtures regenerated, `scripts/create_release_tags.sh` now also tags v0.4.0 (tag pushes are refused from the cloud session).
+- App repo read at 8c257c8: VenuePackage v1 single-floor importer done by Shehryar (his docs), multi-floor phases 3–4 landed.
+- Next (team): run the tag script; site visit for scale checks (§A); correct 8 dev drafts + 3–4 A floors in Studio (§B); laptop FAST comparison (§C); C-F3 route test with an outside person (§D).
+

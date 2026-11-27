@@ -160,6 +160,8 @@ def test_floor_quality_grades(campus):
     assert est["grade"] == "usable" and "estimate" in est["reasons"][0]
     assert floor_quality(**{**base, "destinations_on_main": 8, "pieces": 2})["grade"] == "needs work"
     assert floor_quality(**{**base, "reaches_building": False})["grade"] == "needs work"
+    empty = floor_quality(**{**base, "destinations": 0, "destinations_on_main": 0})
+    assert empty["grade"] == "needs work" and "no destinations found" in empty["reasons"]
 
 
 def test_studio_connection_between_buildings(tmp_path):
@@ -191,3 +193,26 @@ def test_studio_connection_between_buildings(tmp_path):
     assert r["found"] and r["floors"] == ["T0", "W0"] and r["changes"][0]["type"] == "walkway"
     bad = {"manual": [], "connections": [{"from": "T0@right", "to": "W0@left", "type": "teleport"}]}
     assert c.put(f"/api/projects/{pid}/links", json=bad).status_code == 400
+
+
+def test_compare_segmenters_script_classical(tmp_path):
+    """compare_fast_segmenters.py: per-floor table and venue rows (classical only: no weights needed)."""
+    import importlib.util
+    from pathlib import Path
+
+    spec = importlib.util.spec_from_file_location(
+        "cmp", Path(__file__).parents[1] / "scripts" / "compare_fast_segmenters.py"
+    )
+    cmp = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(cmp)
+    for name, variant in (("tower", "tower"), ("annex", "basic")):
+        cv2.imwrite(str(tmp_path / f"{name}.png"), cv2.cvtColor(make_plan(variant).rgb, cv2.COLOR_RGB2BGR))
+    (tmp_path / "venue.yaml").write_text(VENUE_YAML)
+    r = cmp.run_method(
+        str(tmp_path / "tower.png"), str(tmp_path / "venue.yaml"), tmp_path / "c", "classical", 10
+    )
+    assert set(r["floors"]) == {"T0", "T1", "T2", "W0"}
+    assert all(f["valid"] and f["pieces"] == 1 and f["reachable"] == 1.0 for f in r["floors"].values())
+    assert r["venue"]["floor_pairs_connected"] == r["venue"]["floor_pairs_total"] == 12
+    md = cmp.table({"methods": {"classical": r}, "weights": None})
+    assert "| T1 | ok · 8/7/7 · 1 · 100% · ready |" in md and "| floors valid | 4/4 |" in md
